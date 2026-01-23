@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": "./",
+    "typeRoots": [],
     "paths": {
       "react-native-element-dropdown": ["./src/index"]
     },
