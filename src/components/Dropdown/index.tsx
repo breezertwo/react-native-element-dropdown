@@ -145,17 +145,76 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       [excludeItems, valueField]
     );
 
+    const onSearch = useCallback(
+      (text: string) => {
+        if (text.length > 0) {
+          const defaultFilterFunction = (e: any) => {
+            const item = _get(e, searchField || labelField)
+              ?.toLowerCase()
+              .replace(/\s/g, '')
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '');
+            const key = text
+              .toLowerCase()
+              .replace(/\s/g, '')
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '');
+
+            return item.indexOf(key) >= 0;
+          };
+
+          const propSearchFunction = (e: any) => {
+            const labelText = _get(e, searchField || labelField);
+
+            return searchQuery?.(text, labelText);
+          };
+
+          const dataSearch = data.filter(
+            searchQuery ? propSearchFunction : defaultFilterFunction
+          );
+
+          if (excludeSearchItems.length > 0 || excludeItems.length > 0) {
+            const excludeSearchData = _differenceWith(
+              dataSearch,
+              excludeSearchItems,
+              (obj1, obj2) => _get(obj1, valueField) === _get(obj2, valueField)
+            );
+
+            const filterData = excludeData(excludeSearchData);
+            setListData(filterData);
+          } else {
+            setListData(dataSearch);
+          }
+        } else {
+          const filterData = excludeData(data);
+          setListData(filterData);
+        }
+      },
+      [
+        data,
+        searchQuery,
+        excludeSearchItems,
+        excludeItems,
+        searchField,
+        labelField,
+        valueField,
+        excludeData,
+      ]
+    );
+
     useEffect(() => {
       if (data && searchText.length === 0) {
         const filterData = excludeData(data);
-        setListData([...filterData]);
+        if (!_isEqual(filterData, listData)) {
+          setListData([...filterData]);
+        }
       }
 
       if (searchText) {
         onSearch(searchText);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data, searchText]);
+      // eslint-enable-next-line react-hooks/exhaustive-deps
+    }, [data, searchText, excludeData, listData, onSearch]);
 
     const eventOpen = () => {
       if (!disable) {
@@ -300,7 +359,8 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
             }
           }
         }
-      }, [autoScroll, data.length, listData, value, valueField]),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [autoScroll, data.length, value, valueField]), // to fix Maximum Depth Exceeded warning | removed listData from dependency array
       200
     );
 
@@ -353,63 +413,6 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       onFocus,
       onBlur,
     ]);
-
-    const onSearch = useCallback(
-      (text: string) => {
-        if (text.length > 0) {
-          const defaultFilterFunction = (e: any) => {
-            const item = _get(e, searchField || labelField)
-              ?.toLowerCase()
-              .replace(/\s/g, '')
-              .normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, '');
-            const key = text
-              .toLowerCase()
-              .replace(/\s/g, '')
-              .normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, '');
-
-            return item.indexOf(key) >= 0;
-          };
-
-          const propSearchFunction = (e: any) => {
-            const labelText = _get(e, searchField || labelField);
-
-            return searchQuery?.(text, labelText);
-          };
-
-          const dataSearch = data.filter(
-            searchQuery ? propSearchFunction : defaultFilterFunction
-          );
-
-          if (excludeSearchItems.length > 0 || excludeItems.length > 0) {
-            const excludeSearchData = _differenceWith(
-              dataSearch,
-              excludeSearchItems,
-              (obj1, obj2) => _get(obj1, valueField) === _get(obj2, valueField)
-            );
-
-            const filterData = excludeData(excludeSearchData);
-            setListData(filterData);
-          } else {
-            setListData(dataSearch);
-          }
-        } else {
-          const filterData = excludeData(data);
-          setListData(filterData);
-        }
-      },
-      [
-        data,
-        searchQuery,
-        excludeSearchItems,
-        excludeItems,
-        searchField,
-        labelField,
-        valueField,
-        excludeData,
-      ]
-    );
 
     const onSelect = useCallback(
       (item: any) => {
