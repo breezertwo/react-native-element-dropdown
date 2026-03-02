@@ -490,6 +490,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         _assign(item, { _index: index });
         return (
           <TouchableHighlight
+            aria-role="listitem"
             key={index.toString()}
             testID={_get(item, itemTestIDField || labelField)}
             accessible={!!accessibilityLabel}
@@ -601,6 +602,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         const _renderListHelper = () => {
           return (
             <FlatList
+              accessibilityRole='list'
               testID={testID + ' flatlist'}
               accessibilityLabel={accessibilityLabel + ' flatlist'}
               {...flatListProps}
