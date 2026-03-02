@@ -490,6 +490,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         _assign(item, { _index: index });
         return (
           <TouchableHighlight
+            aria-role="listitem"
             key={index.toString()}
             testID={_get(item, itemTestIDField || labelField)}
             accessible={!!accessibilityLabel}
@@ -601,6 +602,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         const _renderListHelper = () => {
           return (
             <FlatList
+              accessibilityRole='list'
               testID={testID + ' flatlist'}
               accessibilityLabel={accessibilityLabel + ' flatlist'}
               {...flatListProps}
@@ -618,13 +620,11 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         };
 
         return (
-          <TouchableWithoutFeedback>
-            <View style={styles.flexShrink}>
-              {isInverted && _renderListHelper()}
-              {renderSearch()}
-              {!isInverted && _renderListHelper()}
-            </View>
-          </TouchableWithoutFeedback>
+          <View style={styles.flexShrink}>
+            {isInverted && _renderListHelper()}
+            {renderSearch()}
+            {!isInverted && _renderListHelper()}
+          </View>
         );
       },
       [
@@ -683,7 +683,11 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
               supportedOrientations={['landscape', 'portrait']}
               onRequestClose={showOrClose}
             >
-              <TouchableWithoutFeedback onPress={showOrClose}>
+              <View 
+                onStartShouldSetResponder={() => true}
+                onResponderRelease={showOrClose}
+                style={{ flex: 1 }}
+              >
                 <View
                   style={StyleSheet.flatten([
                     styles.flex1,
@@ -718,7 +722,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
                     </View>
                   </View>
                 </View>
-              </TouchableWithoutFeedback>
+              </View>
             </Modal>
           );
         }
