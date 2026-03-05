@@ -105,6 +105,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
     const [position, setPosition] = useState<any>();
     const [keyboardHeight, setKeyboardHeight] = useState<number>(0);
     const [searchText, setSearchText] = useState('');
+    const nativeId = `dropdown-${Math.random().toString(16).slice(2)}`;
 
     const { width: W, height: H } = Dimensions.get('window');
     const styleContainerVertical: ViewStyle = useMemo(() => {
@@ -447,10 +448,13 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       const isSelected = currentValue && _get(currentValue, valueField);
       return (
         <TouchableWithoutFeedback
-          testID={testID}
-          accessible={!!accessibilityLabel}
           accessibilityLabel={accessibilityLabel}
+          accessibilityRole="button"
+          accessible={!!accessibilityLabel}
+          aria-controls={nativeId}
+          aria-expanded={visible}
           onPress={showOrClose}
+          testID={testID}
         >
           <View style={styles.dropdown}>
             {renderLeftIcon?.(visible)}
@@ -490,7 +494,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         _assign(item, { _index: index });
         return (
           <TouchableHighlight
-            aria-role="listitem"
+            accessibilityRole="radio"
             key={index.toString()}
             testID={_get(item, itemTestIDField || labelField)}
             accessible={!!accessibilityLabel}
@@ -602,7 +606,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         const _renderListHelper = () => {
           return (
             <FlatList
-              accessibilityRole='list'
+              accessibilityRole='radiogroup'
               testID={testID + ' flatlist'}
               accessibilityLabel={accessibilityLabel + ' flatlist'}
               {...flatListProps}
@@ -612,6 +616,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
               onScrollToIndexFailed={scrollIndex}
               data={listData}
               inverted={isTopPosition ? inverted : false}
+              nativeID={nativeId}
               renderItem={_renderItem}
               keyExtractor={(_item, index) => index.toString()}
               showsVerticalScrollIndicator={showsVerticalScrollIndicator}
