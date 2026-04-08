@@ -107,6 +107,9 @@ const MultiSelectComponent = React.forwardRef<
   const [position, setPosition] = useState<any>();
   const [keyboardHeight, setKeyboardHeight] = useState<number>(0);
   const [searchText, setSearchText] = useState('');
+  const nativeId = useRef(
+    `multiselectdropdown-${Math.random().toString(16).slice(2)}`
+  ).current;
 
   const { width: W, height: H } = Dimensions.get('window');
   const styleContainerVertical: ViewStyle = useMemo(() => {
@@ -412,9 +415,11 @@ const MultiSelectComponent = React.forwardRef<
   const _renderDropdown = () => {
     return (
       <TouchableWithoutFeedback
-        testID={testID}
-        accessible={!!accessibilityLabel}
         accessibilityLabel={accessibilityLabel}
+        accessibilityRole="button"
+        accessible={!!accessibilityLabel}
+        aria-controls={nativeId}
+        aria-expanded={visible}
         onPress={showOrClose}
       >
         <View style={styles.dropdown}>
@@ -575,6 +580,7 @@ const MultiSelectComponent = React.forwardRef<
             keyboardShouldPersistTaps="handled"
             data={listData}
             inverted={isTopPosition ? inverted : false}
+            nativeID={nativeId}
             renderItem={_renderItem}
             keyExtractor={(_item, index) => index.toString()}
             showsVerticalScrollIndicator={showsVerticalScrollIndicator}
@@ -601,6 +607,7 @@ const MultiSelectComponent = React.forwardRef<
       renderSearch,
       showsVerticalScrollIndicator,
       testID,
+      nativeId,
     ]
   );
 
@@ -647,7 +654,11 @@ const MultiSelectComponent = React.forwardRef<
             supportedOrientations={['landscape', 'portrait']}
             onRequestClose={showOrClose}
           >
-            <TouchableWithoutFeedback onPress={showOrClose}>
+            <View
+              onStartShouldSetResponder={() => true}
+              onResponderRelease={showOrClose}
+              style={styles.flex1}
+            >
               <View
                 style={StyleSheet.flatten([
                   styles.flex1,
@@ -682,7 +693,7 @@ const MultiSelectComponent = React.forwardRef<
                   </View>
                 </View>
               </View>
-            </TouchableWithoutFeedback>
+            </View>
           </Modal>
         );
       }
