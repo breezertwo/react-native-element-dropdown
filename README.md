@@ -1,4 +1,4 @@
-_HINT: This is a fork of react-native-element-dropdown by hoaphantn7604. The original repository can be found at https://github.com/hoaphantn7604/react-native-element-dropdown. Fixes a missing export error in lib/module and an infinite loop issue._
+_HINT: This is a fork of react-native-element-dropdown by hoaphantn7604. The original repository can be found at https://github.com/hoaphantn7604/react-native-element-dropdown. We needed some a11y improvements for ScreenReaders, a toggle mode and other little tweaks that are added in this repo. See 'Releases' for further info._
 
 # react-native-element-dropdown
 
@@ -157,10 +157,11 @@ yarn add @breezertwo/react-native-element-dropdown
 
 ### Method
 
-| API   | Params     | Description         |
-| ----- | ---------- | ------------------- |
-| open  | () => void | Open dropdown list  |
-| close | () => void | Close dropdown list |
+| API    | Params     | Description          |
+| ------ | ---------- | -------------------- |
+| open   | () => void | Open dropdown list   |
+| close  | () => void | Close dropdown list  |
+| toggle | () => void | Toggle dropdown list |
 
 ### Dropdown example
 
