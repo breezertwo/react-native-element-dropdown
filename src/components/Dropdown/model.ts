@@ -11,6 +11,7 @@ import type {
 export type IDropdownRef = {
   open: () => void;
   close: () => void;
+  toggle: () => void;
 };
 
 export interface DropdownProps<T> {

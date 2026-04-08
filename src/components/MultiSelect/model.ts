@@ -11,6 +11,7 @@ import { TextProps } from 'react-native';
 export interface IMultiSelectRef {
   open: () => void;
   close: () => void;
+  toggle: () => void;
 }
 
 export interface MultiSelectProps<T> {

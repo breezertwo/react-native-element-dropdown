@@ -20,7 +20,7 @@ const SelectCountryComponent = React.forwardRef<
   const ref: any = useRef(null);
 
   useImperativeHandle(currentRef, () => {
-    return { open: eventOpen, close: eventClose };
+    return { open: eventOpen, close: eventClose, toggle: eventToggle };
   });
 
   const eventOpen = () => {
@@ -29,6 +29,10 @@ const SelectCountryComponent = React.forwardRef<
 
   const eventClose = () => {
     ref.current.close();
+  };
+
+  const eventToggle = () => {
+    ref.current.toggle();
   };
 
   const _renderItem = (item: any) => {

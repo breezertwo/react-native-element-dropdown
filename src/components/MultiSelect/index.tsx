@@ -126,7 +126,7 @@ const MultiSelectComponent = React.forwardRef<
   }, [W, orientation]);
 
   useImperativeHandle(currentRef, () => {
-    return { open: eventOpen, close: eventClose };
+    return { open: eventOpen, close: eventClose, toggle: eventToggle };
   });
 
   useEffect(() => {
@@ -162,43 +162,6 @@ const MultiSelectComponent = React.forwardRef<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, searchText]);
 
-  const eventOpen = () => {
-    if (!disable) {
-      _measure();
-      setVisible(true);
-      if (onFocus) {
-        onFocus();
-      }
-
-      if (searchText.length > 0) {
-        onSearch(searchText);
-      }
-    }
-  };
-
-  const eventClose = () => {
-    if (!disable) {
-      setVisible(false);
-      if (onBlur) {
-        onBlur();
-      }
-    }
-  };
-
-  const font = useCallback(() => {
-    if (fontFamily) {
-      return {
-        fontFamily: fontFamily,
-      };
-    } else {
-      return {};
-    }
-  }, [fontFamily]);
-
-  const getValue = useCallback(() => {
-    setCurrentValue(value ? [...value] : []);
-  }, [value]);
-
   const _measure = useCallback(() => {
     if (ref && ref?.current) {
       ref.current.measureInWindow((pageX, pageY, width, height) => {
@@ -225,6 +188,108 @@ const MultiSelectComponent = React.forwardRef<
       });
     }
   }, [H, W, orientation, mode]);
+
+  const onSearch = useCallback(
+    (text: string) => {
+      if (text.length > 0) {
+        const defaultFilterFunction = (e: any) => {
+          const item = _get(e, searchField || labelField)
+            ?.toLowerCase()
+            .replace(/\s/g, '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+          const key = text
+            .toLowerCase()
+            .replace(/\s/g, '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+
+          return item.indexOf(key) >= 0;
+        };
+
+        const propSearchFunction = (e: any) => {
+          const labelText = _get(e, searchField || labelField);
+
+          return searchQuery?.(text, labelText);
+        };
+
+        const dataSearch = data.filter(
+          searchQuery ? propSearchFunction : defaultFilterFunction
+        );
+
+        if (excludeSearchItems.length > 0 || excludeItems.length > 0) {
+          const excludeSearchData = _differenceWith(
+            dataSearch,
+            excludeSearchItems,
+            (obj1, obj2) => _get(obj1, valueField) === _get(obj2, valueField)
+          );
+
+          const filterData = excludeData(excludeSearchData);
+          setListData(filterData);
+        } else {
+          setListData(dataSearch);
+        }
+      } else {
+        const filterData = excludeData(data);
+        setListData(filterData);
+      }
+    },
+    [
+      data,
+      searchQuery,
+      excludeSearchItems,
+      excludeItems,
+      searchField,
+      labelField,
+      valueField,
+      excludeData,
+    ]
+  );
+
+  const eventOpen = useCallback(() => {
+    if (!disable) {
+      _measure();
+      setVisible(true);
+      if (onFocus) {
+        onFocus();
+      }
+
+      if (searchText.length > 0) {
+        onSearch(searchText);
+      }
+    }
+  }, [disable, onFocus, searchText, onSearch, _measure]);
+
+  const eventClose = useCallback(() => {
+    if (!disable) {
+      setVisible(false);
+      if (onBlur) {
+        onBlur();
+      }
+    }
+  }, [disable, onBlur]);
+
+  const eventToggle = useCallback(() => {
+    if (visible) {
+      eventClose();
+    } else {
+      eventOpen();
+    }
+  }, [visible, eventClose, eventOpen]);
+
+  const font = useCallback(() => {
+    if (fontFamily) {
+      return {
+        fontFamily: fontFamily,
+      };
+    } else {
+      return {};
+    }
+  }, [fontFamily]);
+
+  const getValue = useCallback(() => {
+    setCurrentValue(value ? [...value] : []);
+  }, [value]);
 
   const onKeyboardDidShow = useCallback(
     (e: KeyboardEvent) => {
@@ -305,63 +370,6 @@ const MultiSelectComponent = React.forwardRef<
     onFocus,
     onBlur,
   ]);
-
-  const onSearch = useCallback(
-    (text: string) => {
-      if (text.length > 0) {
-        const defaultFilterFunction = (e: any) => {
-          const item = _get(e, searchField || labelField)
-            ?.toLowerCase()
-            .replace(/\s/g, '')
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');
-          const key = text
-            .toLowerCase()
-            .replace(/\s/g, '')
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');
-
-          return item.indexOf(key) >= 0;
-        };
-
-        const propSearchFunction = (e: any) => {
-          const labelText = _get(e, searchField || labelField);
-
-          return searchQuery?.(text, labelText);
-        };
-
-        const dataSearch = data.filter(
-          searchQuery ? propSearchFunction : defaultFilterFunction
-        );
-
-        if (excludeSearchItems.length > 0 || excludeItems.length > 0) {
-          const excludeSearchData = _differenceWith(
-            dataSearch,
-            excludeSearchItems,
-            (obj1, obj2) => _get(obj1, valueField) === _get(obj2, valueField)
-          );
-
-          const filterData = excludeData(excludeSearchData);
-          setListData(filterData);
-        } else {
-          setListData(dataSearch);
-        }
-      } else {
-        const filterData = excludeData(data);
-        setListData(filterData);
-      }
-    },
-    [
-      data,
-      searchQuery,
-      excludeSearchItems,
-      excludeItems,
-      searchField,
-      labelField,
-      valueField,
-      excludeData,
-    ]
-  );
 
   const onSelect = useCallback(
     (item: any) => {

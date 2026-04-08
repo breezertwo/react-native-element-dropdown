@@ -105,7 +105,9 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
     const [position, setPosition] = useState<any>();
     const [keyboardHeight, setKeyboardHeight] = useState<number>(0);
     const [searchText, setSearchText] = useState('');
-    const nativeId = `dropdown-${Math.random().toString(16).slice(2)}`;
+    const nativeId = useRef(
+      `dropdown-${Math.random().toString(16).slice(2)}`
+    ).current;
 
     const { width: W, height: H } = Dimensions.get('window');
     const styleContainerVertical: ViewStyle = useMemo(() => {
@@ -122,7 +124,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
     }, [W, orientation]);
 
     useImperativeHandle(currentRef, () => {
-      return { open: eventOpen, close: eventClose };
+      return { open: eventOpen, close: eventClose, toggle: eventToggle };
     });
 
     useEffect(() => {
@@ -202,54 +204,6 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         excludeData,
       ]
     );
-
-    useEffect(() => {
-      if (data && searchText.length === 0) {
-        const filterData = excludeData(data);
-        if (!_isEqual(filterData, listData)) {
-          setListData([...filterData]);
-        }
-      }
-
-      if (searchText) {
-        onSearch(searchText);
-      }
-      // eslint-enable-next-line react-hooks/exhaustive-deps
-    }, [data, searchText, excludeData, listData, onSearch]);
-
-    const eventOpen = () => {
-      if (!disable) {
-        _measure();
-        setVisible(true);
-        if (onFocus) {
-          onFocus();
-        }
-
-        if (searchText.length > 0) {
-          onSearch(searchText);
-        }
-      }
-    };
-
-    const eventClose = useCallback(() => {
-      if (!disable) {
-        setVisible(false);
-        if (onBlur) {
-          onBlur();
-        }
-      }
-    }, [disable, onBlur]);
-
-    const font = useCallback(() => {
-      if (fontFamily) {
-        return {
-          fontFamily: fontFamily,
-        };
-      } else {
-        return {};
-      }
-    }, [fontFamily]);
-
     const _measure = useCallback(() => {
       if (ref && ref?.current) {
         ref.current.measureInWindow((pageX, pageY, width, height) => {
@@ -276,6 +230,61 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         });
       }
     }, [H, W, orientation, mode]);
+
+    useEffect(() => {
+      if (data && searchText.length === 0) {
+        const filterData = excludeData(data);
+        if (!_isEqual(filterData, listData)) {
+          setListData([...filterData]);
+        }
+      }
+
+      if (searchText) {
+        onSearch(searchText);
+      }
+      // eslint-enable-next-line react-hooks/exhaustive-deps
+    }, [data, searchText, excludeData, listData, onSearch]);
+
+    const eventOpen = useCallback(() => {
+      if (!disable) {
+        _measure();
+        setVisible(true);
+        if (onFocus) {
+          onFocus();
+        }
+
+        if (searchText.length > 0) {
+          onSearch(searchText);
+        }
+      }
+    }, [disable, onFocus, searchText, onSearch, _measure]);
+
+    const eventClose = useCallback(() => {
+      if (!disable) {
+        setVisible(false);
+        if (onBlur) {
+          onBlur();
+        }
+      }
+    }, [disable, onBlur]);
+
+    const eventToggle = useCallback(() => {
+      if (visible) {
+        eventClose();
+      } else {
+        eventOpen();
+      }
+    }, [visible, eventClose, eventOpen]);
+
+    const font = useCallback(() => {
+      if (fontFamily) {
+        return {
+          fontFamily: fontFamily,
+        };
+      } else {
+        return {};
+      }
+    }, [fontFamily]);
 
     const onKeyboardDidShow = useCallback(
       (e: KeyboardEvent) => {
@@ -606,7 +615,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         const _renderListHelper = () => {
           return (
             <FlatList
-              accessibilityRole='radiogroup'
+              accessibilityRole="radiogroup"
               testID={testID + ' flatlist'}
               accessibilityLabel={accessibilityLabel + ' flatlist'}
               {...flatListProps}
@@ -642,6 +651,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         scrollIndex,
         showsVerticalScrollIndicator,
         testID,
+        nativeId,
       ]
     );
 
@@ -688,10 +698,10 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
               supportedOrientations={['landscape', 'portrait']}
               onRequestClose={showOrClose}
             >
-              <View 
+              <View
                 onStartShouldSetResponder={() => true}
                 onResponderRelease={showOrClose}
-                style={{ flex: 1 }}
+                style={styles.flex1}
               >
                 <View
                   style={StyleSheet.flatten([
