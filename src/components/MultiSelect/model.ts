@@ -1,4 +1,5 @@
 import type React from 'react';
+import type { DropdownSafeAreaInsets } from '../../useDropdownPlacement';
 import type {
   FlatListProps,
   ImageStyle,
@@ -54,6 +55,7 @@ export interface MultiSelectProps<T> {
   alwaysRenderSelectedItem?: boolean;
   visibleSelectedItem?: boolean;
   keyboardAvoiding?: boolean;
+  safeAreaInsets?: DropdownSafeAreaInsets;
   inside?: boolean;
   backgroundColor?: string;
   confirmSelectItem?: boolean;
