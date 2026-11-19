@@ -1,4 +1,5 @@
 import type React from 'react';
+import type { DropdownSafeAreaInsets } from '../../useDropdownPlacement';
 import type {
   StyleProp,
   TextStyle,
@@ -51,6 +52,7 @@ export interface DropdownProps<T> {
   dropdownPosition?: 'auto' | 'top' | 'bottom';
   flatListProps?: Omit<FlatListProps<any>, 'renderItem' | 'data'>;
   keyboardAvoiding?: boolean;
+  safeAreaInsets?: DropdownSafeAreaInsets;
   backgroundColor?: string;
   confirmSelectItem?: boolean;
   accessibilityLabel?: string;

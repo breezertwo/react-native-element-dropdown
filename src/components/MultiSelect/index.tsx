@@ -13,10 +13,8 @@ import React, {
 import {
   Dimensions,
   FlatList,
-  I18nManager,
   Image,
   Keyboard,
-  KeyboardEvent,
   Modal,
   StyleSheet,
   Text,
@@ -24,17 +22,16 @@ import {
   TouchableWithoutFeedback,
   View,
   ViewStyle,
-  StatusBar,
 } from 'react-native';
 import { useDetectDevice } from '../../toolkits';
 import { useDeviceOrientation } from '../../useDeviceOrientation';
+import { hiddenStyle, useDropdownPlacement } from '../../useDropdownPlacement';
 import CInput from '../TextInput';
 import { IMultiSelectRef, MultiSelectProps } from './model';
 import { styles } from './styles';
 
 const { isTablet } = useDetectDevice;
 const ic_down = require('../../assets/down.png');
-const statusBarHeight: number = StatusBar.currentHeight || 0;
 
 const MultiSelectComponent = React.forwardRef<
   IMultiSelectRef,
@@ -97,6 +94,7 @@ const MultiSelectComponent = React.forwardRef<
     mode = 'default',
     excludeItems = [],
     excludeSearchItems = [],
+    safeAreaInsets,
   } = props;
 
   const ref = useRef<View>(null);
@@ -104,14 +102,35 @@ const MultiSelectComponent = React.forwardRef<
   const [currentValue, setCurrentValue] = useState<any[]>([]);
   const [listData, setListData] = useState<any[]>(data);
   const [, setKey] = useState<number>(Math.random());
-  const [position, setPosition] = useState<any>();
-  const [keyboardHeight, setKeyboardHeight] = useState<number>(0);
   const [searchText, setSearchText] = useState('');
   const nativeId = useRef(
     `multiselectdropdown-${Math.random().toString(16).slice(2)}`
   ).current;
 
-  const { width: W, height: H } = Dimensions.get('window');
+  const isFull =
+    !isTablet &&
+    mode !== 'auto' &&
+    (mode === 'modal' || orientation === 'LANDSCAPE');
+
+  const {
+    measure: _measure,
+    placement,
+    isKeyboardVisible,
+    onModalLayout,
+    onContainerLayout,
+  } = useDropdownPlacement({
+    triggerRef: ref,
+    visible,
+    isFull,
+    dropdownPosition,
+    maxHeight,
+    minHeight,
+    keyboardAvoiding,
+    safeAreaInsets,
+    containerStyle,
+  });
+
+  const { width: W } = Dimensions.get('window');
   const styleContainerVertical: ViewStyle = useMemo(() => {
     return {
       backgroundColor: 'rgba(0,0,0,0.1)',
@@ -161,33 +180,6 @@ const MultiSelectComponent = React.forwardRef<
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, searchText]);
-
-  const _measure = useCallback(() => {
-    if (ref && ref?.current) {
-      ref.current.measureInWindow((pageX, pageY, width, height) => {
-        let isFull = isTablet
-          ? false
-          : mode === 'modal' || orientation === 'LANDSCAPE';
-
-        if (mode === 'auto') {
-          isFull = false;
-        }
-
-        const top = isFull ? 20 : height + pageY + 2;
-        const bottom = H - top + height;
-        const left = I18nManager.isRTL ? W - width - pageX : pageX;
-
-        setPosition({
-          isFull,
-          width: Math.floor(width),
-          top: Math.floor(top + statusBarHeight),
-          bottom: Math.floor(bottom - statusBarHeight),
-          left: Math.floor(left),
-          height: Math.floor(height),
-        });
-      });
-    }
-  }, [H, W, orientation, mode]);
 
   const onSearch = useCallback(
     (text: string) => {
@@ -291,40 +283,6 @@ const MultiSelectComponent = React.forwardRef<
     setCurrentValue(value ? [...value] : []);
   }, [value]);
 
-  const onKeyboardDidShow = useCallback(
-    (e: KeyboardEvent) => {
-      _measure();
-      setKeyboardHeight(e.endCoordinates.height);
-    },
-    [_measure]
-  );
-
-  const onKeyboardDidHide = useCallback(() => {
-    setKeyboardHeight(0);
-    _measure();
-  }, [_measure]);
-
-  useEffect(() => {
-    const susbcriptionKeyboardDidShow = Keyboard.addListener(
-      'keyboardDidShow',
-      onKeyboardDidShow
-    );
-    const susbcriptionKeyboardDidHide = Keyboard.addListener(
-      'keyboardDidHide',
-      onKeyboardDidHide
-    );
-
-    return () => {
-      if (typeof susbcriptionKeyboardDidShow?.remove === 'function') {
-        susbcriptionKeyboardDidShow.remove();
-      }
-
-      if (typeof susbcriptionKeyboardDidHide?.remove === 'function') {
-        susbcriptionKeyboardDidHide.remove();
-      }
-    };
-  }, [onKeyboardDidHide, onKeyboardDidShow]);
-
   useEffect(() => {
     getValue();
   }, [getValue, value]);
@@ -333,7 +291,7 @@ const MultiSelectComponent = React.forwardRef<
     if (!disable) {
       const visibleStatus = !visible;
 
-      if (keyboardHeight > 0 && !visibleStatus) {
+      if (isKeyboardVisible && !visibleStatus) {
         return Keyboard.dismiss();
       }
 
@@ -362,7 +320,7 @@ const MultiSelectComponent = React.forwardRef<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     disable,
-    keyboardHeight,
+    isKeyboardVisible,
     visible,
     _measure,
     data,
@@ -620,104 +578,86 @@ const MultiSelectComponent = React.forwardRef<
   );
 
   const _renderModal = useCallback(() => {
-    if (visible && position) {
-      const { isFull, width, height, top, bottom, left } = position;
-
-      const onAutoPosition = () => {
-        if (keyboardHeight > 0) {
-          return bottom < keyboardHeight + height;
-        }
-
-        return bottom < (search ? 150 : 100);
-      };
-
-      if (width && top && bottom) {
-        const styleVertical: ViewStyle = {
-          left: left,
-          maxHeight: maxHeight,
-          minHeight: minHeight,
-        };
-        const isTopPosition =
-          dropdownPosition === 'auto'
-            ? onAutoPosition()
-            : dropdownPosition === 'top';
-
-        let keyboardStyle: ViewStyle = {};
-
-        let extendHeight = !isTopPosition ? top : bottom;
-        if (
-          keyboardAvoiding &&
-          keyboardHeight > 0 &&
-          isTopPosition &&
-          dropdownPosition === 'auto'
-        ) {
-          extendHeight = keyboardHeight;
-        }
-
-        return (
-          <Modal
-            transparent
-            statusBarTranslucent
-            visible={visible}
-            supportedOrientations={['landscape', 'portrait']}
-            onRequestClose={showOrClose}
-          >
-            <View
-              onStartShouldSetResponder={() => true}
-              onResponderRelease={showOrClose}
-              style={styles.flex1}
-            >
-              <View
-                style={StyleSheet.flatten([
-                  styles.flex1,
-                  isFull && styleContainerVertical,
-                  backgroundColor && { backgroundColor: backgroundColor },
-                  keyboardStyle,
-                ])}
-              >
-                <View
-                  style={StyleSheet.flatten([
-                    styles.flex1,
-                    !isTopPosition
-                      ? { paddingTop: extendHeight }
-                      : {
-                          justifyContent: 'flex-end',
-                          paddingBottom: extendHeight,
-                        },
-                    isFull && styles.fullScreen,
-                  ])}
-                >
-                  <View
-                    style={StyleSheet.flatten([
-                      styles.container,
-                      isFull ? styleHorizontal : styleVertical,
-                      {
-                        width,
-                      },
-                      containerStyle,
-                    ])}
-                  >
-                    {_renderList(isTopPosition)}
-                  </View>
-                </View>
-              </View>
-            </View>
-          </Modal>
-        );
-      }
+    if (!visible || !placement) {
       return null;
     }
-    return null;
+
+    const {
+      isReady,
+      isTopPosition,
+      left,
+      width,
+      maxHeight: containerMaxHeight,
+      wrapperStyle,
+    } = placement;
+
+    const styleVertical: ViewStyle = {
+      left: left,
+      maxHeight: containerMaxHeight,
+      minHeight: minHeight,
+    };
+
+    return (
+      <Modal
+        transparent
+        statusBarTranslucent
+        visible={visible}
+        supportedOrientations={['landscape', 'portrait']}
+        onRequestClose={showOrClose}
+      >
+        <View
+          onStartShouldSetResponder={() => true}
+          onResponderRelease={showOrClose}
+          onLayout={onModalLayout}
+          style={styles.flex1}
+        >
+          <View
+            style={StyleSheet.flatten([
+              styles.flex1,
+              isFull && styleContainerVertical,
+              !!backgroundColor && { backgroundColor: backgroundColor },
+            ])}
+          >
+            <View
+              style={StyleSheet.flatten([
+                styles.flex1,
+                wrapperStyle,
+                isFull && styles.fullScreen,
+              ])}
+            >
+              <View
+                onLayout={onContainerLayout}
+                accessibilityElementsHidden={!isReady}
+                importantForAccessibility={
+                  isReady ? 'auto' : 'no-hide-descendants'
+                }
+                style={StyleSheet.flatten([
+                  styles.container,
+                  isFull
+                    ? [styleHorizontal, { maxHeight: containerMaxHeight }]
+                    : styleVertical,
+                  {
+                    width,
+                  },
+                  containerStyle,
+                  !isReady && hiddenStyle,
+                ])}
+              >
+                {_renderList(isTopPosition)}
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
   }, [
     visible,
-    search,
-    position,
-    keyboardHeight,
-    maxHeight,
+    placement,
     minHeight,
-    dropdownPosition,
-    keyboardAvoiding,
+    isFull,
     showOrClose,
+    onModalLayout,
+    onContainerLayout,
     styleContainerVertical,
     backgroundColor,
     containerStyle,
