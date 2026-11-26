@@ -50,4 +50,45 @@ describe('MultiSelect', () => {
     ).toBeTruthy();
     expect(data).toEqual(snapshot);
   });
+
+  describe('selected chips', () => {
+    const data = [
+      { label: 'Apple', value: '1' },
+      { label: 'Banana', value: '2' },
+    ];
+
+    // While the list is closed, item labels only appear as chips.
+    it.each([undefined, null, []])(
+      'shows no chips when value is %p',
+      (value) => {
+        render(
+          <MultiSelect
+            data={data}
+            labelField="label"
+            valueField="value"
+            value={value}
+            onChange={() => {}}
+          />
+        );
+
+        expect(screen.queryByText('Apple')).toBeNull();
+        expect(screen.queryByText('Banana')).toBeNull();
+      }
+    );
+
+    it('shows a chip only for selected items', () => {
+      render(
+        <MultiSelect
+          data={data}
+          labelField="label"
+          valueField="value"
+          value={['2']}
+          onChange={() => {}}
+        />
+      );
+
+      expect(screen.queryByText('Apple')).toBeNull();
+      expect(screen.getByText('Banana')).toBeTruthy();
+    });
+  });
 });

@@ -670,12 +670,10 @@ const MultiSelectComponent = React.forwardRef<
   };
 
   const _renderItemSelected = (inside: boolean) => {
-    const list = data.filter((e: any) => {
-      const check = value?.indexOf(_get(e, valueField));
-      if (check !== -1) {
-        return e;
-      }
-    });
+    const selectedValues = value ?? [];
+    const list = data.filter((e: any) =>
+      selectedValues.includes(_get(e, valueField))
+    );
 
     return (
       <View
