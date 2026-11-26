@@ -86,9 +86,9 @@ describe('computePlacement', () => {
       [100, false, { paddingTop: 142 }, 340],
       [300, false, { paddingTop: 342 }, 340],
       // below: 792 - 742 = 50 < 200; above: 698 - 8 = 690
-      [700, true, { justifyContent: 'flex-end', paddingBottom: 102 }, 340],
+      [700, true, { flex: 0, justifyContent: 'flex-end', height: 698 }, 340],
       // below: 792 - 602 = 190 < 200; above: 558 - 8 = 550
-      [560, true, { justifyContent: 'flex-end', paddingBottom: 242 }, 340],
+      [560, true, { flex: 0, justifyContent: 'flex-end', height: 558 }, 340],
     ])(
       'places a trigger at y=%p (top: %p)',
       (y, isTopPosition, wrapperStyle, maxHeight) => {
@@ -158,7 +158,7 @@ describe('computePlacement', () => {
       ).toMatchObject({
         isTopPosition: true,
         maxHeight: 90, // 98 - 8
-        wrapperStyle: { justifyContent: 'flex-end', paddingBottom: 702 },
+        wrapperStyle: { flex: 0, justifyContent: 'flex-end', height: 98 },
       });
     });
 
@@ -275,7 +275,7 @@ describe('computePlacement', () => {
       ).toMatchObject({
         isTopPosition: true,
         maxHeight: 290,
-        wrapperStyle: { justifyContent: 'flex-end', paddingBottom: 502 },
+        wrapperStyle: { flex: 0, justifyContent: 'flex-end', height: 298 },
       });
     });
 
@@ -379,6 +379,39 @@ describe('defaultBottomInset', () => {
     expect(defaultBottomInset({ ...context, screenHeight: 832 })).toBe(
       expected
     );
+  });
+});
+
+describe('opening on Android with edge-to-edge', () => {
+  // As measured on the phone: the Modal is first laid out without the
+  // system bars (749.87), then grows to the whole screen (832).
+  const placeAt = (modalHeight: number) =>
+    computePlacement(
+      input({
+        trigger: { x: 16, y: 718.22, width: 352, height: 50.13 },
+        modalSize: { width: 384, height: modalHeight },
+        windowSize: { width: 384, height: 832 },
+        contentHeight: 340,
+        defaultTopInset: 34.13,
+        defaultBottomInset: defaultBottomInset({
+          platform: 'android',
+          modalHeight,
+          screenHeight: 832,
+        }),
+      })
+    );
+  // Where the bottom of a list that opens upward ends, from the top of the
+  // Modal (its wrapper reaches from there down to the list's bottom).
+  const listBottom = (modalHeight: number) => {
+    const placement = placeAt(modalHeight);
+    expect(placement?.isTopPosition).toBe(true);
+    return Number(placement?.wrapperStyle.height);
+  };
+
+  it('keeps the list in place while the Modal grows to the full screen', () => {
+    // Just above the field (718.22 - 2), both times: no jump.
+    expect(listBottom(749.87)).toBeCloseTo(716.22);
+    expect(listBottom(832)).toBeCloseTo(716.22);
   });
 });
 

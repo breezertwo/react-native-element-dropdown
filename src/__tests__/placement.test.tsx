@@ -110,7 +110,7 @@ describe('dropdown placement', () => {
     // Below: 800 - 8 - 742 = 50 < 200 needed; above: 698 - 8 = 690.
     expect(openListWrapperStyle()).toMatchObject({
       justifyContent: 'flex-end',
-      paddingBottom: 102, // 800 - (700 - 2)
+      height: 698, // 700 - 2
     });
     expect(openListStyle()).toMatchObject({ maxHeight: 340 });
   });
@@ -129,7 +129,7 @@ describe('dropdown placement', () => {
 
     expect(openListWrapperStyle()).toMatchObject({
       justifyContent: 'flex-end',
-      paddingBottom: 702, // 800 - (100 - 2)
+      height: 98, // 100 - 2
     });
   });
 
@@ -145,7 +145,7 @@ describe('dropdown placement', () => {
     // Below: 800 - 34 - 8 - 602 = 156 < 200; above: 558 - 8 = 550.
     expect(openListWrapperStyle()).toMatchObject({
       justifyContent: 'flex-end',
-      paddingBottom: 242, // 800 - (560 - 2)
+      height: 558, // 560 - 2
     });
   });
 
@@ -158,7 +158,7 @@ describe('dropdown placement', () => {
     // Keyboard top 500: below 498 - 342 = 156 < 200; above 298 - 8 = 290.
     expect(openListWrapperStyle()).toMatchObject({
       justifyContent: 'flex-end',
-      paddingBottom: 502, // 800 - (300 - 2)
+      height: 298, // 300 - 2
     });
     expect(openListStyle()).toMatchObject({ maxHeight: 290 });
   });

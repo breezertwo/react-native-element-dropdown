@@ -34,7 +34,11 @@ export interface DropdownPlacement {
   left: number;
   width: number;
   maxHeight: number;
-  /** Style of the full-screen view that positions the list via padding. */
+  /**
+   * Style of the view that positions the list inside the Modal: padding
+   * from the top for a list below the trigger, a height down to the trigger
+   * for a list above it.
+   */
   wrapperStyle: ViewStyle;
 }
 
@@ -167,10 +171,7 @@ export const computePlacement = ({
         Math.min(maxHeight, Math.floor(available))
       ),
       wrapperStyle: isTopPosition
-        ? {
-            justifyContent: 'flex-end',
-            paddingBottom: Math.max(0, screenHeight - (trigger.y - GAP)),
-          }
+        ? endingAt(trigger.y - GAP)
         : { paddingTop: trigger.y + trigger.height + GAP },
     };
   }
@@ -191,13 +192,23 @@ export const computePlacement = ({
     width: trigger.width,
     maxHeight: Math.max(minHeight, Math.min(maxHeight, Math.floor(available))),
     wrapperStyle: isTopPosition
-      ? {
-          justifyContent: 'flex-end',
-          paddingBottom: Math.max(0, screenHeight - aboveEnd),
-        }
+      ? endingAt(aboveEnd)
       : { paddingTop: belowStart },
   };
 };
+
+/**
+ * A wrapper from the top of the Modal down to `end`, with the list at its
+ * bottom: a list above the trigger ends at `end`. Measured from the top,
+ * not as padding from the bottom, because the Modal's height can still
+ * change after the list is shown (on Android it is first laid out without
+ * the system bars), and the list must not move when it does.
+ */
+const endingAt = (end: number): ViewStyle => ({
+  flex: 0,
+  height: Math.max(0, end),
+  justifyContent: 'flex-end',
+});
 
 const firstNumber = (...values: unknown[]): number => {
   const value = values.find((candidate) => candidate !== undefined);
