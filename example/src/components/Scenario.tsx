@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type { ReactNode } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type ScenarioProps = {
   /** What this screen is for and what to look at. */
@@ -60,9 +60,9 @@ export const dropdownStyles = StyleSheet.create({
     minHeight: 50,
     paddingHorizontal: 12,
     borderWidth: 1,
-    borderColor: "#767676",
+    borderColor: '#767676',
     borderRadius: 8,
-    backgroundColor: "white",
+    backgroundColor: 'white',
   },
 });
 
@@ -78,14 +78,14 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 15,
-    color: "#333",
+    color: '#333',
   },
   field: {
     gap: 6,
   },
   label: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#111",
+    fontWeight: '600',
+    color: '#111',
   },
 });
