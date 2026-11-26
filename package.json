@@ -33,7 +33,8 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "prepack": "bob build",
-    "release": "release-it"
+    "release": "release-it",
+    "example": "pnpm --filter example"
   },
   "packageManager": "pnpm@12.23.0",
   "keywords": [

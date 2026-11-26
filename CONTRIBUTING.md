@@ -6,57 +6,41 @@ We want this community to be friendly and respectful to each other. Please follo
 
 ## Development workflow
 
-To get started with the project, run `yarn` in the root directory to install the required dependencies for each package:
+You need Node.js 26 (see `.nvmrc`) and [pnpm](https://pnpm.io/). The repository pins the pnpm version in `package.json`; pnpm switches to it automatically.
+
+Install the dependencies of the library and the example app from the root directory:
 
 ```sh
-yarn
+pnpm install
 ```
 
-> While it's possible to use [`npm`](https://github.com/npm/cli), the tooling is built around [`yarn`](https://classic.yarnpkg.com/), so you'll have an easier time if you use `yarn` for development.
-
-While developing, you can run the [example app](/example/) to test your changes. Any changes you make in your library's JavaScript code will be reflected in the example app without a rebuild. If you change any native code, then you'll need to rebuild the example app.
-
-To start the packager:
+While developing, run the [example app](/example/) to test your changes. It is an Expo app that uses the library's source directly, so changes show up without a rebuild. Each screen covers one test scenario; [`example/CHECKLIST.md`](/example/CHECKLIST.md) describes what to check on each, including VoiceOver and TalkBack.
 
 ```sh
-yarn example start
+pnpm example start    # start Metro
+pnpm example ios      # run on iOS
+pnpm example android  # run on Android
 ```
 
-To run the example app on Android:
+Make sure your code passes type checking, linting and formatting:
 
 ```sh
-yarn example android
+pnpm typecheck
+pnpm example typecheck
+pnpm lint
+pnpm format:check
 ```
 
-To run the example app on iOS:
+To format all files, run:
 
 ```sh
-yarn example ios
+pnpm format
 ```
 
-To run the example app on Web:
+Remember to add tests for your change if possible. Run the unit tests with:
 
 ```sh
-yarn example web
-```
-
-Make sure your code passes TypeScript and ESLint. Run the following to verify:
-
-```sh
-yarn typecheck
-yarn lint
-```
-
-To fix formatting errors, run the following:
-
-```sh
-yarn lint --fix
-```
-
-Remember to add tests for your change if possible. Run the unit tests by:
-
-```sh
-yarn test
+pnpm test
 ```
 
 ### Commit message convention
@@ -92,11 +76,9 @@ Our pre-commit hooks verify that your commit message matches this format when co
 
 ### Linting and tests
 
-[ESLint](https://eslint.org/), [Prettier](https://prettier.io/), [TypeScript](https://www.typescriptlang.org/)
+We use [TypeScript](https://www.typescriptlang.org/) for type checking, [oxlint](https://oxc.rs/docs/guide/usage/linter) for linting (including React Compiler and React Native accessibility rules), [oxfmt](https://oxc.rs/docs/guide/usage/formatter) for formatting, and [Jest](https://jestjs.io/) with [React Native Testing Library](https://oss.callstack.com/react-native-testing-library/) for testing.
 
-We use [TypeScript](https://www.typescriptlang.org/) for type checking, [ESLint](https://eslint.org/) with [Prettier](https://prettier.io/) for linting and formatting the code, and [Jest](https://jestjs.io/) for testing.
-
-Our pre-commit hooks verify that the linter and tests pass when committing.
+Our pre-commit hook formats the staged files, then lints and type checks them.
 
 ### Publishing to npm
 
@@ -105,20 +87,20 @@ We use [release-it](https://github.com/release-it/release-it) to make it easier 
 To publish new versions, run the following:
 
 ```sh
-yarn release
+pnpm release
 ```
 
 ### Scripts
 
 The `package.json` file contains various scripts for common tasks:
 
-- `yarn bootstrap`: setup project by installing all dependencies and pods.
-- `yarn typecheck`: type-check files with TypeScript.
-- `yarn lint`: lint files with ESLint.
-- `yarn test`: run unit tests with Jest.
-- `yarn example start`: start the Metro server for the example app.
-- `yarn example android`: run the example app on Android.
-- `yarn example ios`: run the example app on iOS.
+- `pnpm typecheck`: type-check the library with TypeScript.
+- `pnpm lint`: lint files with oxlint.
+- `pnpm format` / `pnpm format:check`: format files with oxfmt, or check their formatting.
+- `pnpm test`: run unit tests with Jest.
+- `pnpm prepack`: build the library into `lib/` with react-native-builder-bob.
+- `pnpm example <script>`: run a script of the example app, e.g. `start`, `ios`, `android` or `typecheck`.
+- `type-tests/run.sh <react-native> <react>`: type-check a small app against the packed library, e.g. `type-tests/run.sh 0.83 19.2`.
 
 ### Sending a pull request
 
