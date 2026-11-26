@@ -37,9 +37,7 @@ const renderMultiSelect = (
     />
   );
 
-// The trigger doesn't receive testID (see the accessibility tests), so press
-// its placeholder text instead.
-const pressTrigger = () => fireEvent.press(screen.getByText('Select item'));
+const pressTrigger = () => fireEvent.press(screen.getByTestId('multiselect'));
 
 const open = async () => {
   await pressTrigger();
@@ -365,8 +363,7 @@ describe('MultiSelect', () => {
       expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
     });
 
-    // Known bug (v3 plan, phase 4): the trigger ignores testID.
-    it.failing('puts testID on the trigger', async () => {
+    it('puts testID on the trigger', async () => {
       await renderMultiSelect();
 
       expect(screen.getByTestId('multiselect')).toBeTruthy();

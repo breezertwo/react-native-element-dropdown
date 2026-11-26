@@ -174,6 +174,7 @@ const MultiSelectComponent = React.forwardRef<
     <DropdownTrigger
       visible={visible}
       onPress={showOrClose}
+      testID={testID}
       accessibilityLabel={accessibilityLabel}
       listId={nativeId}
       text={placeholder}
