@@ -243,7 +243,6 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
             selected={selected}
             onPress={() => onSelect(item)}
             testID={_get(item, itemTestIDField || labelField)}
-            accessible={!!accessibilityLabel}
             accessibilityLabel={_get(
               item,
               itemAccessibilityLabelField || labelField
@@ -312,7 +311,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
             defaultListProps={{
               accessibilityRole: 'radiogroup',
               testID: testID + ' flatlist',
-              accessibilityLabel: accessibilityLabel + ' flatlist',
+              accessibilityLabel: accessibilityLabel ?? placeholder,
             }}
             flatListProps={flatListProps}
             listProps={{

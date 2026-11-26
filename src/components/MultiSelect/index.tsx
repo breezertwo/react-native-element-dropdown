@@ -210,11 +210,11 @@ const MultiSelectComponent = React.forwardRef<
         selected={checkSelected(item)}
         onPress={() => onSelect(item)}
         testID={_get(item, itemTestIDField || labelField)}
-        accessible={!!accessibilityLabel}
         accessibilityLabel={_get(
           item,
           itemAccessibilityLabelField || labelField
         )}
+        accessibilityRole="checkbox"
         activeColor={activeColor}
         selectedStyle={styles.wrapItem}
         itemContainerStyle={itemContainerStyle}
@@ -278,7 +278,7 @@ const MultiSelectComponent = React.forwardRef<
           captureTouches
           defaultListProps={{
             testID: testID + ' flatlist',
-            accessibilityLabel: accessibilityLabel + ' flatlist',
+            accessibilityLabel: accessibilityLabel ?? placeholder,
           }}
           flatListProps={flatListProps}
           listProps={{

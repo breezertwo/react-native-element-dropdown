@@ -473,12 +473,28 @@ describe('Dropdown', () => {
       expect(screen.getByRole('radio', { name: 'Banana' })).toBeTruthy();
     });
 
-    // Target behaviour (v3 plan, phase 5): rows accessible without a label.
-    it.failing('exposes rows without an accessibilityLabel', async () => {
-      await renderDropdown();
+    it('exposes rows as radio buttons without an accessibilityLabel and checks the selected one', async () => {
+      await renderDropdown({ value: 'banana' });
       await open();
 
       expect(screen.getAllByRole('radio')).toHaveLength(fruits.length);
+      expect(
+        screen.getByRole('radio', { name: 'Banana', checked: true })
+      ).toBeTruthy();
+      expect(
+        screen.getByRole('radio', { name: 'Apple', checked: false })
+      ).toBeTruthy();
+    });
+
+    it('names the list like the field', async () => {
+      await renderDropdown({ accessibilityLabel: 'Fruit' });
+      await open();
+
+      // A radiogroup, but not an accessibility element itself (that would
+      // merge the rows into one element), so check its props.
+      const list = screen.getByTestId('dropdown flatlist');
+      expect(list.props.accessibilityRole).toBe('radiogroup');
+      expect(list.props.accessibilityLabel).toBe('Fruit');
     });
   });
 

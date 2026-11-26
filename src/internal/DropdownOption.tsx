@@ -6,12 +6,7 @@ import {
   TouchableHighlight,
   View,
 } from 'react-native';
-import type {
-  AccessibilityRole,
-  StyleProp,
-  TextStyle,
-  ViewStyle,
-} from 'react-native';
+import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 
 interface DropdownOptionProps<T> {
   item: T;
@@ -19,10 +14,9 @@ interface DropdownOptionProps<T> {
   selected: boolean;
   onPress: () => void;
   testID?: string;
-  /** Only an accessibility element when the dropdown has a label (2.x). */
-  accessible: boolean;
   accessibilityLabel?: string;
-  accessibilityRole?: AccessibilityRole;
+  /** radio (Dropdown) or checkbox (MultiSelect); reports `selected` as checked. */
+  accessibilityRole: 'radio' | 'checkbox';
   /** Background while pressed and while selected. */
   activeColor: string;
   /** Extra style of the row while selected. */
@@ -40,7 +34,6 @@ export function DropdownOption<T>({
   selected,
   onPress,
   testID,
-  accessible,
   accessibilityLabel,
   accessibilityRole,
   activeColor,
@@ -53,8 +46,8 @@ export function DropdownOption<T>({
   return (
     <TouchableHighlight
       accessibilityRole={accessibilityRole}
+      accessibilityState={{ checked: selected }}
       testID={testID}
-      accessible={accessible}
       accessibilityLabel={accessibilityLabel}
       underlayColor={activeColor}
       onPress={onPress}

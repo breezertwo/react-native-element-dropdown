@@ -477,35 +477,23 @@ describe('MultiSelect', () => {
       });
     });
 
-    it('names rows by their label, without a role, when accessibilityLabel is set', async () => {
-      await renderMultiSelect({ accessibilityLabel: 'Fruits' });
-      await open();
-
-      expect(screen.getByLabelText('Banana')).toBeTruthy();
-      expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
-    });
-
     it('puts testID on the trigger', async () => {
       await renderMultiSelect();
 
       expect(screen.getByTestId('multiselect')).toBeTruthy();
     });
 
-    // Target behaviour (v3 plan, phase 5).
-    it.failing(
-      'exposes rows as checkboxes with their checked state',
-      async () => {
-        await renderMultiSelect({ value: ['banana'] });
-        await open();
+    it('exposes rows as checkboxes with their checked state', async () => {
+      await renderMultiSelect({ value: ['banana'] });
+      await open();
 
-        expect(
-          screen.getByRole('checkbox', { name: 'Banana', checked: true })
-        ).toBeTruthy();
-        expect(
-          screen.getByRole('checkbox', { name: 'Apple', checked: false })
-        ).toBeTruthy();
-      }
-    );
+      expect(
+        screen.getByRole('checkbox', { name: 'Banana', checked: true })
+      ).toBeTruthy();
+      expect(
+        screen.getByRole('checkbox', { name: 'Apple', checked: false })
+      ).toBeTruthy();
+    });
   });
 
   describe('data', () => {
