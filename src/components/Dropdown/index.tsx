@@ -24,6 +24,7 @@ import { DropdownModal } from '../../internal/DropdownModal';
 import { DropdownOption } from '../../internal/DropdownOption';
 import { DropdownSearch } from '../../internal/DropdownSearch';
 import { useAccessibilityFocus } from '../../internal/useAccessibilityFocus';
+import { useAnnounceSearchResults } from '../../internal/useAnnounceSearchResults';
 import { DropdownTrigger } from '../../internal/DropdownTrigger';
 import { useFullScreenMode } from '../../internal/useFullScreenMode';
 import { createKeyExtractor } from '../../internal/keyExtractor';
@@ -129,6 +130,11 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       excludeItems,
       excludeSearchItems,
       onChangeText,
+    });
+    useAnnounceSearchResults({
+      searchText,
+      resultCount: listData.length,
+      message: strings.searchResults,
     });
 
     const keyExtractor = useMemo(

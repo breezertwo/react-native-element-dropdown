@@ -2,7 +2,7 @@
 import _get from 'lodash/get';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { ComponentRef } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, StyleSheet, View } from 'react-native';
 import type { TextInput } from 'react-native';
 import {
   useDropdownPlacement,
@@ -15,6 +15,7 @@ import { DropdownModal } from '../../internal/DropdownModal';
 import { DropdownOption } from '../../internal/DropdownOption';
 import { DropdownSearch } from '../../internal/DropdownSearch';
 import { useAccessibilityFocus } from '../../internal/useAccessibilityFocus';
+import { useAnnounceSearchResults } from '../../internal/useAnnounceSearchResults';
 import { DropdownTrigger } from '../../internal/DropdownTrigger';
 import { useFullScreenMode } from '../../internal/useFullScreenMode';
 import { createKeyExtractor } from '../../internal/keyExtractor';
@@ -125,7 +126,6 @@ const MultiSelectComponent = React.forwardRef<
     excludeSearchItems,
     onChangeText,
   });
-
   const keyExtractor = useMemo(
     () => createKeyExtractor(valueField),
     [valueField]
@@ -149,6 +149,12 @@ const MultiSelectComponent = React.forwardRef<
     [accessibilityStrings]
   );
 
+  useAnnounceSearchResults({
+    searchText,
+    resultCount: listData.length,
+    message: strings.searchResults,
+  });
+
   const onSelect = useCallback(
     (item: any) => {
       const { values, removed } = toggleValue(
@@ -158,18 +164,31 @@ const MultiSelectComponent = React.forwardRef<
       );
       const confirm = removed ? confirmUnSelectItem : confirmSelectItem;
       if (onConfirmSelectItem && confirm) {
+        // The app decides whether the change happens, so don't announce it.
         onConfirmSelectItem(values);
-      } else {
-        onChange(values);
+        return;
+      }
+      onChange(values);
+
+      if (values.length !== currentValue.length) {
+        const label = String(
+          _get(item, itemAccessibilityLabelField || labelField)
+        );
+        AccessibilityInfo.announceForAccessibility(
+          removed ? strings.itemRemoved(label) : strings.itemSelected(label)
+        );
       }
     },
     [
       confirmSelectItem,
       confirmUnSelectItem,
       currentValue,
+      itemAccessibilityLabelField,
+      labelField,
       maxSelect,
       onChange,
       onConfirmSelectItem,
+      strings,
       valueField,
     ]
   );

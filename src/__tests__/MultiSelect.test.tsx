@@ -11,7 +11,7 @@ import {
 } from '@jest/globals';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import React, { createRef } from 'react';
-import { Text } from 'react-native';
+import { AccessibilityInfo, Text } from 'react-native';
 import { MultiSelect, type IMultiSelectRef } from '../index';
 import { layoutOpenList, mockTriggerLayout } from '../__fixtures__/testUtils';
 
@@ -519,6 +519,68 @@ describe('MultiSelect', () => {
           nativeEvent: { actionName: 'remove-1' },
         });
         expect(onChange).toHaveBeenCalledWith(['apple']);
+      });
+    });
+
+    describe('announcements', () => {
+      const announce = jest.mocked(AccessibilityInfo.announceForAccessibility);
+
+      beforeEach(() => {
+        announce.mockClear();
+      });
+
+      it('announces added and removed items', async () => {
+        await renderMultiSelect({ value: ['apple'] });
+        await open();
+
+        await fireEvent.press(screen.getByText('Banana'));
+        expect(announce).toHaveBeenLastCalledWith('Banana selected');
+
+        await fireEvent.press(screen.getByText('Apple'));
+        expect(announce).toHaveBeenLastCalledWith('Apple removed');
+      });
+
+      it("doesn't announce at maxSelect or when the app confirms the change", async () => {
+        await renderMultiSelect({ value: ['apple'], maxSelect: 1 });
+        await open();
+        await fireEvent.press(screen.getByText('Banana'));
+
+        await renderMultiSelect({
+          value: [],
+          confirmSelectItem: true,
+          onConfirmSelectItem: () => {},
+        });
+        await fireEvent.press(screen.getAllByTestId('multiselect').at(-1)!);
+        await layoutOpenList();
+        await fireEvent.press(screen.getAllByText('Cherry').at(-1)!);
+
+        expect(announce).not.toHaveBeenCalled();
+      });
+
+      it('announces the number of search results after typing pauses', async () => {
+        await renderMultiSelect({
+          search: true,
+          accessibilityStrings: { searchResults: (n) => `${n} Treffer` },
+        });
+        await open();
+
+        await fireEvent.changeText(
+          screen.getByTestId('multiselect input'),
+          'a'
+        );
+        await fireEvent.changeText(
+          screen.getByTestId('multiselect input'),
+          'an'
+        );
+        await act(async () => {
+          jest.advanceTimersByTime(699);
+        });
+        expect(announce).not.toHaveBeenCalled();
+
+        await act(async () => {
+          jest.advanceTimersByTime(1);
+        });
+        expect(announce.mock.calls).toEqual([['1 Treffer']]);
       });
     });
 
