@@ -11,7 +11,7 @@ import {
 } from '@jest/globals';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import React, { createRef } from 'react';
-import { Text } from 'react-native';
+import { Text, TextInput } from 'react-native';
 import { Dropdown, type IDropdownRef } from '../index';
 import { layoutOpenList, mockTriggerLayout } from '../__fixtures__/testUtils';
 
@@ -253,26 +253,17 @@ describe('Dropdown', () => {
       await fireEvent.changeText(screen.getByTestId('dropdown input'), text);
     };
 
-    // Known regression since 2.12.5 (commit 66af554): without onChangeText the
-    // search effect resets the filtered list right away, so searching shows
-    // all items. Fix planned as 2.13.x.
-    it.failing(
-      'filters by label, ignoring case, whitespace and accents',
-      async () => {
-        await renderDropdown({ search: true });
-        await open();
+    it('filters by label, ignoring case, whitespace and accents', async () => {
+      await renderDropdown({ search: true });
+      await open();
 
-        await search('CREME BRU');
+      await search('CREME BRU');
 
-        expect(screen.getByText('Crème brûlée')).toBeTruthy();
-        expect(screen.queryByText('Apple')).toBeNull();
-      }
-    );
+      expect(screen.getByText('Crème brûlée')).toBeTruthy();
+      expect(screen.queryByText('Apple')).toBeNull();
+    });
 
-    // Known regression since 2.12.5 (commit 66af554): without onChangeText the
-    // search effect resets the filtered list right away, so searching shows
-    // all items. Fix planned as 2.13.x.
-    it.failing('filters by searchField instead of the label', async () => {
+    it('filters by searchField instead of the label', async () => {
       await renderDropdown({ search: true, searchField: 'value' });
       await open();
 
@@ -282,10 +273,7 @@ describe('Dropdown', () => {
       expect(screen.queryByText('Apple')).toBeNull();
     });
 
-    // Known regression since 2.12.5 (commit 66af554): without onChangeText the
-    // search effect resets the filtered list right away, so searching shows
-    // all items. Fix planned as 2.13.x.
-    it.failing('uses searchQuery when given', async () => {
+    it('uses searchQuery when given', async () => {
       const searchQuery = jest.fn(
         (keyword: string, labelValue: string) => labelValue === keyword
       );
@@ -299,12 +287,7 @@ describe('Dropdown', () => {
       expect(screen.queryByText('Apple')).toBeNull();
     });
 
-    // Known bug (v3 plan, phase 4; upstream #302): with onChangeText set,
-    // typing starts an endless render loop, because the search effect depends
-    // on the list it replaces. It crashes the test run, so the test can't be
-    // `it.failing`. Enable it after the fix.
-    // oxlint-disable-next-line jest/no-disabled-tests -- crashes the run, see above
-    it.skip('reports the search text through onChangeText and clears it on close', async () => {
+    it('reports the search text through onChangeText and clears it on close', async () => {
       const onChangeText = jest.fn();
       await renderDropdown({ search: true, onChangeText });
       await open();
@@ -314,6 +297,52 @@ describe('Dropdown', () => {
 
       await fireEvent.press(trigger());
       expect(onChangeText).toHaveBeenLastCalledWith('');
+    });
+
+    it('filters the list while onChangeText is set', async () => {
+      await renderDropdown({ search: true, onChangeText: () => {} });
+      await open();
+
+      await search('ban');
+
+      expect(screen.getByText('Banana')).toBeTruthy();
+      expect(screen.queryByText('Apple')).toBeNull();
+    });
+
+    it('filters through a custom input from renderInputSearch', async () => {
+      await renderDropdown({
+        search: true,
+        renderInputSearch: (onSearch) => (
+          <TextInput testID="custom search" onChangeText={onSearch} />
+        ),
+      });
+      await open();
+
+      await fireEvent.changeText(screen.getByTestId('custom search'), 'ban');
+
+      expect(screen.getByText('Banana')).toBeTruthy();
+      expect(screen.queryByText('Apple')).toBeNull();
+    });
+
+    it('keeps filtering when data changes during a search', async () => {
+      const { rerender } = await renderDropdown({ search: true });
+      await open();
+      await search('an');
+
+      await rerender(
+        <Dropdown
+          testID="dropdown"
+          search
+          data={[...fruits, { label: 'Mango', value: 'mango' }]}
+          labelField="label"
+          valueField="value"
+          onChange={() => {}}
+        />
+      );
+
+      expect(screen.getByText('Banana')).toBeTruthy();
+      expect(screen.getByText('Mango')).toBeTruthy();
+      expect(screen.queryByText('Apple')).toBeNull();
     });
   });
 
@@ -326,24 +355,20 @@ describe('Dropdown', () => {
       expect(screen.getByText('Banana')).toBeTruthy();
     });
 
-    // Same search regression as above.
-    it.failing(
-      'hides excludeSearchItems only from search results',
-      async () => {
-        await renderDropdown({
-          search: true,
-          excludeSearchItems: [fruits[0]!],
-        });
-        await open();
+    it('hides excludeSearchItems only from search results', async () => {
+      await renderDropdown({
+        search: true,
+        excludeSearchItems: [fruits[0]!],
+      });
+      await open();
 
-        expect(screen.getByText('Apple')).toBeTruthy();
+      expect(screen.getByText('Apple')).toBeTruthy();
 
-        await fireEvent.changeText(screen.getByTestId('dropdown input'), 'a');
+      await fireEvent.changeText(screen.getByTestId('dropdown input'), 'a');
 
-        expect(screen.queryByText('Apple')).toBeNull();
-        expect(screen.getByText('Banana')).toBeTruthy();
-      }
-    );
+      expect(screen.queryByText('Apple')).toBeNull();
+      expect(screen.getByText('Banana')).toBeTruthy();
+    });
   });
 
   describe('accessibility (2.13 behaviour)', () => {

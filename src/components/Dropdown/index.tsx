@@ -40,6 +40,16 @@ import { styles } from './styles';
 const { isTablet } = useDetectDevice;
 const ic_down = require('../../assets/down.png');
 
+// Stable defaults, so the derived list isn't recomputed on every render.
+const NO_ITEMS: any[] = [];
+
+const normalizeSearchText = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/\s/g, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
 const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
   (props, currentRef) => {
     const orientation = useDeviceOrientation();
@@ -92,8 +102,8 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       itemAccessibilityLabelField,
       mode = 'default',
       closeModalWhenSelectedItem = true,
-      excludeItems = [],
-      excludeSearchItems = [],
+      excludeItems = NO_ITEMS,
+      excludeSearchItems = NO_ITEMS,
       safeAreaInsets,
     } = props;
 
@@ -101,7 +111,6 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
     const refList = useRef<FlatList>(null);
     const [visible, setVisible] = useState<boolean>(false);
     const [currentValue, setCurrentValue] = useState<any>(null);
-    const [listData, setListData] = useState<any[]>(data);
     const [searchText, setSearchText] = useState('');
     const nativeId = useRef(
       `dropdown-${Math.random().toString(16).slice(2)}`
@@ -153,91 +162,52 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const excludeData = useCallback(
-      (data: any[]) => {
-        if (excludeItems.length > 0) {
-          const getData = _differenceWith(
-            data,
-            excludeItems,
-            (obj1, obj2) => _get(obj1, valueField) === _get(obj2, valueField)
-          );
-          return getData || [];
-        } else {
-          return data || [];
-        }
-      },
-      [excludeItems, valueField]
+    const isSameItem = useCallback(
+      (a: any, b: any) => _get(a, valueField) === _get(b, valueField),
+      [valueField]
     );
+
+    // The list is derived from the data, the search text and the excluded
+    // items. It used to be state that an effect re-filtered, which broke
+    // search: without onChangeText the effect reset the list right away, with
+    // it the effect looped endlessly.
+    const listData = useMemo(() => {
+      const available =
+        excludeItems.length > 0
+          ? _differenceWith(data, excludeItems, isSameItem)
+          : data;
+      if (searchText.length === 0) {
+        return available;
+      }
+
+      const key = normalizeSearchText(searchText);
+      const matches = available.filter((item: any) => {
+        const label = _get(item, searchField || labelField);
+        return searchQuery
+          ? !!searchQuery(searchText, label)
+          : normalizeSearchText(String(label ?? '')).includes(key);
+      });
+      return excludeSearchItems.length > 0
+        ? _differenceWith(matches, excludeSearchItems, isSameItem)
+        : matches;
+    }, [
+      data,
+      excludeItems,
+      excludeSearchItems,
+      isSameItem,
+      labelField,
+      searchField,
+      searchQuery,
+      searchText,
+    ]);
 
     const onSearch = useCallback(
       (text: string) => {
-        if (text.length > 0) {
-          const defaultFilterFunction = (e: any) => {
-            const item = _get(e, searchField || labelField)
-              ?.toLowerCase()
-              .replace(/\s/g, '')
-              .normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, '');
-            const key = text
-              .toLowerCase()
-              .replace(/\s/g, '')
-              .normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, '');
-
-            return item.indexOf(key) >= 0;
-          };
-
-          const propSearchFunction = (e: any) => {
-            const labelText = _get(e, searchField || labelField);
-
-            return searchQuery?.(text, labelText);
-          };
-
-          const dataSearch = data.filter(
-            searchQuery ? propSearchFunction : defaultFilterFunction
-          );
-
-          if (excludeSearchItems.length > 0 || excludeItems.length > 0) {
-            const excludeSearchData = _differenceWith(
-              dataSearch,
-              excludeSearchItems,
-              (obj1, obj2) => _get(obj1, valueField) === _get(obj2, valueField)
-            );
-
-            const filterData = excludeData(excludeSearchData);
-            setListData(filterData);
-          } else {
-            setListData(dataSearch);
-          }
-        } else {
-          const filterData = excludeData(data);
-          setListData(filterData);
-        }
+        setSearchText(text);
+        onChangeText?.(text);
       },
-      [
-        data,
-        searchQuery,
-        excludeSearchItems,
-        excludeItems,
-        searchField,
-        labelField,
-        valueField,
-        excludeData,
-      ]
+      [onChangeText]
     );
-    useEffect(() => {
-      if (data && searchText.length === 0) {
-        const filterData = excludeData(data);
-        if (!_isEqual(filterData, listData)) {
-          setListData([...filterData]);
-        }
-      }
-
-      if (searchText) {
-        onSearch(searchText);
-      }
-      // eslint-enable-next-line react-hooks/exhaustive-deps
-    }, [data, searchText, excludeData, listData, onSearch]);
 
     const eventOpen = useCallback(() => {
       if (!disable) {
@@ -246,12 +216,8 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         if (onFocus) {
           onFocus();
         }
-
-        if (searchText.length > 0) {
-          onSearch(searchText);
-        }
       }
-    }, [disable, onFocus, searchText, onSearch, _measure]);
+    }, [disable, onFocus, _measure]);
 
     const eventClose = useCallback(() => {
       if (!disable) {
@@ -347,16 +313,10 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
             onChangeText('');
           }
           setSearchText('');
-          onSearch('');
         }
 
         _measure();
         setVisible(visibleStatus);
-
-        if (data) {
-          const filterData = excludeData(data);
-          setListData(filterData);
-        }
 
         if (visibleStatus) {
           if (onFocus) {
@@ -367,19 +327,13 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
             onBlur();
           }
         }
-
-        if (searchText.length > 0) {
-          onSearch(searchText);
-        }
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       disable,
       isKeyboardVisible,
       visible,
       _measure,
-      data,
-      searchText,
+      onChangeText,
       onFocus,
       onBlur,
     ]);
@@ -398,7 +352,6 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
             onChangeText('');
           }
           setSearchText('');
-          onSearch('');
           eventClose();
         }
       },
@@ -408,7 +361,6 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         onChange,
         onChangeText,
         onConfirmSelectItem,
-        onSearch,
         closeModalWhenSelectedItem,
       ]
     );
@@ -519,13 +471,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
     const renderSearch = useCallback(() => {
       if (search) {
         if (renderInputSearch) {
-          return renderInputSearch((text) => {
-            if (onChangeText) {
-              setSearchText(text);
-              onChangeText(text);
-            }
-            onSearch(text);
-          });
+          return renderInputSearch(onSearch);
         } else {
           return (
             <CInput
@@ -536,13 +482,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
               value={searchText}
               autoCorrect={false}
               placeholder={searchPlaceholder}
-              onChangeText={(e) => {
-                if (onChangeText) {
-                  setSearchText(e);
-                  onChangeText(e);
-                }
-                onSearch(e);
-              }}
+              onChangeText={onSearch}
               placeholderTextColor={searchPlaceholderTextColor}
               showIcon
               iconStyle={[{ tintColor: iconColor }, iconStyle]}
@@ -557,7 +497,6 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       iconColor,
       iconStyle,
       inputSearchStyle,
-      onChangeText,
       onSearch,
       renderInputSearch,
       search,
