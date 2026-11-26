@@ -1,10 +1,12 @@
 import type { ComponentRef, ReactElement, Ref } from 'react';
 import { StyleSheet } from 'react-native';
 import type { ImageStyle, StyleProp, TextInput, TextStyle } from 'react-native';
-import type { DropdownAccessibilityStrings } from './a11y';
+import type { DropdownAccessibilityStrings, TextScaling } from './a11y';
 import SearchInput from './SearchInput';
 
 interface DropdownSearchProps {
+  /** `allowFontScaling` and `maxFontSizeMultiplier` for the input. */
+  textScaling?: TextScaling;
   /** The built-in input, for moving screen reader focus to it. */
   inputRef?: Ref<ComponentRef<typeof TextInput>>;
   searchText: string;
@@ -24,6 +26,7 @@ interface DropdownSearchProps {
 
 /** The search input above (or below) the list. */
 export function DropdownSearch({
+  textScaling,
   inputRef,
   searchText,
   onSearch,
@@ -43,6 +46,7 @@ export function DropdownSearch({
 
   return (
     <SearchInput
+      {...textScaling}
       ref={inputRef}
       testID={testID + ' input'}
       accessibilityLabel={placeholder || strings.search}
@@ -68,6 +72,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginBottom: 8,
     margin: 6,
-    height: 45,
+    // A minimum, so large system font sizes aren't cut off.
+    minHeight: 45,
   },
 });

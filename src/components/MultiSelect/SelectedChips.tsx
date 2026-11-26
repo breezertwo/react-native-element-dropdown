@@ -1,3 +1,4 @@
+import type { TextScaling } from '../../internal/a11y';
 import _get from 'lodash/get';
 import type { ReactElement } from 'react';
 import {
@@ -14,6 +15,8 @@ import type { DropdownAccessibilityStrings } from '../../internal/a11y';
 const CHIP_HIT_SLOP = { top: 6, bottom: 6 };
 
 interface SelectedChipsProps<T> {
+  /** `allowFontScaling` and `maxFontSizeMultiplier` for the texts. */
+  textScaling?: TextScaling;
   /** The selected items, in data order. */
   items: T[];
   /** Rendered inside the field instead of below it (`inside` prop). */
@@ -35,6 +38,7 @@ interface SelectedChipsProps<T> {
 
 /** A chip per selected item; pressing one unselects its item. */
 export function SelectedChips<T>({
+  textScaling,
   items,
   inside,
   onUnselect,
@@ -73,6 +77,7 @@ export function SelectedChips<T>({
             ) : (
               <View style={StyleSheet.flatten([styles.chip, selectedStyle])}>
                 <Text
+                  {...textScaling}
                   style={StyleSheet.flatten([
                     styles.chipText,
                     selectedTextStyle,
@@ -82,6 +87,7 @@ export function SelectedChips<T>({
                   {label}
                 </Text>
                 <Text
+                  {...textScaling}
                   style={StyleSheet.flatten([
                     styles.removeIcon,
                     selectedTextStyle,

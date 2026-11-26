@@ -49,6 +49,8 @@ const MultiSelectComponent = React.forwardRef<
     activeColor = '#F6F7F8',
     containerStyle,
     fontFamily,
+    allowFontScaling,
+    maxFontSizeMultiplier,
     placeholderStyle,
     iconColor = 'gray',
     inputSearchStyle,
@@ -148,6 +150,10 @@ const MultiSelectComponent = React.forwardRef<
     () => resolveAccessibilityStrings(accessibilityStrings),
     [accessibilityStrings]
   );
+  const textScaling = useMemo(
+    () => ({ allowFontScaling, maxFontSizeMultiplier }),
+    [allowFontScaling, maxFontSizeMultiplier]
+  );
 
   useAnnounceSearchResults({
     searchText,
@@ -195,6 +201,7 @@ const MultiSelectComponent = React.forwardRef<
 
   const _renderDropdown = () => (
     <DropdownTrigger
+      textScaling={textScaling}
       ref={triggerFocusRef}
       visible={visible}
       onPress={showOrClose}
@@ -241,6 +248,7 @@ const MultiSelectComponent = React.forwardRef<
   const _renderItem = useCallback(
     ({ item, index }: { item: any; index: number }) => (
       <DropdownOption
+        textScaling={textScaling}
         ref={index === focusRowIndex ? focusRowRef : undefined}
         item={item}
         label={_get(item, labelField)}
@@ -272,6 +280,7 @@ const MultiSelectComponent = React.forwardRef<
       labelField,
       onSelect,
       renderItem,
+      textScaling,
     ]
   );
 
@@ -298,6 +307,7 @@ const MultiSelectComponent = React.forwardRef<
           search={
             search ? (
               <DropdownSearch
+                textScaling={textScaling}
                 inputRef={searchInputRef}
                 searchText={searchText}
                 onSearch={onSearch}
@@ -344,6 +354,7 @@ const MultiSelectComponent = React.forwardRef<
   const _renderItemSelected = (inside: boolean) => {
     return (
       <SelectedChips
+        textScaling={textScaling}
         items={selectedItems}
         inside={inside}
         onUnselect={unSelect}
@@ -368,6 +379,7 @@ const MultiSelectComponent = React.forwardRef<
         onLayout={_measure}
       >
         <InsideTrigger
+          textScaling={textScaling}
           ref={triggerFocusRef}
           visible={visible}
           onPress={showOrClose}

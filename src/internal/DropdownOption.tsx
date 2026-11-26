@@ -1,3 +1,4 @@
+import type { TextScaling } from './a11y';
 import type { TriggerInstance } from './placement/useDropdownPlacement';
 import type { ReactElement, ReactNode, Ref } from 'react';
 import {
@@ -10,6 +11,8 @@ import {
 import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 
 interface DropdownOptionProps<T> {
+  /** `allowFontScaling` and `maxFontSizeMultiplier` for the texts. */
+  textScaling?: TextScaling;
   /** The row, for moving screen reader focus to it. */
   ref?: Ref<TriggerInstance>;
   item: T;
@@ -32,6 +35,7 @@ interface DropdownOptionProps<T> {
 
 /** One row in the list: `renderItem`, or the label in a padded row. */
 export function DropdownOption<T>({
+  textScaling,
   ref,
   item,
   label,
@@ -68,6 +72,7 @@ export function DropdownOption<T>({
         ) : (
           <View style={styles.item}>
             <Text
+              {...textScaling}
               style={StyleSheet.flatten([
                 styles.text,
                 itemTextStyle,

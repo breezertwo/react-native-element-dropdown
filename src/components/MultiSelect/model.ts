@@ -38,6 +38,13 @@ export interface MultiSelectProps<T> {
   minHeight?: number;
   maxSelect?: number;
   fontFamily?: string;
+  /**
+   * Whether texts follow the system font size (default: true). Keep it on
+   * for accessibility; use maxFontSizeMultiplier to cap very large sizes.
+   */
+  allowFontScaling?: boolean;
+  /** Largest font scale for the texts, e.g. 1.5. */
+  maxFontSizeMultiplier?: number;
   iconColor?: string;
   activeColor?: string;
   data: T[];

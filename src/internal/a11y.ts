@@ -35,3 +35,9 @@ export const resolveAccessibilityStrings = (
   strings
     ? { ...defaultAccessibilityStrings, ...strings }
     : defaultAccessibilityStrings;
+
+/** How texts follow the system font size (`allowFontScaling`, `maxFontSizeMultiplier`). */
+export interface TextScaling {
+  allowFontScaling?: boolean;
+  maxFontSizeMultiplier?: number;
+}

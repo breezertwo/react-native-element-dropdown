@@ -562,6 +562,30 @@ describe('Dropdown', () => {
     });
   });
 
+  describe('text scaling', () => {
+    it('applies allowFontScaling and maxFontSizeMultiplier to every text and the search input', async () => {
+      await renderDropdown({
+        value: 'banana',
+        search: true,
+        allowFontScaling: false,
+        maxFontSizeMultiplier: 1.5,
+      });
+      await open();
+
+      const texts =
+        screen.root?.queryAll(
+          (node) => node.type === 'Text' || node.type === 'TextInput'
+        ) ?? [];
+      expect(texts.length).toBeGreaterThan(3);
+      for (const text of texts) {
+        expect(text.props).toMatchObject({
+          allowFontScaling: false,
+          maxFontSizeMultiplier: 1.5,
+        });
+      }
+    });
+  });
+
   describe('data', () => {
     it('does not mutate the items passed in data', async () => {
       const data = [

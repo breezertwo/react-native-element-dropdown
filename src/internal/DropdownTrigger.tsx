@@ -1,3 +1,4 @@
+import type { TextScaling } from './a11y';
 import type { TriggerInstance } from './placement/useDropdownPlacement';
 import type { ReactElement, Ref } from 'react';
 import {
@@ -32,6 +33,8 @@ export function ChevronIcon({ color, style }: ChevronIconProps) {
 }
 
 interface DropdownTriggerProps {
+  /** `allowFontScaling` and `maxFontSizeMultiplier` for the texts. */
+  textScaling?: TextScaling;
   /** The accessibility element, for moving screen reader focus to it. */
   ref?: Ref<TriggerInstance>;
   /** The list's open state, for aria-expanded and the icon render props. */
@@ -59,6 +62,7 @@ interface DropdownTriggerProps {
  * and whether the list is expanded.
  */
 export function DropdownTrigger({
+  textScaling,
   ref,
   visible,
   onPress,
@@ -90,6 +94,7 @@ export function DropdownTrigger({
       <View ref={ref} style={triggerStyles.dropdown}>
         {renderLeftIcon?.(visible)}
         <Text
+          {...textScaling}
           style={[
             triggerStyles.text,
             textStyle,

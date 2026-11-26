@@ -54,6 +54,8 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       value,
       activeColor = '#F6F7F8',
       fontFamily,
+      allowFontScaling,
+      maxFontSizeMultiplier,
       iconColor = 'gray',
       searchPlaceholder,
       searchPlaceholderTextColor = 'gray',
@@ -119,6 +121,10 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
     const strings = useMemo(
       () => resolveAccessibilityStrings(accessibilityStrings),
       [accessibilityStrings]
+    );
+    const textScaling = useMemo(
+      () => ({ allowFontScaling, maxFontSizeMultiplier }),
+      [allowFontScaling, maxFontSizeMultiplier]
     );
 
     const { searchText, listData, onSearch, clearSearch } = useSearch({
@@ -229,6 +235,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       const hasSelection = currentValue != null;
       return (
         <DropdownTrigger
+          textScaling={textScaling}
           ref={triggerFocusRef}
           visible={visible}
           onPress={showOrClose}
@@ -268,6 +275,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         const selected = isSelectedItem(item);
         return (
           <DropdownOption
+            textScaling={textScaling}
             ref={index === focusRowIndex ? focusRowRef : undefined}
             item={item}
             label={_get(item, labelField)}
@@ -299,6 +307,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         labelField,
         onSelect,
         renderItem,
+        textScaling,
       ]
     );
 
@@ -325,6 +334,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
             search={
               search ? (
                 <DropdownSearch
+                  textScaling={textScaling}
                   inputRef={searchInputRef}
                   searchText={searchText}
                   onSearch={onSearch}

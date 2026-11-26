@@ -1,3 +1,4 @@
+import type { TextScaling } from '../../internal/a11y';
 import type { TriggerInstance } from '../../internal/placement/useDropdownPlacement';
 import type { ReactElement, ReactNode, Ref } from 'react';
 import {
@@ -11,6 +12,8 @@ import type { ImageStyle, StyleProp, TextStyle } from 'react-native';
 import { ChevronIcon, triggerStyles } from '../../internal/DropdownTrigger';
 
 interface InsideTriggerProps {
+  /** `allowFontScaling` and `maxFontSizeMultiplier` for the texts. */
+  textScaling?: TextScaling;
   /** The accessibility element, for moving screen reader focus to it. */
   ref?: Ref<TriggerInstance>;
   /** The list's open state, for the icon render props. */
@@ -40,6 +43,7 @@ interface InsideTriggerProps {
 
 /** The field of `<MultiSelect inside />`: chips inside the field. */
 export function InsideTrigger({
+  textScaling,
   ref,
   visible,
   onPress,
@@ -81,6 +85,7 @@ export function InsideTrigger({
         {renderLeftIcon?.(visible)}
         {chips ?? (
           <Text
+            {...textScaling}
             style={StyleSheet.flatten([
               triggerStyles.text,
               placeholderStyle,
