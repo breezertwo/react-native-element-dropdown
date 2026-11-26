@@ -2,12 +2,13 @@ import type React from 'react';
 import type { DropdownAccessibilityStrings } from '../../internal/a11y';
 import type { DropdownSafeAreaInsets } from '../../internal/placement/useDropdownPlacement';
 import type {
+  FlatListProps,
+  ImageStyle,
+  Insets,
   StyleProp,
+  TextProps,
   TextStyle,
   ViewStyle,
-  TextProps,
-  ImageStyle,
-  FlatListProps,
 } from 'react-native';
 
 export type IDropdownRef = {
@@ -25,6 +26,11 @@ export interface DropdownProps<T> {
   testID?: string;
   itemTestIDField?: string;
   style?: StyleProp<ViewStyle>;
+  /**
+   * Extends the field's touch area beyond its bounds, e.g. to reach the
+   * recommended 44pt (iOS) / 48dp (Android) without making it taller.
+   */
+  hitSlop?: Insets | number;
   containerStyle?: StyleProp<ViewStyle>;
   placeholderStyle?: StyleProp<TextStyle>;
   selectedTextStyle?: StyleProp<TextStyle>;

@@ -9,7 +9,13 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import type { ImageStyle, StyleProp, TextProps, TextStyle } from 'react-native';
+import type {
+  ImageStyle,
+  Insets,
+  StyleProp,
+  TextProps,
+  TextStyle,
+} from 'react-native';
 
 const chevronDown = require('../assets/down.png');
 
@@ -33,6 +39,8 @@ export function ChevronIcon({ color, style }: ChevronIconProps) {
 }
 
 interface DropdownTriggerProps {
+  /** Extends the touch area (`hitSlop` prop). */
+  hitSlop?: Insets | number;
   /** `allowFontScaling` and `maxFontSizeMultiplier` for the texts. */
   textScaling?: TextScaling;
   /** The accessibility element, for moving screen reader focus to it. */
@@ -62,6 +70,7 @@ interface DropdownTriggerProps {
  * and whether the list is expanded.
  */
 export function DropdownTrigger({
+  hitSlop,
   textScaling,
   ref,
   visible,
@@ -81,6 +90,7 @@ export function DropdownTrigger({
 }: DropdownTriggerProps) {
   return (
     <TouchableWithoutFeedback
+      hitSlop={hitSlop}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="combobox"
       accessibilityValue={

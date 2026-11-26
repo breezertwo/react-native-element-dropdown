@@ -8,10 +8,12 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import type { ImageStyle, StyleProp, TextStyle } from 'react-native';
+import type { ImageStyle, Insets, StyleProp, TextStyle } from 'react-native';
 import { ChevronIcon, triggerStyles } from '../../internal/DropdownTrigger';
 
 interface InsideTriggerProps {
+  /** Extends the touch area (`hitSlop` prop). */
+  hitSlop?: Insets | number;
   /** `allowFontScaling` and `maxFontSizeMultiplier` for the texts. */
   textScaling?: TextScaling;
   /** The accessibility element, for moving screen reader focus to it. */
@@ -43,6 +45,7 @@ interface InsideTriggerProps {
 
 /** The field of `<MultiSelect inside />`: chips inside the field. */
 export function InsideTrigger({
+  hitSlop,
   textScaling,
   ref,
   visible,
@@ -63,6 +66,7 @@ export function InsideTrigger({
 }: InsideTriggerProps) {
   return (
     <TouchableWithoutFeedback
+      hitSlop={hitSlop}
       testID={testID}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="combobox"

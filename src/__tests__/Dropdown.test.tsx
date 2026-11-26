@@ -562,6 +562,17 @@ describe('Dropdown', () => {
     });
   });
 
+  describe('hitSlop', () => {
+    it('extends the touch area of the field', async () => {
+      const hitSlop = { top: 4, bottom: 4, left: 0, right: 0 };
+      await renderDropdown({ accessibilityLabel: 'Fruit', hitSlop });
+
+      expect(
+        screen.getByRole('combobox', { name: 'Fruit' }).props.hitSlop
+      ).toEqual(hitSlop);
+    });
+  });
+
   describe('text scaling', () => {
     it('applies allowFontScaling and maxFontSizeMultiplier to every text and the search input', async () => {
       await renderDropdown({

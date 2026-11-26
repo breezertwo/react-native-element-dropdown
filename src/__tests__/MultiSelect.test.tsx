@@ -603,6 +603,29 @@ describe('MultiSelect', () => {
     });
   });
 
+  describe('hitSlop', () => {
+    it('extends the touch area of the field', async () => {
+      const hitSlop = { top: 4, bottom: 4, left: 0, right: 0 };
+      await renderMultiSelect({ accessibilityLabel: 'Fruits', hitSlop });
+
+      expect(
+        screen.getByRole('combobox', { name: 'Fruits' }).props.hitSlop
+      ).toEqual(hitSlop);
+    });
+
+    it('passes hitSlop to the field with inside', async () => {
+      await renderMultiSelect({
+        inside: true,
+        accessibilityLabel: 'Fruits',
+        hitSlop: 8,
+      });
+
+      expect(
+        screen.getByRole('combobox', { name: 'Fruits' }).props.hitSlop
+      ).toBe(8);
+    });
+  });
+
   describe('text scaling', () => {
     it('applies allowFontScaling and maxFontSizeMultiplier to every text and the search input', async () => {
       await renderMultiSelect({

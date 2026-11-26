@@ -4,6 +4,7 @@ import type { DropdownSafeAreaInsets } from '../../internal/placement/useDropdow
 import type {
   FlatListProps,
   ImageStyle,
+  Insets,
   StyleProp,
   TextStyle,
   ViewStyle,
@@ -25,6 +26,11 @@ export interface MultiSelectProps<T> {
   testID?: string;
   itemTestIDField?: string;
   style?: StyleProp<ViewStyle>;
+  /**
+   * Extends the field's touch area beyond its bounds, e.g. to reach the
+   * recommended 44pt (iOS) / 48dp (Android) without making it taller.
+   */
+  hitSlop?: Insets | number;
   containerStyle?: StyleProp<ViewStyle>;
   placeholderStyle?: StyleProp<TextStyle>;
   inputSearchStyle?: StyleProp<TextStyle>;

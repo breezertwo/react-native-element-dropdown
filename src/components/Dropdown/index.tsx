@@ -39,6 +39,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       itemTestIDField,
       onChange,
       style = {},
+      hitSlop,
       containerStyle,
       placeholderStyle,
       selectedTextStyle,
@@ -235,6 +236,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       const hasSelection = currentValue != null;
       return (
         <DropdownTrigger
+          hitSlop={hitSlop}
           textScaling={textScaling}
           ref={triggerFocusRef}
           visible={visible}

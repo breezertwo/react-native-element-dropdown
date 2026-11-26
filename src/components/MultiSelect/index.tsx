@@ -37,6 +37,7 @@ const MultiSelectComponent = React.forwardRef<
     data = [],
     value,
     style = {},
+    hitSlop,
     labelField,
     valueField,
     searchField,
@@ -201,6 +202,7 @@ const MultiSelectComponent = React.forwardRef<
 
   const _renderDropdown = () => (
     <DropdownTrigger
+      hitSlop={hitSlop}
       textScaling={textScaling}
       ref={triggerFocusRef}
       visible={visible}
@@ -379,6 +381,7 @@ const MultiSelectComponent = React.forwardRef<
         onLayout={_measure}
       >
         <InsideTrigger
+          hitSlop={hitSlop}
           textScaling={textScaling}
           ref={triggerFocusRef}
           visible={visible}
