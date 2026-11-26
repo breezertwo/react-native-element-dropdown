@@ -110,7 +110,8 @@
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
-    ]
+    ],
+    "helpUrl": "https://github.com/breezertwo/react-native-element-dropdown/blob/main/CONTRIBUTING.md#commit-message-convention"
   },
   "release-it": {
     "git": {

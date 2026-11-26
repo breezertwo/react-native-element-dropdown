@@ -64,12 +64,30 @@ yarn test
 
 We follow the [conventional commits specification](https://www.conventionalcommits.org/en) for our commit messages:
 
+```
+<type>(<optional scope>): <subject>
+```
+
 - `fix`: bug fixes, e.g. fix crash due to deprecated method.
 - `feat`: new features, e.g. add new method to the module.
 - `refactor`: code refactor, e.g. migrate from class components to hooks.
-- `docs`: changes into documentation, e.g. add usage example for the module..
+- `docs`: changes into documentation, e.g. add usage example for the module.
 - `test`: adding or updating tests, e.g. add integration tests using detox.
-- `chore`: tooling changes, e.g. change CI config.
+- `chore`: tooling changes, e.g. update dependencies.
+- `ci`: CI configuration, e.g. update GitHub actions.
+- also allowed: `build`, `perf`, `style`, `revert`.
+
+Rules the commit-msg hook ([commitlint](https://commitlint.js.org/)) checks:
+
+- `type` is lowercase and one of the types above.
+- The subject must not start with a capital letter or be in Title Case, and must not end with a period.
+- The first line is at most 100 characters; so are lines in the body.
+
+| ✅ Passes | ❌ Fails |
+| --- | --- |
+| `chore: update license` | `chore: Update License` (capitalized subject) |
+| `fix(multiselect): hide chips when value is empty` | `Fix: hide chips` (capitalized type) |
+| `docs: add country picker recipe` | `docs: add country picker recipe.` (trailing period) |
 
 Our pre-commit hooks verify that your commit message matches this format when committing.
 
