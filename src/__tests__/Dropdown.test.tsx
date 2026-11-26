@@ -229,22 +229,33 @@ describe('Dropdown', () => {
       expect(screen.getByText('Banana (selected)')).toBeTruthy();
     });
 
-    // Known bug (v3 plan, phase 4): with nothing selected, the "selected
-    // value" is null, which matches an item whose value is null.
-    it.failing(
-      'does not mark an item with a null value as selected when nothing is selected',
-      async () => {
-        await renderDropdown({
-          data: [...fruits, { label: 'None', value: null as never }],
-          renderItem: (item: Fruit, selected?: boolean) => (
-            <Text>{`${item.label}${selected ? ' (selected)' : ''}`}</Text>
-          ),
-        });
-        await open();
+    it('does not mark an item with a null value as selected when nothing is selected', async () => {
+      await renderDropdown({
+        data: [...fruits, { label: 'None', value: null as never }],
+        renderItem: (item: Fruit, selected?: boolean) => (
+          <Text>{`${item.label}${selected ? ' (selected)' : ''}`}</Text>
+        ),
+      });
+      await open();
 
-        expect(screen.getByText('None')).toBeTruthy();
-      }
-    );
+      expect(screen.getByText('None')).toBeTruthy();
+    });
+    it('shows the label when the selected item has a null value', async () => {
+      await renderDropdown({
+        data: [...fruits, { label: 'None', value: null as never }],
+        value: { label: 'None', value: null as never },
+        renderItem: (item: Fruit, selected?: boolean) => (
+          <Text>{`${item.label}${selected ? ' (selected)' : ''}`}</Text>
+        ),
+      });
+
+      expect(screen.getByText('None')).toBeTruthy();
+      expect(screen.queryByText('Select item')).toBeNull();
+
+      await open();
+
+      expect(screen.getByText('None (selected)')).toBeTruthy();
+    });
   });
 
   describe('search', () => {

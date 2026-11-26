@@ -185,8 +185,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
     );
 
     const _renderDropdown = () => {
-      const isSelected = currentValue && _get(currentValue, valueField);
-      const hasSelection = isSelected !== null;
+      const hasSelection = currentValue != null;
       return (
         <DropdownTrigger
           visible={visible}
@@ -208,8 +207,9 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
 
     const _renderItem = useCallback(
       ({ item }: { item: any }) => {
-        const isSelected = currentValue && _get(currentValue, valueField);
-        const selected = _isEqual(_get(item, valueField), isSelected);
+        const selected =
+          currentValue != null &&
+          _isEqual(_get(item, valueField), _get(currentValue, valueField));
         return (
           <DropdownOption
             item={item}
