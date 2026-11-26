@@ -52,9 +52,8 @@
 
     // Known issues in the 2.x code, raised back to "error" once fixed:
     // touchables without role/label (v3 plan, phase 5) and React Compiler
-    // rule violations (phases 3 and 7).
+    // rule violations (phase 7).
     "rn-a11y/has-valid-accessibility-descriptors": "warn",
-    "react/refs": "warn",
     "react/set-state-in-effect": "warn"
   }
 }

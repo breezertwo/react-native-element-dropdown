@@ -28,7 +28,7 @@ import {
   hiddenStyle,
   useDropdownPlacement,
   type TriggerInstance,
-} from '../../useDropdownPlacement';
+} from '../../internal/placement/useDropdownPlacement';
 import CInput from '../TextInput';
 import { IMultiSelectRef, MultiSelectProps } from './model';
 import { styles } from './styles';

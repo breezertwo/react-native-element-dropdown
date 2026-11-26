@@ -1,0 +1,215 @@
+import { StyleSheet } from 'react-native';
+import type { StyleProp, ViewStyle } from 'react-native';
+import type { KeyboardFrame } from './keyboard';
+
+/** Space between the trigger and the list. */
+export const GAP = 2;
+/** Minimum distance between the list and the screen edges or insets. */
+export const EDGE_MARGIN = 8;
+
+export type DropdownPosition = 'auto' | 'top' | 'bottom';
+
+export interface DropdownSafeAreaInsets {
+  top?: number;
+  bottom?: number;
+}
+
+export interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface Size {
+  width: number;
+  height: number;
+}
+
+export interface DropdownPlacement {
+  /** False until everything needed for the final position is measured. */
+  isReady: boolean;
+  /** Whether the list opens above the trigger. */
+  isTopPosition: boolean;
+  left: number;
+  width: number;
+  maxHeight: number;
+  /** Style of the full-screen view that positions the list via padding. */
+  wrapperStyle: ViewStyle;
+}
+
+export interface PlacementInput {
+  /** Trigger rect relative to the top of the screen; null until measured. */
+  trigger: Rect | null;
+  /** Whether `trigger` was measured since the list opened. */
+  isTriggerFresh: boolean;
+  /** Size of the modal the list renders in; null until it is laid out. */
+  modalSize: Size | null;
+  /** Window size, used until the modal is laid out. */
+  windowSize: Size;
+  /** Height of the list content; null until it is laid out. */
+  contentHeight: number | null;
+  /** The keyboard covering the screen; null if none, or if it is ignored. */
+  keyboard: KeyboardFrame | null;
+  isFull: boolean;
+  isRTL: boolean;
+  dropdownPosition: DropdownPosition;
+  maxHeight: number;
+  minHeight: number;
+  safeAreaInsets?: DropdownSafeAreaInsets;
+  /** Top inset when `safeAreaInsets.top` isn't given (Android: status bar). */
+  defaultTopInset: number;
+  /** Vertical margins of the list container (`containerStyle`). */
+  verticalMargins: number;
+}
+
+/**
+ * Where the open list goes and how tall it may get. Returns null while the
+ * trigger hasn't been measured.
+ *
+ * With `dropdownPosition="auto"`, the list opens below the trigger unless the
+ * space below (above the keyboard and bottom inset) is too small for its
+ * content and the space above is larger.
+ */
+export const computePlacement = ({
+  trigger,
+  isTriggerFresh,
+  modalSize,
+  windowSize,
+  contentHeight,
+  keyboard,
+  isFull,
+  isRTL,
+  dropdownPosition,
+  maxHeight,
+  minHeight,
+  safeAreaInsets,
+  defaultTopInset,
+  verticalMargins,
+}: PlacementInput): DropdownPlacement | null => {
+  if (!trigger || !(trigger.width > 0)) {
+    return null;
+  }
+
+  const screenHeight = modalSize?.height ?? windowSize.height;
+  const screenWidth = modalSize?.width ?? windowSize.width;
+  const isReady =
+    modalSize != null &&
+    isTriggerFresh &&
+    (isFull || dropdownPosition !== 'auto' || contentHeight != null);
+
+  const left = isRTL ? screenWidth - trigger.width - trigger.x : trigger.x;
+
+  const topInset = safeAreaInsets?.top ?? defaultTopInset;
+  const bottomInset = safeAreaInsets?.bottom ?? 0;
+  const keyboardTop = keyboard
+    ? Math.min(
+        screenHeight,
+        keyboard.screenY > 0 ? keyboard.screenY : screenHeight - keyboard.height
+      )
+    : Infinity;
+
+  const topLimit = topInset + EDGE_MARGIN;
+  const bottomLimit = Math.min(
+    screenHeight - bottomInset - EDGE_MARGIN,
+    keyboardTop - GAP
+  );
+
+  if (isFull) {
+    return {
+      isReady,
+      isTopPosition: false,
+      left,
+      width: trigger.width,
+      maxHeight: Math.max(
+        minHeight,
+        Math.floor(bottomLimit - topLimit - verticalMargins)
+      ),
+      wrapperStyle: {
+        paddingTop: topLimit,
+        paddingBottom: Math.max(0, screenHeight - bottomLimit),
+      },
+    };
+  }
+
+  if (!isReady) {
+    return {
+      isReady,
+      isTopPosition: false,
+      left,
+      width: trigger.width,
+      maxHeight,
+      wrapperStyle: {},
+    };
+  }
+
+  if (dropdownPosition !== 'auto') {
+    const isTopPosition = dropdownPosition === 'top';
+    return {
+      isReady,
+      isTopPosition,
+      left,
+      width: trigger.width,
+      maxHeight,
+      wrapperStyle: isTopPosition
+        ? {
+            justifyContent: 'flex-end',
+            paddingBottom: Math.max(0, screenHeight - (trigger.y - GAP)),
+          }
+        : { paddingTop: trigger.y + trigger.height + GAP },
+    };
+  }
+
+  const belowStart = Math.max(trigger.y + trigger.height + GAP, topLimit);
+  const aboveEnd = Math.min(trigger.y - GAP, bottomLimit);
+  const spaceBelow = bottomLimit - belowStart - verticalMargins;
+  const spaceAbove = aboveEnd - topLimit - verticalMargins;
+  const needed = Math.min(contentHeight ?? maxHeight, maxHeight);
+
+  const isTopPosition = spaceBelow < needed && spaceAbove > spaceBelow;
+  const available = isTopPosition ? spaceAbove : spaceBelow;
+
+  return {
+    isReady,
+    isTopPosition,
+    left,
+    width: trigger.width,
+    maxHeight: Math.max(minHeight, Math.min(maxHeight, Math.floor(available))),
+    wrapperStyle: isTopPosition
+      ? {
+          justifyContent: 'flex-end',
+          paddingBottom: Math.max(0, screenHeight - aboveEnd),
+        }
+      : { paddingTop: belowStart },
+  };
+};
+
+const firstNumber = (...values: unknown[]): number => {
+  const value = values.find((candidate) => candidate !== undefined);
+  return typeof value === 'number' ? value : 0;
+};
+
+/**
+ * Top plus bottom margin of a style, with the same precedence as React
+ * Native's layout: the most specific property wins. Non-numeric margins
+ * (percentages, "auto") count as 0.
+ */
+export const getVerticalMargins = (style: StyleProp<ViewStyle>): number => {
+  const flat = (StyleSheet.flatten(style) ?? {}) as Record<string, unknown>;
+  return (
+    firstNumber(
+      flat.marginTop,
+      flat.marginBlockStart,
+      flat.marginBlock,
+      flat.marginVertical,
+      flat.margin
+    ) +
+    firstNumber(
+      flat.marginBottom,
+      flat.marginBlockEnd,
+      flat.marginBlock,
+      flat.marginVertical,
+      flat.margin
+    )
+  );
+};

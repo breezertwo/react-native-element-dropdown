@@ -32,7 +32,7 @@ import {
   hiddenStyle,
   useDropdownPlacement,
   type TriggerInstance,
-} from '../../useDropdownPlacement';
+} from '../../internal/placement/useDropdownPlacement';
 import CInput from '../TextInput';
 import { DropdownProps, IDropdownRef } from './model';
 import { styles } from './styles';

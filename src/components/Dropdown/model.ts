@@ -1,5 +1,5 @@
 import type React from 'react';
-import type { DropdownSafeAreaInsets } from '../../useDropdownPlacement';
+import type { DropdownSafeAreaInsets } from '../../internal/placement/useDropdownPlacement';
 import type {
   StyleProp,
   TextStyle,
