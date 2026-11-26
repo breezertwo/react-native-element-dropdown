@@ -130,6 +130,19 @@ export const useDropdownPlacement = ({
     measureTrigger();
   }, [measureTrigger]);
 
+  /**
+   * Call right before opening: forgets the measurements of the last opening
+   * and measures the trigger and the keyboard again. It runs in the same
+   * event as the opening, so the list never renders with stale sizes.
+   */
+  const prepareOpen = useCallback(() => {
+    setIsTriggerFresh(false);
+    setModalSize(null);
+    setContentHeight(null);
+    setKeyboard(getCurrentKeyboardFrame());
+    measureTrigger();
+  }, [measureTrigger]);
+
   const stopTracking = useCallback(() => {
     trackingRef.current += 1;
   }, []);
@@ -170,14 +183,9 @@ export const useDropdownPlacement = ({
   useEffect(() => {
     if (!visible) {
       stopTracking();
-      setIsTriggerFresh(false);
-      setModalSize(null);
-      setContentHeight(null);
-      setKeyboard(null);
       return;
     }
 
-    setKeyboard(getCurrentKeyboardFrame());
     trackTrigger();
 
     const onFrame = (e: KeyboardEvent) => {
@@ -269,8 +277,10 @@ export const useDropdownPlacement = ({
 
   return {
     measure,
+    prepareOpen,
     placement,
-    isKeyboardVisible: keyboard != null,
+    // Keyboard events are only followed while the list is open.
+    isKeyboardVisible: visible && keyboard != null,
     onModalLayout,
     onContainerLayout,
   };

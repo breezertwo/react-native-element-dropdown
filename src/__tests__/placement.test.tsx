@@ -11,9 +11,9 @@ import {
   jest,
 } from '@jest/globals';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
-import React from 'react';
+import React, { createRef } from 'react';
 import { Dimensions, Keyboard } from 'react-native';
-import { Dropdown, type DropdownProps } from '../index';
+import { Dropdown, type DropdownProps, type IDropdownRef } from '../index';
 import {
   layoutOpenList,
   mockTriggerLayout,
@@ -161,6 +161,35 @@ describe('dropdown placement', () => {
       paddingBottom: 502, // 800 - (300 - 2)
     });
     expect(openListStyle()).toMatchObject({ maxHeight: 290 });
+  });
+
+  describe('opening again', () => {
+    it('keeps the list hidden until it is laid out again', async () => {
+      await openAt(100);
+      expect(openListStyle()).not.toMatchObject({ opacity: 0 });
+
+      await fireEvent.press(screen.getByTestId('dropdown'));
+      await fireEvent.press(screen.getByTestId('dropdown'));
+
+      // The sizes of the last opening are gone: hidden until measured.
+      expect(openListStyle()).toMatchObject({ opacity: 0 });
+      await layoutOpenList({ screenSize, contentHeight: 200 });
+      expect(openListStyle()).not.toMatchObject({ opacity: 0 });
+      expect(openListWrapperStyle()).toMatchObject({ paddingTop: 142 });
+    });
+
+    it('forgets the keyboard of the last opening', async () => {
+      const ref = createRef<IDropdownRef>();
+      await openAt(300, { ref });
+      await keyboardDidShow(500, 300);
+      await act(async () => ref.current?.close());
+
+      // Opens on the first press: no keyboard left to dismiss first.
+      await fireEvent.press(screen.getByTestId('dropdown'));
+      await layoutOpenList({ screenSize, contentHeight: 200 });
+
+      expect(openListWrapperStyle()).toMatchObject({ paddingTop: 342 });
+    });
   });
 
   it('ignores the keyboard with keyboardAvoiding={false}', async () => {

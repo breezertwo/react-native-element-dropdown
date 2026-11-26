@@ -19,8 +19,8 @@ interface UseDropdownStateParams {
   visible: boolean;
   setVisible: (visible: boolean) => void;
   disable: boolean;
-  /** Re-measures the trigger before the list opens. */
-  measure: () => void;
+  /** Called right before the list opens (re-measures the trigger). */
+  prepareOpen: () => void;
   isKeyboardVisible: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
@@ -37,7 +37,7 @@ export const useDropdownState = ({
   visible,
   setVisible,
   disable,
-  measure,
+  prepareOpen,
   isKeyboardVisible,
   onFocus,
   onBlur,
@@ -47,10 +47,10 @@ export const useDropdownState = ({
     if (disable) {
       return;
     }
-    measure();
+    prepareOpen();
     setVisible(true);
     onFocus?.();
-  }, [disable, measure, setVisible, onFocus]);
+  }, [disable, prepareOpen, setVisible, onFocus]);
 
   const close = useCallback(() => {
     if (disable) {
@@ -84,7 +84,9 @@ export const useDropdownState = ({
     if (!nextVisible) {
       onDismiss?.();
     }
-    measure();
+    if (nextVisible) {
+      prepareOpen();
+    }
     setVisible(nextVisible);
     if (nextVisible) {
       onFocus?.();
@@ -96,7 +98,7 @@ export const useDropdownState = ({
     visible,
     isKeyboardVisible,
     onDismiss,
-    measure,
+    prepareOpen,
     setVisible,
     onFocus,
     onBlur,

@@ -115,6 +115,7 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
 
   const {
     measure: _measure,
+    prepareOpen,
     placement,
     isKeyboardVisible,
     onModalLayout,
@@ -171,7 +172,7 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
     visible,
     setVisible,
     disable,
-    measure: _measure,
+    prepareOpen,
     isKeyboardVisible,
     onFocus,
     onBlur,
