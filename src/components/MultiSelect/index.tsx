@@ -224,7 +224,6 @@ const MultiSelectComponent = React.forwardRef<
       />
     ),
     [
-      accessibilityLabel,
       activeColor,
       checkSelected,
       fontFamily,
@@ -299,20 +298,21 @@ const MultiSelectComponent = React.forwardRef<
     }
   };
 
+  const selectedItems = data.filter((item: any) =>
+    currentValue.includes(_get(item, valueField))
+  );
+
   const _renderItemSelected = (inside: boolean) => {
-    const selectedValues = value ?? [];
     return (
       <SelectedChips
-        items={data.filter((item: any) =>
-          selectedValues.includes(_get(item, valueField))
-        )}
+        items={selectedItems}
         inside={inside}
         onUnselect={unSelect}
         labelField={labelField}
         valueField={valueField}
         itemTestIDField={itemTestIDField}
         itemAccessibilityLabelField={itemAccessibilityLabelField}
-        accessible={!!accessibilityLabel}
+        strings={strings}
         selectedStyle={selectedStyle}
         selectedTextStyle={selectedTextStyle}
         fontFamily={fontFamily}
@@ -339,7 +339,13 @@ const MultiSelectComponent = React.forwardRef<
               : undefined
           }
           disabled={disable}
-          chips={value && value.length > 0 ? _renderItemSelected(true) : null}
+          removeActions={selectedItems.map((item: any) => ({
+            label: strings.removeItem(
+              String(_get(item, itemAccessibilityLabelField || labelField))
+            ),
+            onRemove: () => unSelect(item),
+          }))}
+          chips={selectedItems.length > 0 ? _renderItemSelected(true) : null}
           placeholder={placeholder}
           placeholderStyle={placeholderStyle}
           fontFamily={fontFamily}

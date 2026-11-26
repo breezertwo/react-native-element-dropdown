@@ -264,7 +264,6 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         );
       },
       [
-        accessibilityLabel,
         activeColor,
         fontFamily,
         isSelectedItem,

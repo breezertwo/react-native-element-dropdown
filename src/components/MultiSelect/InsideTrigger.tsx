@@ -19,6 +19,11 @@ interface InsideTriggerProps {
   /** What is selected, read after the name (e.g. "2 selected"). */
   accessibilityValue?: string;
   disabled?: boolean;
+  /**
+   * The chips are inside this one accessibility element, so screen readers
+   * can't reach them; offer removing each item as a custom action instead.
+   */
+  removeActions?: { label: string; onRemove: () => void }[];
   /** The chips; the placeholder shows when there are none. */
   chips: ReactNode;
   placeholder: string;
@@ -38,6 +43,7 @@ export function InsideTrigger({
   accessibilityLabel,
   accessibilityValue,
   disabled = false,
+  removeActions = [],
   chips,
   placeholder,
   placeholderStyle,
@@ -57,6 +63,14 @@ export function InsideTrigger({
       }
       aria-expanded={visible}
       aria-disabled={disabled}
+      accessibilityActions={removeActions.map((action, index) => ({
+        name: `remove-${index}`,
+        label: action.label,
+      }))}
+      onAccessibilityAction={(event) => {
+        const index = Number(event.nativeEvent.actionName.split('-')[1]);
+        removeActions[index]?.onRemove();
+      }}
       onPress={onPress}
     >
       <View style={styles.field}>

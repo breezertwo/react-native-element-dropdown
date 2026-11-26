@@ -67,8 +67,11 @@ export function DropdownList<T>({
     </View>
   );
 
+  // Not an accessibility element: it only claims touches.
   return captureTouches ? (
-    <TouchableWithoutFeedback>{content}</TouchableWithoutFeedback>
+    <TouchableWithoutFeedback accessible={false}>
+      {content}
+    </TouchableWithoutFeedback>
   ) : (
     content
   );

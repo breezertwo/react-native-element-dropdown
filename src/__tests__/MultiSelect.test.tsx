@@ -477,6 +477,51 @@ describe('MultiSelect', () => {
       });
     });
 
+    describe('chips', () => {
+      it('are "Remove <label>" buttons with a 44pt touch target', async () => {
+        const onChange = jest.fn();
+        await renderMultiSelect({ value: ['apple', 'banana'], onChange });
+
+        const chip = screen.getByRole('button', { name: 'Remove Banana' });
+        expect(chip.props.hitSlop).toEqual({ top: 6, bottom: 6 });
+
+        await fireEvent.press(chip);
+        expect(onChange).toHaveBeenCalledWith(['apple']);
+      });
+
+      it('use accessibilityStrings', async () => {
+        await renderMultiSelect({
+          value: ['apple'],
+          accessibilityStrings: { removeItem: (label) => `${label} entfernen` },
+        });
+
+        expect(
+          screen.getByRole('button', { name: 'Apple entfernen' })
+        ).toBeTruthy();
+      });
+
+      it('are custom actions of the field with inside', async () => {
+        const onChange = jest.fn();
+        await renderMultiSelect({
+          inside: true,
+          accessibilityLabel: 'Fruits',
+          value: ['apple', 'banana'],
+          onChange,
+        });
+        const field = screen.getByRole('combobox', { name: 'Fruits' });
+
+        expect(field.props.accessibilityActions).toEqual([
+          { name: 'remove-0', label: 'Remove Apple' },
+          { name: 'remove-1', label: 'Remove Banana' },
+        ]);
+
+        await fireEvent(field, 'accessibilityAction', {
+          nativeEvent: { actionName: 'remove-1' },
+        });
+        expect(onChange).toHaveBeenCalledWith(['apple']);
+      });
+    });
+
     it('puts testID on the trigger', async () => {
       await renderMultiSelect();
 

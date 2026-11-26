@@ -8,6 +8,10 @@ import {
   View,
 } from 'react-native';
 import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
+import type { DropdownAccessibilityStrings } from '../../internal/a11y';
+
+// Chips are about 35pt high; this makes the touch target at least 44pt.
+const CHIP_HIT_SLOP = { top: 6, bottom: 6 };
 
 interface SelectedChipsProps<T> {
   /** The selected items, in data order. */
@@ -19,8 +23,7 @@ interface SelectedChipsProps<T> {
   valueField: keyof T;
   itemTestIDField?: string;
   itemAccessibilityLabelField?: string;
-  /** Chips are only accessibility elements when the field has a label (2.x). */
-  accessible: boolean;
+  strings: DropdownAccessibilityStrings;
   selectedStyle?: StyleProp<ViewStyle>;
   selectedTextStyle?: StyleProp<TextStyle>;
   fontFamily?: string;
@@ -39,7 +42,7 @@ export function SelectedChips<T>({
   valueField,
   itemTestIDField,
   itemAccessibilityLabelField,
-  accessible,
+  strings,
   selectedStyle,
   selectedTextStyle,
   fontFamily,
@@ -52,11 +55,16 @@ export function SelectedChips<T>({
         return (
           <TouchableWithoutFeedback
             testID={_get(item, itemTestIDField || (labelField as string))}
-            accessible={accessible}
-            accessibilityLabel={_get(
-              item,
-              itemAccessibilityLabelField || (labelField as string)
+            accessibilityRole="button"
+            accessibilityLabel={strings.removeItem(
+              String(
+                _get(
+                  item,
+                  itemAccessibilityLabelField || (labelField as string)
+                )
+              )
             )}
+            hitSlop={CHIP_HIT_SLOP}
             key={String(_get(item, valueField as string))}
             onPress={() => onUnselect(item)}
           >
