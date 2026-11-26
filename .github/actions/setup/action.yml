@@ -1,26 +1,19 @@
 name: Setup
-description: Setup Node.js and install dependencies
+description: Set up pnpm and Node.js and install dependencies
 
 runs:
   using: composite
   steps:
-    - name: Setup Node.js
+    # Uses the pnpm version from the `packageManager` field in package.json.
+    - name: Set up pnpm
+      uses: pnpm/action-setup@v6
+
+    - name: Set up Node.js
       uses: actions/setup-node@v7
       with:
         node-version-file: .nvmrc
-
-    - name: Cache dependencies
-      id: yarn-cache
-      uses: actions/cache@v6
-      with:
-        path: |
-          **/node_modules
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-yarn-
+        cache: pnpm
 
     - name: Install dependencies
-      if: steps.yarn-cache.outputs.cache-hit != 'true'
-      run: |
-        yarn install --frozen-lockfile
+      run: pnpm install --frozen-lockfile
       shell: bash

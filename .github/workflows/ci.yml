@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - main
+      - next
   pull_request:
     branches:
       - main
+      - next
 
 jobs:
   lint:
@@ -17,11 +19,14 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
-      - name: Lint files
-        run: yarn lint
+      - name: Lint
+        run: pnpm lint
 
-      - name: Typecheck files
-        run: yarn typecheck
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Typecheck
+        run: pnpm typecheck
 
   test:
     runs-on: ubuntu-latest
@@ -33,7 +38,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Run unit tests
-        run: yarn test --maxWorkers=2 --coverage
+        run: pnpm test --maxWorkers=2 --coverage
 
   build:
     runs-on: ubuntu-latest
@@ -45,4 +50,27 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Build package
-        run: yarn prepack
+        run: pnpm prepack
+
+  # Type-checks a small app against the packed library with the oldest and
+  # newest supported React Native / React types.
+  type-compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - react-native: '0.83'
+            react: '19.2'
+          - react-native: '0.88'
+            react: '19.3'
+    name: types (react-native ${{ matrix.react-native }})
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Check types
+        run: type-tests/run.sh ${{ matrix.react-native }} ${{ matrix.react }}
