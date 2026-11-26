@@ -2,7 +2,7 @@ import { DEFAULT_GRAY } from '../../internal/colors';
 import { getField, getFieldText } from '../../internal/fields';
 import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type { ComponentRef } from 'react';
-import { AccessibilityInfo, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo } from 'react-native';
 import type { TextInput } from 'react-native';
 import {
   useDropdownPlacement,
@@ -219,7 +219,9 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
     <DropdownTrigger
       hitSlop={hitSlop}
       textScaling={textScaling}
-      ref={triggerFocusRef}
+      ref={ref}
+      style={style}
+      onLayout={_measure}
       visible={visible}
       onPress={showOrClose}
       testID={testID}
@@ -256,7 +258,6 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
 
   // Screen reader focus: into the list when it is shown (search input,
   // else the selected or first row), back to the field when it closes.
-  const triggerFocusRef = useRef<TriggerInstance>(null);
   const searchInputRef = useRef<ComponentRef<typeof TextInput>>(null);
   const focusRowRef = useRef<TriggerInstance>(null);
   const focusRowIndex = Math.max(0, listData.findIndex(checkSelected));
@@ -264,7 +265,7 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
     visible,
     isReady: placement?.isReady ?? false,
     getListTarget: () => searchInputRef.current ?? focusRowRef.current,
-    triggerRef: triggerFocusRef,
+    triggerRef: ref,
   });
 
   const _renderItem = useCallback(
@@ -419,15 +420,13 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
 
   if (inside) {
     return (
-      <View
-        style={StyleSheet.flatten([styles.mainWrap, style])}
-        ref={ref}
-        onLayout={_measure}
-      >
+      <>
         <InsideTrigger
+          style={style}
+          onLayout={_measure}
           hitSlop={hitSlop}
           textScaling={textScaling}
-          ref={triggerFocusRef}
+          ref={ref}
           visible={visible}
           onPress={showOrClose}
           testID={testID}
@@ -455,20 +454,16 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
           iconStyle={iconStyle}
         />
         {_renderModal()}
-      </View>
+      </>
     );
   }
 
+  // The list's Modal is absolutely positioned, so the field and the chips
+  // are the only elements in the layout.
   return (
     <>
-      <View
-        style={StyleSheet.flatten([styles.mainWrap, style])}
-        ref={ref}
-        onLayout={_measure}
-      >
-        {_renderDropdown()}
-        {_renderModal()}
-      </View>
+      {_renderDropdown()}
+      {_renderModal()}
       {(!visible || alwaysRenderSelectedItem) &&
         visibleSelectedItem &&
         _renderItemSelected(false)}

@@ -73,6 +73,24 @@ afterEach(() => {
 });
 
 describe('MultiSelect', () => {
+  describe('touch area', () => {
+    it.each([false, true])(
+      'makes the whole field pressable, padding included (inside: %p)',
+      async (inside) => {
+        await renderMultiSelect({
+          inside,
+          value: ['apple'],
+          style: { minHeight: 50, paddingHorizontal: 12 },
+        });
+
+        expect(screen.getByTestId('multiselect')).toHaveStyle({
+          minHeight: 50,
+          paddingHorizontal: 12,
+        });
+      }
+    );
+  });
+
   describe('opening and closing', () => {
     it('always shows the placeholder in the field', async () => {
       await renderMultiSelect({ value: ['apple'] });
@@ -987,7 +1005,7 @@ describe('MultiSelect', () => {
       await open();
 
       const texts =
-        screen.root?.queryAll(
+        screen.container.queryAll(
           (node) => node.type === 'Text' || node.type === 'TextInput'
         ) ?? [];
       expect(texts.length).toBeGreaterThan(3);

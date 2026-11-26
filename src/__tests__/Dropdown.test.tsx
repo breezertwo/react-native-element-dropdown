@@ -133,6 +133,16 @@ describe('Dropdown', () => {
     });
   });
 
+  describe('touch area', () => {
+    it('makes the whole field pressable, padding included', async () => {
+      await renderDropdown({ style: { minHeight: 50, paddingHorizontal: 12 } });
+
+      // The style is on the pressable element itself, not on a wrapper
+      // around a pressable that is only as tall as the text.
+      expect(trigger()).toHaveStyle({ minHeight: 50, paddingHorizontal: 12 });
+    });
+  });
+
   describe('opening and closing', () => {
     it('opens on press and calls onFocus', async () => {
       const onFocus = jest.fn();
@@ -626,7 +636,7 @@ describe('Dropdown', () => {
     it('keeps screen readers inside the open list and closes it on the escape gesture', async () => {
       await renderDropdown();
       await open();
-      const container = screen.root?.queryAll(
+      const container = screen.container.queryAll(
         (node) => node.props.accessibilityViewIsModal === true
       )[0];
 
@@ -653,7 +663,7 @@ describe('Dropdown', () => {
     await renderDropdown({ search: true });
     await open();
 
-    const icon = screen.root?.queryAll((node) => node.type === 'Image')[0];
+    const icon = screen.container.queryAll((node) => node.type === 'Image')[0];
     expect(icon?.props.style).toMatchObject({ tintColor: '#767676' });
     expect(screen.getByRole('search').props.placeholderTextColor).toBe(
       '#767676'
@@ -735,7 +745,7 @@ describe('Dropdown', () => {
       await open();
 
       const texts =
-        screen.root?.queryAll(
+        screen.container.queryAll(
           (node) => node.type === 'Text' || node.type === 'TextInput'
         ) ?? [];
       expect(texts.length).toBeGreaterThan(3);

@@ -43,17 +43,17 @@ export const layoutOpenList = async ({
   screenSize = { width: 400, height: 800 },
   contentHeight = 200,
 }: { screenSize?: Size; contentHeight?: number } = {}) => {
-  const root = screen.root;
-  if (!root) {
-    throw new Error('Nothing rendered');
-  }
-  // The modal's full-screen backdrop is the only view that both reports its
-  // layout and handles touches; the list container is the only one that
-  // reports its layout and toggles its accessibility visibility.
+  // The whole tree: the list's Modal is a sibling of the field.
+  const root = screen.container;
+  // The modal's full-screen backdrop is the only view that reports its
+  // layout and handles touches without being an accessibility element (the
+  // field is one); the list container is the only one that reports its
+  // layout and toggles its accessibility visibility.
   const [modalRoot] = root.queryAll(
     (node) =>
       typeof node.props.onLayout === 'function' &&
-      typeof node.props.onStartShouldSetResponder === 'function'
+      typeof node.props.onStartShouldSetResponder === 'function' &&
+      node.props.accessible !== true
   );
   const [container] = root.queryAll(
     (node) =>
@@ -73,7 +73,7 @@ export const layoutOpenList = async ({
 
 const openListContainer = () => {
   const [container] =
-    screen.root?.queryAll(
+    screen.container.queryAll(
       (node) =>
         typeof node.props.onLayout === 'function' &&
         node.props.importantForAccessibility !== undefined

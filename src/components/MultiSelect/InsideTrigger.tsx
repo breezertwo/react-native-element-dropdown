@@ -2,10 +2,24 @@ import { FIELD_ROLE, type TextScaling } from '../../internal/a11y';
 import type { TriggerInstance } from '../../internal/placement/useDropdownPlacement';
 import type { ReactElement, ReactNode, Ref } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
-import type { ImageStyle, Insets, StyleProp, TextStyle } from 'react-native';
+import type {
+  ImageStyle,
+  Insets,
+  LayoutChangeEvent,
+  StyleProp,
+  TextStyle,
+  ViewStyle,
+} from 'react-native';
 import { ChevronIcon, triggerStyles } from '../../internal/DropdownTrigger';
 
 interface InsideTriggerProps {
+  /**
+   * The style of the field (`style` prop). The field itself is the pressable
+   * element, so its whole box, padding included, opens the list.
+   */
+  style?: StyleProp<ViewStyle>;
+  /** Re-measures the field when its layout changes. */
+  onLayout?: (event: LayoutChangeEvent) => void;
   /** Extends the touch area (`hitSlop` prop). */
   hitSlop?: Insets | number;
   /** `allowFontScaling` and `maxFontSizeMultiplier` for the texts. */
@@ -39,6 +53,8 @@ interface InsideTriggerProps {
 
 /** The field of `<MultiSelect inside />`: chips inside the field. */
 export function InsideTrigger({
+  style,
+  onLayout,
   hitSlop,
   textScaling,
   ref,
@@ -61,7 +77,8 @@ export function InsideTrigger({
   return (
     <Pressable
       ref={ref}
-      style={styles.field}
+      style={StyleSheet.flatten([styles.field, style])}
+      onLayout={onLayout}
       hitSlop={hitSlop}
       testID={testID}
       accessibilityLabel={accessibilityLabel}

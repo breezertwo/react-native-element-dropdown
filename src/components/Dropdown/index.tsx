@@ -3,7 +3,6 @@ import { getField, getFieldText, isEqualValue } from '../../internal/fields';
 
 import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type { ComponentRef } from 'react';
-import { StyleSheet, View } from 'react-native';
 import type { TextInput } from 'react-native';
 import {
   useDropdownPlacement,
@@ -23,7 +22,6 @@ import { useFullScreenMode } from '../../internal/useFullScreenMode';
 import { createKeyExtractor } from '../../internal/keyExtractor';
 import { NO_ITEMS, useSearch } from '../../internal/useSearch';
 import type { DropdownProps } from './model';
-import { styles } from './styles';
 
 /**
  * A dropdown to pick one item. `T` (the item type) is inferred from `data`,
@@ -256,7 +254,9 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
       <DropdownTrigger
         hitSlop={hitSlop}
         textScaling={textScaling}
-        ref={triggerFocusRef}
+        ref={ref}
+        style={style}
+        onLayout={_measure}
         visible={visible}
         onPress={showOrClose}
         testID={testID}
@@ -283,7 +283,6 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
 
   // Screen reader focus: into the list when it is shown (search input,
   // else the selected or first row), back to the field when it closes.
-  const triggerFocusRef = useRef<TriggerInstance>(null);
   const searchInputRef = useRef<ComponentRef<typeof TextInput>>(null);
   const focusRowRef = useRef<TriggerInstance>(null);
   const focusRowIndex = Math.max(0, listData.findIndex(isSelectedItem));
@@ -291,7 +290,7 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
     visible,
     isReady: placement?.isReady ?? false,
     getListTarget: () => searchInputRef.current ?? focusRowRef.current,
-    triggerRef: triggerFocusRef,
+    triggerRef: ref,
   });
 
   const _renderItem = useCallback(
@@ -409,15 +408,13 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
     );
   };
 
+  // The list's Modal is absolutely positioned, so the field stays the only
+  // element in the layout.
   return (
-    <View
-      style={StyleSheet.flatten([styles.mainWrap, style])}
-      ref={ref}
-      onLayout={_measure}
-    >
+    <>
       {_renderDropdown()}
       {_renderModal()}
-    </View>
+    </>
   );
 }
 

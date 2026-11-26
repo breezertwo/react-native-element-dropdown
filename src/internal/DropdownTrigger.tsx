@@ -5,9 +5,11 @@ import { I18nManager, Image, Pressable, StyleSheet, Text } from 'react-native';
 import type {
   ImageStyle,
   Insets,
+  LayoutChangeEvent,
   StyleProp,
   TextProps,
   TextStyle,
+  ViewStyle,
 } from 'react-native';
 
 const chevronDown = require('../assets/down.png');
@@ -32,6 +34,13 @@ export function ChevronIcon({ color, style }: ChevronIconProps) {
 }
 
 interface DropdownTriggerProps {
+  /**
+   * The style of the field (`style` prop). The field itself is the pressable
+   * element, so its whole box, padding included, opens the list.
+   */
+  style?: StyleProp<ViewStyle>;
+  /** Re-measures the field when its layout changes. */
+  onLayout?: (event: LayoutChangeEvent) => void;
   /** Extends the touch area (`hitSlop` prop). */
   hitSlop?: Insets | number;
   /** `allowFontScaling` and `maxFontSizeMultiplier` for the texts. */
@@ -63,6 +72,8 @@ interface DropdownTriggerProps {
  * and whether the list is expanded.
  */
 export function DropdownTrigger({
+  style,
+  onLayout,
   hitSlop,
   textScaling,
   ref,
@@ -84,7 +95,8 @@ export function DropdownTrigger({
   return (
     <Pressable
       ref={ref}
-      style={triggerStyles.dropdown}
+      style={StyleSheet.flatten([triggerStyles.dropdown, style])}
+      onLayout={onLayout}
       hitSlop={hitSlop}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole={FIELD_ROLE}
