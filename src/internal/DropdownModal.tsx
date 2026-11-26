@@ -122,13 +122,8 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: '#EEEEEE',
     backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
+    // The iOS shadow of 2.x (offset 1, radius 1.41, opacity 0.2), now the
+    // same on Android, where it was elevation 2. CSS blur = 2 × iOS radius.
+    boxShadow: '0px 1px 2.82px rgba(0, 0, 0, 0.2)',
   },
 });

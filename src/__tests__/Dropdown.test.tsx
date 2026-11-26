@@ -20,7 +20,11 @@ import React, { createRef } from 'react';
 import { AccessibilityInfo, Text, TextInput } from 'react-native';
 import { Dropdown, type DropdownProps, type IDropdownRef } from '../index';
 import { FIELD_ROLE } from '../internal/a11y';
-import { layoutOpenList, mockTriggerLayout } from '../__fixtures__/testUtils';
+import {
+  layoutOpenList,
+  mockTriggerLayout,
+  openListStyle,
+} from '../__fixtures__/testUtils';
 
 type Fruit = { label: string; value: string; soldOut?: boolean };
 
@@ -741,6 +745,23 @@ describe('Dropdown', () => {
           maxFontSizeMultiplier: 1.5,
         });
       }
+    });
+  });
+
+  describe('list style', () => {
+    it('has the same shadow on both platforms', async () => {
+      await renderDropdown();
+      await open();
+      expect(openListStyle()).toMatchObject({
+        boxShadow: '0px 1px 2.82px rgba(0, 0, 0, 0.2)',
+      });
+      expect(openListStyle()).not.toHaveProperty('elevation');
+    });
+
+    it('lets containerStyle replace the shadow', async () => {
+      await renderDropdown({ containerStyle: { boxShadow: 'none' } });
+      await open();
+      expect(openListStyle()).toMatchObject({ boxShadow: 'none' });
     });
   });
 
