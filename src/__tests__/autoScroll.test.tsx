@@ -16,7 +16,7 @@ import {
 import React from 'react';
 import { FlatList } from 'react-native';
 import { Dropdown, type DropdownProps } from '../index';
-import { useAutoScroll } from '../internal/useAutoScroll';
+import { REVEAL_TIMEOUT_MS, useAutoScroll } from '../internal/useAutoScroll';
 import { layoutOpenList, mockTriggerLayout } from '../__fixtures__/testUtils';
 
 type Item = { label: string; value: string };
@@ -39,9 +39,10 @@ const renderDropdown = (props: Partial<DropdownProps<Item, 'value'>> = {}) =>
     />
   );
 
+// The tests report the content size themselves.
 const open = async () => {
   await fireEvent.press(screen.getByTestId('dropdown'));
-  await layoutOpenList();
+  await layoutOpenList({ layOutContent: false });
 };
 
 const close = () => fireEvent.press(screen.getByTestId('dropdown'));
@@ -49,7 +50,8 @@ const close = () => fireEvent.press(screen.getByTestId('dropdown'));
 /** FlatList reports its content size, e.g. after rendering more rows. */
 const contentSizeChange = (height: number) =>
   fireEvent(
-    screen.getByTestId('dropdown flatlist'),
+    // Still hidden: the list is shown once it is scrolled.
+    screen.getByTestId('dropdown flatlist', { includeHiddenElements: true }),
     'contentSizeChange',
     200,
     height
@@ -83,7 +85,58 @@ describe('Dropdown autoScroll', () => {
     await contentSizeChange(2000);
 
     expect(scrollToIndex).toHaveBeenCalledTimes(1);
-    expect(scrollToIndex).toHaveBeenCalledWith({ index: 60, animated: false });
+    expect(scrollToIndex).toHaveBeenCalledWith({
+      index: 60,
+      animated: false,
+      viewPosition: 0.5,
+    });
+  });
+
+  describe('showing the list', () => {
+    const isListShown = () =>
+      screen.queryByTestId('dropdown flatlist') !== null;
+    const advanceFrames = (ms: number) =>
+      act(async () => {
+        jest.advanceTimersByTime(ms);
+      });
+
+    it('keeps the list hidden until the scroll is on screen', async () => {
+      await renderDropdown();
+      await open();
+      expect(isListShown()).toBe(false);
+
+      await contentSizeChange(2000);
+      expect(isListShown()).toBe(false);
+
+      // Two frames for the native scroll and the rows to appear.
+      await advanceFrames(40);
+      expect(isListShown()).toBe(true);
+    });
+
+    it('shows the list right away without a selection', async () => {
+      await renderDropdown({ value: null });
+      await open();
+
+      expect(isListShown()).toBe(true);
+    });
+
+    it('shows the list right away with autoScroll={false}', async () => {
+      await renderDropdown({ autoScroll: false });
+      await open();
+
+      expect(isListShown()).toBe(true);
+    });
+
+    it('shows the list in time even if the scroll never happens', async () => {
+      await renderDropdown();
+      await open();
+
+      // No content size reported, e.g. nothing laid out.
+      await advanceFrames(REVEAL_TIMEOUT_MS - 1);
+      expect(isListShown()).toBe(false);
+      await advanceFrames(1);
+      expect(isListShown()).toBe(true);
+    });
   });
 
   it("doesn't scroll back when more content is laid out", async () => {
@@ -103,7 +156,11 @@ describe('Dropdown autoScroll', () => {
 
     await contentSizeChange(2000);
 
-    expect(scrollToIndex).toHaveBeenCalledWith({ index: 50, animated: false });
+    expect(scrollToIndex).toHaveBeenCalledWith({
+      index: 50,
+      animated: false,
+      viewPosition: 0.5,
+    });
   });
 
   it('scrolls to an item selected without updating value', async () => {
@@ -117,7 +174,11 @@ describe('Dropdown autoScroll', () => {
     await open();
     await contentSizeChange(2000);
 
-    expect(scrollToIndex).toHaveBeenCalledWith({ index: 3, animated: false });
+    expect(scrollToIndex).toHaveBeenCalledWith({
+      index: 3,
+      animated: false,
+      viewPosition: 0.5,
+    });
   });
 
   it('scrolls again each time the list opens', async () => {
@@ -181,6 +242,8 @@ describe('Dropdown autoScroll', () => {
       jest.runAllTimers();
     });
 
+    // Shown where it is once the retries are used up.
+    expect(screen.queryByTestId('dropdown flatlist')).not.toBeNull();
     // The first attempt plus ten retries; from the second failure on, each
     // jumps close to the row first.
     expect(scrollToIndex).toHaveBeenCalledTimes(11);
@@ -211,6 +274,7 @@ describe('useAutoScroll first render batch', () => {
         useAutoScroll({
           enabled: true,
           visible: true,
+          openingId: 1,
           listData: data,
           isSelected: isSelected(index),
           initialNumToRender,

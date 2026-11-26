@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FlatList } from 'react-native';
 
 /** FlatList's default `initialNumToRender`. */
@@ -12,11 +12,17 @@ const MAX_RETRIES = 10;
  * position are rendered and measured before the next attempt.
  */
 const RETRY_DELAY_MS = 50;
+/** Shows the list anyway after this long, e.g. when every retry failed. */
+export const REVEAL_TIMEOUT_MS = MAX_RETRIES * RETRY_DELAY_MS + 100;
+/** The selected row ends up in the middle of the list, with context around. */
+const VIEW_POSITION = 0.5;
 
 interface UseAutoScrollParams<T> {
   /** The `autoScroll` prop. */
   enabled: boolean;
   visible: boolean;
+  /** Changes on every opening (`useDropdownState`). */
+  openingId: number;
   /** The items the list shows. */
   listData: readonly T[];
   isSelected: (item: T) => boolean;
@@ -32,8 +38,9 @@ type ScrollToIndexFailedInfo = {
 };
 
 /**
- * Shows the selected item when the list opens, once its content is laid out
- * (still before the list becomes visible).
+ * Opens the list at the selected item: once its content is laid out, it
+ * scrolls the item to the middle, and `isScrolled` keeps the list hidden
+ * until that scroll is on screen, so the list never visibly jumps.
  *
  * FlatList can only scroll to rows it has measured: without `getItemLayout`
  * it caps the space for unrendered rows at the last measured row, and
@@ -49,6 +56,7 @@ type ScrollToIndexFailedInfo = {
 export const useAutoScroll = <T>({
   enabled,
   visible,
+  openingId,
   listData,
   isSelected,
   initialNumToRender = DEFAULT_INITIAL_NUM_TO_RENDER,
@@ -66,10 +74,26 @@ export const useAutoScroll = <T>({
       ? targetIndex + 1 + ROWS_AFTER_TARGET
       : initialNumToRender;
 
+  const failedRef = useRef(false);
+  const frameRef = useRef<number | null>(null);
+
+  // The opening whose list is scrolled and may be shown.
+  const [shownOpeningId, setShownOpeningId] = useState<number | null>(null);
+  const isScrolled =
+    !enabled || targetIndex <= 0 || shownOpeningId === openingId;
+  const reveal = useCallback(() => setShownOpeningId(openingId), [openingId]);
+
   const cancelRetry = useCallback(() => {
     if (retryTimerRef.current != null) {
       clearTimeout(retryTimerRef.current);
       retryTimerRef.current = null;
+    }
+  }, []);
+
+  const cancelReveal = useCallback(() => {
+    if (frameRef.current != null) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
     }
   }, []);
 
@@ -78,10 +102,55 @@ export const useAutoScroll = <T>({
       hasScrolledRef.current = false;
       retriesRef.current = 0;
       cancelRetry();
+      cancelReveal();
     }
-  }, [visible, cancelRetry]);
+  }, [visible, cancelRetry, cancelReveal]);
 
-  useEffect(() => cancelRetry, [cancelRetry]);
+  useEffect(
+    () => () => {
+      cancelRetry();
+      cancelReveal();
+    },
+    [cancelRetry, cancelReveal]
+  );
+
+  // Never keep the list hidden for long, whatever happens to the scroll.
+  useEffect(() => {
+    if (!visible || isScrolled) {
+      return;
+    }
+    const timer = setTimeout(reveal, REVEAL_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [visible, isScrolled, reveal]);
+
+  // The native scroll and the rows at the new position need about two
+  // frames to appear on screen (seen in a screen recording on Android).
+  const revealAfterFrames = useCallback(() => {
+    cancelReveal();
+    frameRef.current = requestAnimationFrame(() => {
+      frameRef.current = requestAnimationFrame(() => {
+        frameRef.current = null;
+        reveal();
+      });
+    });
+  }, [cancelReveal, reveal]);
+
+  /** Scrolls to the row; shows the list unless FlatList can't reach it yet. */
+  const scrollTo = useCallback(
+    (index: number) => {
+      failedRef.current = false;
+      listRef.current?.scrollToIndex({
+        index,
+        animated: false,
+        viewPosition: VIEW_POSITION,
+      });
+      // onScrollToIndexFailed runs during scrollToIndex.
+      if (!failedRef.current) {
+        revealAfterFrames();
+      }
+    },
+    [revealAfterFrames]
+  );
 
   const onContentSizeChange = useCallback(() => {
     if (hasScrolledRef.current) {
@@ -89,17 +158,22 @@ export const useAutoScroll = <T>({
     }
     hasScrolledRef.current = true;
     if (targetIndex > 0) {
-      listRef.current?.scrollToIndex({ index: targetIndex, animated: false });
+      scrollTo(targetIndex);
+    } else {
+      reveal();
     }
-  }, [targetIndex]);
+  }, [targetIndex, scrollTo, reveal]);
 
   // Fallback when the row still isn't measured: jump close to it using the
   // average row height (unknown until the first rows are measured), then try
   // again once FlatList has rendered rows there.
   const onScrollToIndexFailed = useCallback(
     ({ index, averageItemLength }: ScrollToIndexFailedInfo) => {
+      failedRef.current = true;
       const list = listRef.current;
       if (!list || retriesRef.current >= MAX_RETRIES) {
+        // Show the list where it is rather than keep it hidden.
+        reveal();
         return;
       }
       retriesRef.current += 1;
@@ -112,13 +186,14 @@ export const useAutoScroll = <T>({
       cancelRetry();
       retryTimerRef.current = setTimeout(() => {
         retryTimerRef.current = null;
-        listRef.current?.scrollToIndex({ index, animated: false });
+        scrollTo(index);
       }, RETRY_DELAY_MS);
     },
-    [cancelRetry]
+    [cancelRetry, reveal, scrollTo]
   );
 
   return {
+    isScrolled,
     listRef,
     initialNumToRender: firstBatchSize,
     onContentSizeChange,

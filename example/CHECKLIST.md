@@ -101,8 +101,8 @@ These apply to every dropdown on every screen:
 
 ### Large list
 
-- Visual: the list opens scrolled to item 750 without jumping back; scrolling
-  is smooth.
+- Visual: the list appears with item 750 in the middle, without first
+  showing the top of the list or jumping; scrolling back up is smooth.
 - Screen reader: focus lands on "Item 750" when the list opens.
 
 ### Frozen data
@@ -119,5 +119,6 @@ These apply to every dropdown on every screen:
 
 ### Country picker recipe
 
-- Visual: the selected flag appears in the field; every row shows flag and name.
+- Visual: the selected flag appears in the field; every row shows flag and
+  name. The list appears with Germany in the middle, without a jump.
 - Screen reader: flags are not announced; rows are announced by country name.

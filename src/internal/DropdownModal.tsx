@@ -6,6 +6,11 @@ import { hiddenStyle } from './placement/useDropdownPlacement';
 
 interface DropdownModalProps {
   placement: DropdownPlacement;
+  /**
+   * Whether the list's content may be shown (default: true). Dropdown keeps
+   * it hidden until it is scrolled to the selected item.
+   */
+  isContentReady?: boolean;
   /** Full-screen mode: the list is centered on a dimmed backdrop. */
   isFull: boolean;
   isLandscape: boolean;
@@ -28,6 +33,7 @@ interface DropdownModalProps {
  */
 export function DropdownModal({
   placement,
+  isContentReady = true,
   isFull,
   isLandscape,
   minHeight,
@@ -38,7 +44,10 @@ export function DropdownModal({
   onContainerLayout,
   children,
 }: DropdownModalProps) {
-  const { isReady, left, width, maxHeight, wrapperStyle } = placement;
+  const { left, width, maxHeight, wrapperStyle } = placement;
+  // Hidden until it is placed and its content is ready (e.g. scrolled to
+  // the selected item).
+  const isReady = placement.isReady && isContentReady;
   const { width: windowWidth } = useWindowDimensions();
 
   const positionStyle: ViewStyle = isFull

@@ -164,7 +164,11 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
     clearSearch();
   }, [onChangeText, clearSearch]);
 
-  const { close: eventClose, onPress: showOrClose } = useDropdownState({
+  const {
+    close: eventClose,
+    onPress: showOrClose,
+    openingId,
+  } = useDropdownState({
     ref: currentRef,
     visible,
     setVisible,
@@ -207,6 +211,7 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
   );
 
   const {
+    isScrolled,
     listRef,
     initialNumToRender,
     onContentSizeChange,
@@ -214,6 +219,7 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
   } = useAutoScroll({
     enabled: autoScroll,
     visible,
+    openingId,
     listData,
     isSelected: isSelectedItem,
     initialNumToRender: flatListProps?.initialNumToRender ?? undefined,
@@ -288,7 +294,7 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
   const focusRowIndex = Math.max(0, listData.findIndex(isSelectedItem));
   useAccessibilityFocus({
     visible,
-    isReady: placement?.isReady ?? false,
+    isReady: (placement?.isReady ?? false) && isScrolled,
     getListTarget: () => searchInputRef.current ?? focusRowRef.current,
     triggerRef: ref,
   });
@@ -353,6 +359,7 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
     return (
       <DropdownModal
         placement={placement}
+        isContentReady={isScrolled}
         isFull={isFull}
         isLandscape={isLandscape}
         minHeight={minHeight}

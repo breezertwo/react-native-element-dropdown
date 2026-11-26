@@ -3,6 +3,7 @@ import {
   useEffect,
   useEffectEvent,
   useImperativeHandle,
+  useState,
 } from 'react';
 import type { Ref } from 'react';
 import { Keyboard } from 'react-native';
@@ -43,11 +44,16 @@ export const useDropdownState = ({
   onBlur,
   onDismiss,
 }: UseDropdownStateParams) => {
+  // Counts openings, so per-opening state can tell this opening from the
+  // last one without resetting it in an effect.
+  const [openingId, setOpeningId] = useState(0);
+
   const open = useCallback(() => {
     if (disable) {
       return;
     }
     prepareOpen();
+    setOpeningId((id) => id + 1);
     setVisible(true);
     onFocus?.();
   }, [disable, prepareOpen, setVisible, onFocus]);
@@ -86,6 +92,7 @@ export const useDropdownState = ({
     }
     if (nextVisible) {
       prepareOpen();
+      setOpeningId((id) => id + 1);
     }
     setVisible(nextVisible);
     if (nextVisible) {
@@ -113,5 +120,5 @@ export const useDropdownState = ({
   });
   useEffect(() => () => blurIfOpen(), []);
 
-  return { open, close, toggle, onPress };
+  return { open, close, toggle, onPress, openingId };
 };

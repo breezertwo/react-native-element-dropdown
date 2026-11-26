@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
-import { fireEvent, screen } from '@testing-library/react-native';
+import { act, fireEvent, screen } from '@testing-library/react-native';
 import { View } from 'react-native';
+import { REVEAL_TIMEOUT_MS } from '../internal/useAutoScroll';
 
 type MeasureInWindowCallback = (
   x: number,
@@ -42,7 +43,19 @@ const layoutEvent = ({ width, height }: Size) => ({
 export const layoutOpenList = async ({
   screenSize = { width: 400, height: 800 },
   contentHeight = 200,
-}: { screenSize?: Size; contentHeight?: number } = {}) => {
+  layOutContent = true,
+}: {
+  screenSize?: Size;
+  contentHeight?: number;
+  /**
+   * Also report the list's content size, which Dropdown waits for to scroll
+   * to the selected item, and wait until the list is shown: two frames
+   * after the scroll, or, since rows are never measured in tests and
+   * scrolling to one fails, after Dropdown's safety timeout. Turn it off to
+   * report the content size yourself.
+   */
+  layOutContent?: boolean;
+} = {}) => {
   // The whole tree: the list's Modal is a sibling of the field.
   const root = screen.container;
   // The modal's full-screen backdrop is the only view that reports its
@@ -69,6 +82,17 @@ export const layoutOpenList = async ({
     'layout',
     layoutEvent({ width: 200, height: contentHeight })
   );
+  if (layOutContent) {
+    const [list] = root.queryAll((node) =>
+      String(node.props.testID ?? '').endsWith(' flatlist')
+    );
+    if (list) {
+      await fireEvent(list, 'contentSizeChange', 200, contentHeight);
+    }
+    await act(async () => {
+      jest.advanceTimersByTime(REVEAL_TIMEOUT_MS);
+    });
+  }
 };
 
 const openListContainer = () => {
