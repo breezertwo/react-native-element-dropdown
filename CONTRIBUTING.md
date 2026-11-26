@@ -59,7 +59,6 @@ Remember to add tests for your change if possible. Run the unit tests by:
 yarn test
 ```
 
-
 ### Commit message convention
 
 We follow the [conventional commits specification](https://www.conventionalcommits.org/en) for our commit messages:
@@ -83,11 +82,11 @@ Rules the commit-msg hook ([commitlint](https://commitlint.js.org/)) checks:
 - The subject must not start with a capital letter or be in Title Case, and must not end with a period.
 - The first line is at most 100 characters; so are lines in the body.
 
-| ✅ Passes | ❌ Fails |
-| --- | --- |
-| `chore: update license` | `chore: Update License` (capitalized subject) |
-| `fix(multiselect): hide chips when value is empty` | `Fix: hide chips` (capitalized type) |
-| `docs: add country picker recipe` | `docs: add country picker recipe.` (trailing period) |
+| ✅ Passes                                          | ❌ Fails                                             |
+| -------------------------------------------------- | ---------------------------------------------------- |
+| `chore: update license`                            | `chore: Update License` (capitalized subject)        |
+| `fix(multiselect): hide chips when value is empty` | `Fix: hide chips` (capitalized type)                 |
+| `docs: add country picker recipe`                  | `docs: add country picker recipe.` (trailing period) |
 
 Our pre-commit hooks verify that your commit message matches this format when committing.
 

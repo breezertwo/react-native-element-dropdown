@@ -101,7 +101,7 @@ const isAndroidEdgeToEdge = (): boolean => {
 
 const getWindowOffsetY = (): number =>
   Platform.OS === 'android' && !isAndroidEdgeToEdge()
-    ? StatusBar.currentHeight ?? 0
+    ? (StatusBar.currentHeight ?? 0)
     : 0;
 
 const toKeyboardFrame = (
@@ -322,7 +322,7 @@ export const useDropdownPlacement = ({
 
     const topInset =
       insetTop ??
-      (Platform.OS === 'android' ? StatusBar.currentHeight ?? 0 : 0);
+      (Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0);
     const bottomInset = insetBottom ?? 0;
     const keyboardTop =
       keyboardAvoiding && keyboard
