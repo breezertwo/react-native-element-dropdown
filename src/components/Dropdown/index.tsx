@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-shadow */
+import _debounce from 'lodash/debounce';
 import _differenceWith from 'lodash/differenceWith';
 import _findIndex from 'lodash/findIndex';
 import _get from 'lodash/get';
 import _isEqual from 'lodash/isEqual';
 
-import { debounce } from 'lodash';
 import React, {
   useCallback,
   useEffect,
@@ -295,7 +295,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       getValue();
     }, [value, data, getValue]);
 
-    const scrollIndex = debounce(
+    const scrollIndex = _debounce(
       useCallback(() => {
         if (
           autoScroll &&

@@ -145,6 +145,17 @@
           "trailingComma": "es5",
           "useTabs": false
         }
+      ],
+      "no-restricted-imports": [
+        "error",
+        {
+          "paths": [
+            {
+              "name": "lodash",
+              "message": "Import single methods (e.g. 'lodash/get') so apps don't bundle all of lodash."
+            }
+          ]
+        }
       ]
     }
   },
