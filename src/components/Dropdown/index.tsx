@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/no-shadow */
-import _debounce from 'lodash/debounce';
-import _findIndex from 'lodash/findIndex';
 import _get from 'lodash/get';
 import _isEqual from 'lodash/isEqual';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  FlatList,
   Image,
   StyleSheet,
   Text,
@@ -14,26 +11,24 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import { useDetectDevice } from '../../toolkits';
-import { useDeviceOrientation } from '../../useDeviceOrientation';
 import {
   useDropdownPlacement,
   type TriggerInstance,
 } from '../../internal/placement/useDropdownPlacement';
+import { useAutoScroll } from '../../internal/useAutoScroll';
 import { useDropdownState } from '../../internal/useDropdownState';
 import { DropdownList } from '../../internal/DropdownList';
 import { DropdownModal } from '../../internal/DropdownModal';
 import { DropdownSearch } from '../../internal/DropdownSearch';
+import { useFullScreenMode } from '../../internal/useFullScreenMode';
 import { NO_ITEMS, useSearch } from '../../internal/useSearch';
 import { DropdownProps, IDropdownRef } from './model';
 import { styles } from './styles';
 
-const { isTablet } = useDetectDevice;
 const ic_down = require('../../assets/down.png');
 
 const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
   (props, currentRef) => {
-    const orientation = useDeviceOrientation();
     const {
       testID,
       itemTestIDField,
@@ -89,17 +84,13 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
     } = props;
 
     const ref = useRef<TriggerInstance>(null);
-    const refList = useRef<FlatList>(null);
     const [visible, setVisible] = useState<boolean>(false);
     const [currentValue, setCurrentValue] = useState<any>(null);
     const nativeId = useRef(
       `dropdown-${Math.random().toString(16).slice(2)}`
     ).current;
 
-    const isFull =
-      !isTablet &&
-      mode !== 'auto' &&
-      (mode === 'modal' || orientation === 'LANDSCAPE');
+    const { isFull, isLandscape } = useFullScreenMode(mode);
 
     const {
       measure: _measure,
@@ -176,40 +167,13 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       getValue();
     }, [value, data, getValue]);
 
-    const scrollIndex = _debounce(
-      useCallback(() => {
-        if (
-          autoScroll &&
-          data?.length > 0 &&
-          listData?.length === data?.length
-        ) {
-          if (refList && refList?.current) {
-            const defaultValue =
-              typeof value === 'object' ? _get(value, valueField) : value;
-
-            const index = _findIndex(listData, (e) =>
-              _isEqual(defaultValue, _get(e, valueField))
-            );
-            if (
-              listData?.length > 0 &&
-              index > -1 &&
-              index <= listData?.length - 1
-            ) {
-              try {
-                refList.current.scrollToIndex({
-                  index: index,
-                  animated: false,
-                });
-              } catch (error) {
-                console.warn(`scrollToIndex error: ${error}`);
-              }
-            }
-          }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [autoScroll, data.length, value, valueField]), // to fix Maximum Depth Exceeded warning | removed listData from dependency array
-      200
-    );
+    const { listRef, scrollToValue } = useAutoScroll({
+      autoScroll,
+      data,
+      listData,
+      value,
+      valueField,
+    });
 
     const onSelect = useCallback(
       (item: any) => {
@@ -349,7 +313,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         <DropdownModal
           placement={placement}
           isFull={isFull}
-          isLandscape={orientation === 'LANDSCAPE'}
+          isLandscape={isLandscape}
           minHeight={minHeight}
           backgroundColor={backgroundColor}
           containerStyle={containerStyle}
@@ -384,9 +348,9 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
             }}
             flatListProps={flatListProps}
             listProps={{
-              ref: refList,
-              onContentSizeChange: scrollIndex,
-              onScrollToIndexFailed: scrollIndex,
+              ref: listRef,
+              onContentSizeChange: scrollToValue,
+              onScrollToIndexFailed: scrollToValue,
               data: listData,
               nativeID: nativeId,
               renderItem: _renderItem,

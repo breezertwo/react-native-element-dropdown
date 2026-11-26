@@ -9,8 +9,6 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import { useDetectDevice } from '../../toolkits';
-import { useDeviceOrientation } from '../../useDeviceOrientation';
 import {
   useDropdownPlacement,
   type TriggerInstance,
@@ -19,18 +17,17 @@ import { useDropdownState } from '../../internal/useDropdownState';
 import { DropdownList } from '../../internal/DropdownList';
 import { DropdownModal } from '../../internal/DropdownModal';
 import { DropdownSearch } from '../../internal/DropdownSearch';
+import { useFullScreenMode } from '../../internal/useFullScreenMode';
 import { NO_ITEMS, useSearch } from '../../internal/useSearch';
 import { IMultiSelectRef, MultiSelectProps } from './model';
 import { styles } from './styles';
 
-const { isTablet } = useDetectDevice;
 const ic_down = require('../../assets/down.png');
 
 const MultiSelectComponent = React.forwardRef<
   IMultiSelectRef,
   MultiSelectProps<any>
 >((props, currentRef) => {
-  const orientation = useDeviceOrientation();
   const {
     testID,
     itemTestIDField,
@@ -98,10 +95,7 @@ const MultiSelectComponent = React.forwardRef<
     `multiselectdropdown-${Math.random().toString(16).slice(2)}`
   ).current;
 
-  const isFull =
-    !isTablet &&
-    mode !== 'auto' &&
-    (mode === 'modal' || orientation === 'LANDSCAPE');
+  const { isFull, isLandscape } = useFullScreenMode(mode);
 
   const {
     measure: _measure,
@@ -325,7 +319,7 @@ const MultiSelectComponent = React.forwardRef<
       <DropdownModal
         placement={placement}
         isFull={isFull}
-        isLandscape={orientation === 'LANDSCAPE'}
+        isLandscape={isLandscape}
         minHeight={minHeight}
         backgroundColor={backgroundColor}
         containerStyle={containerStyle}
