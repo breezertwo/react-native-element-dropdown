@@ -51,6 +51,13 @@ export interface MultiSelectProps<T, V extends keyof T = keyof T> {
   selectedStyle?: StyleProp<ViewStyle>;
   selectedTextProps?: TextProps;
   selectedTextStyle?: StyleProp<TextStyle>;
+  /** Style of the chips' ⓧ icon, on top of selectedTextStyle. */
+  chipRemoveIconStyle?: StyleProp<TextStyle>;
+  /**
+   * Replaces the ⓧ icon of a chip; return null to hide it. Not used with
+   * renderSelectedItem, which replaces the whole chip.
+   */
+  renderChipRemoveIcon?: (item: T) => React.ReactElement | null;
   itemContainerStyle?: StyleProp<ViewStyle>;
   itemTextStyle?: StyleProp<TextStyle>;
   /** Style of the label in selected rows, on top of itemTextStyle. */

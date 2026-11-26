@@ -32,6 +32,10 @@ interface SelectedChipsProps<T> {
   strings: DropdownAccessibilityStrings;
   selectedStyle?: StyleProp<ViewStyle>;
   selectedTextStyle?: StyleProp<TextStyle>;
+  /** Style of the default ⓧ icon, on top of selectedTextStyle. */
+  chipRemoveIconStyle?: StyleProp<TextStyle>;
+  /** Replaces the ⓧ icon of the default chip; return null to hide it. */
+  renderChipRemoveIcon?: (item: T) => ReactElement | null;
   fontFamily?: string;
   renderSelectedItem?: (
     item: T,
@@ -53,6 +57,8 @@ export function SelectedChips<T>({
   strings,
   selectedStyle,
   selectedTextStyle,
+  chipRemoveIconStyle,
+  renderChipRemoveIcon,
   fontFamily,
   renderSelectedItem,
 }: SelectedChipsProps<T>) {
@@ -97,15 +103,20 @@ export function SelectedChips<T>({
                 >
                   {label}
                 </Text>
-                <Text
-                  {...textScaling}
-                  style={StyleSheet.flatten([
-                    styles.removeIcon,
-                    selectedTextStyle,
-                  ])}
-                >
-                  ⓧ
-                </Text>
+                {renderChipRemoveIcon ? (
+                  renderChipRemoveIcon(item)
+                ) : (
+                  <Text
+                    {...textScaling}
+                    style={StyleSheet.flatten([
+                      styles.removeIcon,
+                      selectedTextStyle,
+                      chipRemoveIconStyle,
+                    ])}
+                  >
+                    ⓧ
+                  </Text>
+                )}
               </View>
             )}
           </TouchableWithoutFeedback>

@@ -297,6 +297,30 @@ describe('MultiSelect', () => {
       expect(onChange).toHaveBeenCalledWith(['cherry']);
     });
 
+    it('styles the ⓧ icon with chipRemoveIconStyle', async () => {
+      await renderMultiSelect({
+        value: ['banana'],
+        selectedTextStyle: { color: 'white' },
+        chipRemoveIconStyle: { fontSize: 20 },
+      });
+
+      expect(screen.getByText('ⓧ')).toHaveStyle({
+        color: 'white',
+        fontSize: 20,
+      });
+    });
+
+    it('replaces the ⓧ icon with renderChipRemoveIcon', async () => {
+      await renderMultiSelect({
+        value: ['banana'],
+        renderChipRemoveIcon: (item) => <Text>{`x ${item.label}`}</Text>,
+      });
+
+      expect(screen.queryByText('ⓧ')).toBeNull();
+      const chip = screen.getByRole('button', { name: 'Remove Banana' });
+      expect(within(chip).getByText('x Banana')).toBeTruthy();
+    });
+
     it('hides the chips while the list is open', async () => {
       await renderMultiSelect({ value: ['banana'] });
       await open();
