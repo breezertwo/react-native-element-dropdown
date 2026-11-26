@@ -1,5 +1,5 @@
-// Recipe: a country picker built with Dropdown. It replaces the deprecated
-// SelectCountry component: `renderLeftIcon` shows the selected country's flag
+// Recipe: a country picker built with Dropdown. It replaces the
+// SelectCountry component of 2.x: `renderLeftIcon` shows the selected country's flag
 // and `renderItem` shows flag + name per row.
 import { Dropdown } from '@breezertwo/react-native-element-dropdown';
 import { useState } from 'react';
@@ -12,7 +12,7 @@ export default function CountryPicker() {
   const selected = countries.find((country) => country.code === code);
 
   return (
-    <Scenario description="SelectCountry is deprecated. This screen shows how to build the same thing with Dropdown. The selected flag appears in the field, and every row shows flag and name.">
+    <Scenario description="SelectCountry was removed in 3.0. This screen shows how to build the same thing with Dropdown. The selected flag appears in the field, and every row shows flag and name.">
       <Field label="Country">
         <Dropdown
           style={dropdownStyles.dropdown}

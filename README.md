@@ -148,18 +148,9 @@ yarn add @breezertwo/react-native-element-dropdown
 | excludeItems                 | Item[]                                               | No        | The array containing the items to be excluded.                                                               |
 | excludeSearchItems           | Item[]                                               | No        | The array containing the items to be excluded.                                                               |
 
-### SelectCountry (deprecated)
+### Country picker (replaces SelectCountry)
 
-> **Deprecated:** `SelectCountry` will be removed in v3.0.0. It is a thin wrapper around `Dropdown`, so you can build the same thing with `renderLeftIcon` (image of the selected item) and `renderItem` (image + label per row). See the replacement below.
-
-`SelectCountry` extends `Dropdown` with these props:
-
-| Props      | Params     | isRequire | Description                          |
-| ---------- | ---------- | --------- | ------------------------------------ |
-| imageField | String     | Yes       | Extract the image from the data item |
-| imageStyle | ImageStyle | No        | Styling for image                    |
-
-#### Replacement with `Dropdown`
+`SelectCountry` was removed in v3.0.0. It was a thin wrapper around `Dropdown`; build the same thing with `renderLeftIcon` (image of the selected item) and `renderItem` (image + label per row):
 
 ```tsx
 import React, { useState } from 'react';

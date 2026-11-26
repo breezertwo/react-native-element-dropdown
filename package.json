@@ -48,8 +48,7 @@
     "menu",
     "multiselect",
     "picker",
-    "select",
-    "select country"
+    "select"
   ],
   "repository": "https://github.com/breezertwo/react-native-element-dropdown",
   "author": "Andy <andy@heycare.com>",

@@ -57,7 +57,7 @@ const scenarios: Scenario[] = [
   {
     href: '/country-picker',
     title: 'Country picker recipe',
-    summary: 'Replacement for the deprecated SelectCountry component.',
+    summary: 'Replacement for the SelectCountry component of 2.x.',
   },
 ];
 
