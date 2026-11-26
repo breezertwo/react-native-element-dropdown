@@ -62,31 +62,33 @@ export const isAndroidEdgeToEdge = (): boolean => {
 export const ANDROID_NAVIGATION_BAR_HEIGHT = 48;
 
 /**
- * The bottom inset when `safeAreaInsets.bottom` isn't given.
+ * The bottom inset when `safeAreaInsets.bottom` isn't given: on Android,
+ * the navigation bar when the list's Modal reaches under it.
  *
- * With React Native's edge-to-edge flag, every Modal reaches under the
- * navigation bar (React Native forces `navigationBarTranslucent`), so the
- * list must stay above it. React Native doesn't report the bar's height in
- * that mode (the window is as tall as the screen), so this reserves the
- * tallest bar. Without the flag, the Modal ends above the navigation bar.
+ * With React Native's edge-to-edge flag, every Modal ends up covering the
+ * whole screen, navigation bar included (React Native forces
+ * `navigationBarTranslucent`), and React Native doesn't report the bar's
+ * height then, so this reserves the tallest bar. Whether the Modal covers
+ * it is read from its measured height, not from the flag: the Modal is
+ * first laid out without the system bars and only then grows to the full
+ * screen, and reserving the bar during that first layout (where the bar is
+ * already excluded) put the list too high for a frame. Without the flag the
+ * Modal always ends above the navigation bar.
  */
 export const defaultBottomInset = ({
   platform,
-  isEdgeToEdgeFlagOn,
+  modalHeight,
+  screenHeight,
 }: {
   platform: typeof Platform.OS;
-  isEdgeToEdgeFlagOn: boolean;
+  modalHeight: number | undefined;
+  screenHeight: number;
 }): number =>
-  platform === 'android' && isEdgeToEdgeFlagOn
+  platform === 'android' &&
+  modalHeight !== undefined &&
+  modalHeight >= screenHeight - 1
     ? ANDROID_NAVIGATION_BAR_HEIGHT
     : 0;
-
-/** `defaultBottomInset` for the running app. */
-export const getDefaultBottomInset = (): number =>
-  defaultBottomInset({
-    platform: Platform.OS,
-    isEdgeToEdgeFlagOn: readEdgeToEdge().flag,
-  });
 
 /** `windowOffsetY` for the running app. */
 export const getWindowOffsetY = (): number =>

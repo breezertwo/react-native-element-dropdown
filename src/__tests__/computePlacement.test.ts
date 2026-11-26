@@ -348,22 +348,37 @@ describe('windowOffsetY', () => {
 });
 
 describe('defaultBottomInset', () => {
+  // Measured on an Android 17 phone with 3-button navigation: screen 832,
+  // status bar 34, navigation bar 48.
   it.each([
-    ['iOS', { platform: 'ios', isEdgeToEdgeFlagOn: false }, 0],
-    // The Modal reaches under the navigation bar.
+    ['iOS, full-screen Modal', { platform: 'ios', modalHeight: 832 }, 0],
+    // Edge-to-edge flag: the Modal covers the navigation bar.
     [
-      'Android, edge-to-edge flag',
-      { platform: 'android', isEdgeToEdgeFlagOn: true },
+      'Android, Modal covers the screen',
+      { platform: 'android', modalHeight: 832 },
       48,
     ],
-    // The Modal ends above the navigation bar.
+    // Edge-to-edge flag, first layout: the bars are still excluded.
     [
-      'Android, no edge-to-edge flag',
-      { platform: 'android', isEdgeToEdgeFlagOn: false },
+      'Android, Modal without the system bars',
+      { platform: 'android', modalHeight: 749.87 },
+      0,
+    ],
+    // No flag: the Modal ends above the navigation bar.
+    [
+      'Android, Modal above the navigation bar',
+      { platform: 'android', modalHeight: 784 },
+      0,
+    ],
+    [
+      'Android, Modal not laid out yet',
+      { platform: 'android', modalHeight: undefined },
       0,
     ],
   ] as const)('is %p → %p', (_, context, expected) => {
-    expect(defaultBottomInset(context)).toBe(expected);
+    expect(defaultBottomInset({ ...context, screenHeight: 832 })).toBe(
+      expected
+    );
   });
 });
 
