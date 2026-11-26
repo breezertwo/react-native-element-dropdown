@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-shadow */
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Image,
   TextInput,
@@ -28,16 +28,16 @@ const TextInputComponent: CTextInput = (props) => {
     renderRightIcon,
   } = props;
 
-  const [text, setText] = useState<string>('');
-
-  useEffect(() => {
-    if (value) {
-      setText(value);
-    }
-  }, [value]);
+  // Controlled when a value is given; it used to ignore an empty value, so
+  // clearing the text from outside didn't clear the input.
+  const [ownText, setOwnText] = useState<string>('');
+  const isControlled = value !== undefined;
+  const text = isControlled ? value : ownText;
 
   const onChange = (text: string) => {
-    setText(text);
+    if (!isControlled) {
+      setOwnText(text);
+    }
     onChangeText(text);
   };
 
