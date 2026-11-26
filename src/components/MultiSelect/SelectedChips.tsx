@@ -30,6 +30,8 @@ interface SelectedChipsProps<T> {
   itemTestIDField?: keyof T;
   itemAccessibilityLabelField?: keyof T;
   strings: DropdownAccessibilityStrings;
+  /** The view around the chips. */
+  containerStyle?: StyleProp<ViewStyle>;
   selectedStyle?: StyleProp<ViewStyle>;
   selectedTextStyle?: StyleProp<TextStyle>;
   /** Style of the default ⓧ icon, on top of selectedTextStyle. */
@@ -55,6 +57,7 @@ export function SelectedChips<T>({
   itemTestIDField,
   itemAccessibilityLabelField,
   strings,
+  containerStyle,
   selectedStyle,
   selectedTextStyle,
   chipRemoveIconStyle,
@@ -63,7 +66,13 @@ export function SelectedChips<T>({
   renderSelectedItem,
 }: SelectedChipsProps<T>) {
   return (
-    <View style={StyleSheet.flatten([styles.chips, inside && styles.inside])}>
+    <View
+      style={StyleSheet.flatten([
+        styles.chips,
+        inside && styles.inside,
+        containerStyle,
+      ])}
+    >
       {items.map((item) => {
         const label = _get(item, labelField);
         const disabled = isDisabled(item);

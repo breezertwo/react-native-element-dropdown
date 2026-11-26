@@ -48,6 +48,7 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
     disabledField,
     disabledItemStyle,
     searchField,
+    chipsContainerStyle,
     selectedStyle,
     selectedTextStyle,
     chipRemoveIconStyle,
@@ -400,6 +401,7 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
         itemTestIDField={itemTestIDField}
         itemAccessibilityLabelField={itemAccessibilityLabelField}
         strings={strings}
+        containerStyle={chipsContainerStyle}
         selectedStyle={selectedStyle}
         selectedTextStyle={selectedTextStyle}
         chipRemoveIconStyle={chipRemoveIconStyle}

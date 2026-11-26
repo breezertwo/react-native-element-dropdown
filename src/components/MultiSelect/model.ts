@@ -48,6 +48,8 @@ export interface MultiSelectProps<T, V extends keyof T = keyof T> {
   inputSearchStyle?: StyleProp<TextStyle>;
   /** Replaces the icon of the search's clear button (the button stays). */
   renderSearchClearIcon?: () => React.ReactElement | null;
+  /** The view around the chips, below or inside the field (e.g. a gap). */
+  chipsContainerStyle?: StyleProp<ViewStyle>;
   selectedStyle?: StyleProp<ViewStyle>;
   selectedTextProps?: TextProps;
   selectedTextStyle?: StyleProp<TextStyle>;

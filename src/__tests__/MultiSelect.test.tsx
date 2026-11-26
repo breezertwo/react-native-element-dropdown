@@ -297,6 +297,16 @@ describe('MultiSelect', () => {
       expect(onChange).toHaveBeenCalledWith(['cherry']);
     });
 
+    it('styles the view around the chips with chipsContainerStyle', async () => {
+      await renderMultiSelect({
+        value: ['banana'],
+        chipsContainerStyle: { marginTop: 12 },
+      });
+
+      const chip = screen.getByRole('button', { name: 'Remove Banana' });
+      expect(chip.parent).toHaveStyle({ marginTop: 12, flexWrap: 'wrap' });
+    });
+
     it('styles the ⓧ icon with chipRemoveIconStyle', async () => {
       await renderMultiSelect({
         value: ['banana'],
