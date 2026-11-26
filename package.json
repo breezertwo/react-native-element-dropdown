@@ -29,7 +29,9 @@
   "scripts": {
     "test": "jest",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "lint": "oxlint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "prepack": "bob build",
     "release": "release-it"
   },
@@ -66,7 +68,6 @@
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@jest/globals": "^30.5.2",
-    "@react-native-community/eslint-config": "^3.0.2",
     "@react-native/babel-preset": "0.88.1",
     "@react-native/jest-preset": "0.88.1",
     "@react-native/typescript-config": "0.88.1",
@@ -74,12 +75,11 @@
     "@testing-library/react-native": "^14.1.0",
     "@types/lodash": "^4.17.20",
     "@types/react": "~19.3.0",
-    "eslint": "^8.4.1",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.0.0",
+    "@volksverpetzer/eslint-plugin-react-native-a11y": "3.6.0",
     "jest": "^30.5.2",
     "lefthook": "^2.2.2",
-    "prettier": "^2.0.5",
+    "oxfmt": "0.80.0",
+    "oxlint": "1.95.0",
     "react": "19.3.0",
     "react-native": "0.88.1",
     "react-native-builder-bob": "^0.44.1",
@@ -125,47 +125,6 @@
         "preset": "angular"
       }
     }
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@react-native-community",
-      "prettier"
-    ],
-    "rules": {
-      "prettier/prettier": [
-        "error",
-        {
-          "quoteProps": "consistent",
-          "singleQuote": true,
-          "tabWidth": 2,
-          "trailingComma": "es5",
-          "useTabs": false
-        }
-      ],
-      "no-restricted-imports": [
-        "error",
-        {
-          "paths": [
-            {
-              "name": "lodash",
-              "message": "Import single methods (e.g. 'lodash/get') so apps don't bundle all of lodash."
-            }
-          ]
-        }
-      ]
-    }
-  },
-  "eslintIgnore": [
-    "node_modules/",
-    "lib/"
-  ],
-  "prettier": {
-    "quoteProps": "consistent",
-    "singleQuote": true,
-    "tabWidth": 2,
-    "trailingComma": "es5",
-    "useTabs": false
   },
   "react-native-builder-bob": {
     "source": "src",

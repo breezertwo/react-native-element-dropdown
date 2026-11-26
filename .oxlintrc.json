@@ -1,0 +1,56 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "eslint",
+    "typescript",
+    "react",
+    "jest",
+    "import",
+    "unicorn",
+    "oxc"
+  ],
+  "jsPlugins": [
+    {
+      "name": "rn-a11y",
+      "specifier": "@volksverpetzer/eslint-plugin-react-native-a11y"
+    }
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "globals": {
+    "__DEV__": "readonly"
+  },
+  "ignorePatterns": ["lib/"],
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "lodash",
+            "message": "Import single methods (e.g. 'lodash/get') so apps don't bundle all of lodash."
+          }
+        ]
+      }
+    ],
+    "rn-a11y/has-valid-accessibility-actions": "error",
+    "rn-a11y/no-nested-touchables": "error",
+
+    // The library only renders monochrome icons, which should invert with
+    // iOS Smart Invert. Consumer images go through render props.
+    "rn-a11y/has-valid-accessibility-ignores-invert-colors": "off",
+    // Naming style of the 2.x code (`_get`, `_renderItem`); revisit in the refactor.
+    "no-underscore-dangle": "off",
+
+    // Known issues in the 2.x code, raised back to "error" once fixed:
+    // touchables without role/label (v3 plan, phase 5) and React Compiler
+    // rule violations (phases 3 and 7).
+    "rn-a11y/has-valid-accessibility-descriptors": "warn",
+    "react/refs": "warn",
+    "react/set-state-in-effect": "warn"
+  }
+}
