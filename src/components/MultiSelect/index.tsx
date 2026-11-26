@@ -1,12 +1,6 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import _get from 'lodash/get';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
   useDropdownPlacement,
@@ -92,8 +86,6 @@ const MultiSelectComponent = React.forwardRef<
 
   const ref = useRef<TriggerInstance>(null);
   const [visible, setVisible] = useState<boolean>(false);
-  const [currentValue, setCurrentValue] = useState<any[]>([]);
-  const [, setKey] = useState<number>(Math.random());
   const nativeId = useRef(
     `multiselectdropdown-${Math.random().toString(16).slice(2)}`
   ).current;
@@ -146,13 +138,7 @@ const MultiSelectComponent = React.forwardRef<
     onDismiss: clearSearch,
   });
 
-  const getValue = useCallback(() => {
-    setCurrentValue(value ? [...value] : []);
-  }, [value]);
-
-  useEffect(() => {
-    getValue();
-  }, [getValue, value]);
+  const currentValue: any[] = value ?? NO_ITEMS;
 
   const onSelect = useCallback(
     (item: any) => {
@@ -167,9 +153,6 @@ const MultiSelectComponent = React.forwardRef<
       } else {
         onChange(values);
       }
-
-      // 2.x behaviour, removed in v3 plan phase 4: forces a re-render.
-      setKey(Math.random());
     },
     [
       confirmSelectItem,
