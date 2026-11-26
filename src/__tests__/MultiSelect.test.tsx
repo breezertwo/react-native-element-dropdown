@@ -265,6 +265,24 @@ describe('MultiSelect', () => {
       expect(screen.queryByText('Select item')).toBeNull();
     });
 
+    it('passes the open state to the icon render props with inside', async () => {
+      await renderMultiSelect({
+        inside: true,
+        renderLeftIcon: (visible?: boolean) => <Text>{`left ${visible}`}</Text>,
+        renderRightIcon: (visible?: boolean) => (
+          <Text>{`right ${visible}`}</Text>
+        ),
+      });
+
+      expect(screen.getByText('left false')).toBeTruthy();
+      expect(screen.getByText('right false')).toBeTruthy();
+
+      await pressTrigger();
+
+      expect(screen.getByText('left true')).toBeTruthy();
+      expect(screen.getByText('right true')).toBeTruthy();
+    });
+
     it('renders custom chips with renderSelectedItem', async () => {
       const onChange = jest.fn();
       await renderMultiSelect({

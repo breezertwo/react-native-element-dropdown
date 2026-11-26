@@ -10,6 +10,8 @@ import type { ImageStyle, StyleProp, TextStyle } from 'react-native';
 import { ChevronIcon, triggerStyles } from '../../internal/DropdownTrigger';
 
 interface InsideTriggerProps {
+  /** The list's open state, for the icon render props. */
+  visible: boolean;
   onPress: () => void;
   testID?: string;
   accessibilityLabel?: string;
@@ -18,15 +20,15 @@ interface InsideTriggerProps {
   placeholder: string;
   placeholderStyle?: StyleProp<TextStyle>;
   fontFamily?: string;
-  // 2.x behaviour: unlike the default trigger, the icons don't get `visible`.
-  renderLeftIcon?: () => ReactElement | null;
-  renderRightIcon?: () => ReactElement | null;
+  renderLeftIcon?: (visible?: boolean) => ReactElement | null;
+  renderRightIcon?: (visible?: boolean) => ReactElement | null;
   iconColor: string;
   iconStyle?: StyleProp<ImageStyle>;
 }
 
 /** The field of `<MultiSelect inside />`: chips inside the field. */
 export function InsideTrigger({
+  visible,
   onPress,
   testID,
   accessibilityLabel,
@@ -47,7 +49,7 @@ export function InsideTrigger({
       onPress={onPress}
     >
       <View style={styles.field}>
-        {renderLeftIcon?.()}
+        {renderLeftIcon?.(visible)}
         {chips ?? (
           <Text
             style={StyleSheet.flatten([
@@ -60,7 +62,7 @@ export function InsideTrigger({
           </Text>
         )}
         {renderRightIcon ? (
-          renderRightIcon()
+          renderRightIcon(visible)
         ) : (
           <ChevronIcon color={iconColor} style={iconStyle} />
         )}

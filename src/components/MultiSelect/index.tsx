@@ -322,6 +322,7 @@ const MultiSelectComponent = React.forwardRef<
         onLayout={_measure}
       >
         <InsideTrigger
+          visible={visible}
           onPress={showOrClose}
           testID={testID}
           accessibilityLabel={accessibilityLabel}
