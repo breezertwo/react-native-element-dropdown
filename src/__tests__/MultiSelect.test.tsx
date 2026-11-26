@@ -413,19 +413,68 @@ describe('MultiSelect', () => {
     });
   });
 
-  describe('accessibility (2.13 behaviour)', () => {
-    it('exposes the trigger as an expandable button when accessibilityLabel is set', async () => {
-      await renderMultiSelect({ accessibilityLabel: 'Fruits' });
+  describe('accessibility', () => {
+    describe('field', () => {
+      it('is a combo box named by accessibilityLabel that reports whether it is expanded', async () => {
+        await renderMultiSelect({ accessibilityLabel: 'Fruits' });
 
-      expect(
-        screen.getByRole('button', { name: 'Fruits', expanded: false })
-      ).toBeTruthy();
+        expect(
+          screen.getByRole('combobox', { name: 'Fruits', expanded: false })
+        ).toBeTruthy();
 
-      await open();
+        await open();
 
-      expect(
-        screen.getByRole('button', { name: 'Fruits', expanded: true })
-      ).toBeTruthy();
+        expect(
+          screen.getByRole('combobox', { name: 'Fruits', expanded: true })
+        ).toBeTruthy();
+      });
+
+      it('is named by the placeholder and reports the number selected', async () => {
+        await renderMultiSelect({
+          placeholder: 'Pick fruits',
+          value: ['apple', 'banana'],
+        });
+
+        expect(
+          screen.getByRole('combobox', {
+            name: 'Pick fruits',
+            value: { text: '2 selected' },
+          })
+        ).toBeTruthy();
+      });
+
+      it('uses accessibilityStrings for the value', async () => {
+        await renderMultiSelect({
+          accessibilityLabel: 'Obst',
+          value: ['apple'],
+          accessibilityStrings: { selectedCount: (n) => `${n} ausgewählt` },
+        });
+
+        expect(
+          screen.getByRole('combobox', {
+            name: 'Obst',
+            value: { text: '1 ausgewählt' },
+          })
+        ).toBeTruthy();
+      });
+
+      it('has the same semantics with inside', async () => {
+        await renderMultiSelect({
+          inside: true,
+          accessibilityLabel: 'Fruits',
+          value: ['apple'],
+          disable: true,
+        });
+
+        expect(
+          screen.getByRole('combobox', {
+            name: 'Fruits',
+            value: { text: '1 selected' },
+            expanded: false,
+            disabled: true,
+          })
+        ).toBeTruthy();
+      });
     });
 
     it('names rows by their label, without a role, when accessibilityLabel is set', async () => {

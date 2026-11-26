@@ -1,4 +1,5 @@
 import type React from 'react';
+import type { DropdownAccessibilityStrings } from '../../internal/a11y';
 import type { DropdownSafeAreaInsets } from '../../internal/placement/useDropdownPlacement';
 import type {
   FlatListProps,
@@ -61,6 +62,12 @@ export interface MultiSelectProps<T> {
   confirmSelectItem?: boolean;
   confirmUnSelectItem?: boolean;
   accessibilityLabel?: string;
+  /**
+   * Texts for screen readers (search label, chip labels, announcements).
+   * Pass the ones to translate or reword; the rest keep their English
+   * defaults.
+   */
+  accessibilityStrings?: Partial<DropdownAccessibilityStrings>;
   itemAccessibilityLabelField?: string;
   inverted?: boolean;
   mode?: 'default' | 'modal' | 'auto';

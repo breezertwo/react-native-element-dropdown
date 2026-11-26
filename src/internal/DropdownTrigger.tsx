@@ -35,9 +35,11 @@ interface DropdownTriggerProps {
   visible: boolean;
   onPress: () => void;
   testID?: string;
-  accessibilityLabel?: string;
-  /** nativeID of the list. */
-  listId: string;
+  /** The field's name for screen readers. */
+  accessibilityLabel: string;
+  /** What is selected, read after the name (e.g. "Banana", "2 selected"). */
+  accessibilityValue?: string;
+  disabled?: boolean;
   text: string;
   textStyle?: StyleProp<TextStyle>;
   textProps?: TextProps;
@@ -49,16 +51,17 @@ interface DropdownTriggerProps {
 }
 
 /**
- * The field that opens the list: left icon, text and right icon. Only an
- * accessibility element when an accessibilityLabel is given (2.x behaviour,
- * changed in v3 plan phase 5).
+ * The field that opens the list: left icon, text and right icon. Screen
+ * readers get it as one combo box with its name, the selection as its value,
+ * and whether the list is expanded.
  */
 export function DropdownTrigger({
   visible,
   onPress,
   testID,
   accessibilityLabel,
-  listId,
+  accessibilityValue,
+  disabled = false,
   text,
   textStyle,
   textProps,
@@ -71,10 +74,12 @@ export function DropdownTrigger({
   return (
     <TouchableWithoutFeedback
       accessibilityLabel={accessibilityLabel}
-      accessibilityRole="button"
-      accessible={!!accessibilityLabel}
-      aria-controls={listId}
+      accessibilityRole="combobox"
+      accessibilityValue={
+        accessibilityValue ? { text: accessibilityValue } : undefined
+      }
       aria-expanded={visible}
+      aria-disabled={disabled}
       onPress={onPress}
       testID={testID}
     >

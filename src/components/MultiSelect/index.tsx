@@ -7,6 +7,7 @@ import {
   type TriggerInstance,
 } from '../../internal/placement/useDropdownPlacement';
 import { useDropdownState } from '../../internal/useDropdownState';
+import { resolveAccessibilityStrings } from '../../internal/a11y';
 import { DropdownList } from '../../internal/DropdownList';
 import { DropdownModal } from '../../internal/DropdownModal';
 import { DropdownOption } from '../../internal/DropdownOption';
@@ -76,6 +77,7 @@ const MultiSelectComponent = React.forwardRef<
     confirmUnSelectItem,
     onConfirmSelectItem,
     accessibilityLabel,
+    accessibilityStrings,
     itemAccessibilityLabelField,
     visibleSelectedItem = true,
     mode = 'default',
@@ -139,6 +141,10 @@ const MultiSelectComponent = React.forwardRef<
   });
 
   const currentValue: any[] = value ?? NO_ITEMS;
+  const strings = useMemo(
+    () => resolveAccessibilityStrings(accessibilityStrings),
+    [accessibilityStrings]
+  );
 
   const onSelect = useCallback(
     (item: any) => {
@@ -170,8 +176,13 @@ const MultiSelectComponent = React.forwardRef<
       visible={visible}
       onPress={showOrClose}
       testID={testID}
-      accessibilityLabel={accessibilityLabel}
-      listId={nativeId}
+      accessibilityLabel={accessibilityLabel ?? placeholder}
+      accessibilityValue={
+        currentValue.length > 0
+          ? strings.selectedCount(currentValue.length)
+          : undefined
+      }
+      disabled={disable}
       text={placeholder}
       textStyle={placeholderStyle}
       textProps={selectedTextProps}
@@ -321,7 +332,13 @@ const MultiSelectComponent = React.forwardRef<
           visible={visible}
           onPress={showOrClose}
           testID={testID}
-          accessibilityLabel={accessibilityLabel}
+          accessibilityLabel={accessibilityLabel ?? placeholder}
+          accessibilityValue={
+            currentValue.length > 0
+              ? strings.selectedCount(currentValue.length)
+              : undefined
+          }
+          disabled={disable}
           chips={value && value.length > 0 ? _renderItemSelected(true) : null}
           placeholder={placeholder}
           placeholderStyle={placeholderStyle}

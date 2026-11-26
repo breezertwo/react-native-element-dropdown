@@ -421,19 +421,48 @@ describe('Dropdown', () => {
     });
   });
 
-  describe('accessibility (2.13 behaviour)', () => {
-    it('exposes the trigger as an expandable button when accessibilityLabel is set', async () => {
-      await renderDropdown({ accessibilityLabel: 'Fruit' });
+  describe('accessibility', () => {
+    describe('field', () => {
+      it('is a combo box named by accessibilityLabel that reports whether it is expanded', async () => {
+        await renderDropdown({ accessibilityLabel: 'Fruit' });
 
-      expect(
-        screen.getByRole('button', { name: 'Fruit', expanded: false })
-      ).toBeTruthy();
+        expect(
+          screen.getByRole('combobox', { name: 'Fruit', expanded: false })
+        ).toBeTruthy();
 
-      await open();
+        await open();
 
-      expect(
-        screen.getByRole('button', { name: 'Fruit', expanded: true })
-      ).toBeTruthy();
+        expect(
+          screen.getByRole('combobox', { name: 'Fruit', expanded: true })
+        ).toBeTruthy();
+      });
+
+      it('is named by the placeholder without an accessibilityLabel', async () => {
+        await renderDropdown({ placeholder: 'Pick a fruit' });
+
+        expect(
+          screen.getByRole('combobox', { name: 'Pick a fruit' })
+        ).toBeTruthy();
+      });
+
+      it('reports the selected item as its value', async () => {
+        await renderDropdown({ accessibilityLabel: 'Fruit', value: 'banana' });
+
+        expect(
+          screen.getByRole('combobox', {
+            name: 'Fruit',
+            value: { text: 'Banana' },
+          })
+        ).toBeTruthy();
+      });
+
+      it('reports when it is disabled', async () => {
+        await renderDropdown({ accessibilityLabel: 'Fruit', disable: true });
+
+        expect(
+          screen.getByRole('combobox', { name: 'Fruit', disabled: true })
+        ).toBeTruthy();
+      });
     });
 
     it('exposes rows as radio buttons named by their label when accessibilityLabel is set', async () => {
@@ -444,17 +473,13 @@ describe('Dropdown', () => {
       expect(screen.getByRole('radio', { name: 'Banana' })).toBeTruthy();
     });
 
-    // Target behaviour (v3 plan, phase 5): accessible without a label.
-    it.failing(
-      'exposes the trigger and rows without an accessibilityLabel',
-      async () => {
-        await renderDropdown();
-        await open();
+    // Target behaviour (v3 plan, phase 5): rows accessible without a label.
+    it.failing('exposes rows without an accessibilityLabel', async () => {
+      await renderDropdown();
+      await open();
 
-        expect(screen.getByRole('button')).toBeTruthy();
-        expect(screen.getAllByRole('radio')).toHaveLength(fruits.length);
-      }
-    );
+      expect(screen.getAllByRole('radio')).toHaveLength(fruits.length);
+    });
   });
 
   describe('data', () => {

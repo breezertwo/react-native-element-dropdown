@@ -4,6 +4,7 @@ import SelectCountry from './components/SelectCountry';
 import type { IDropdownRef } from './components/Dropdown/model';
 import type { IMultiSelectRef } from './components/MultiSelect/model';
 import type { ISelectCountryRef } from './components/SelectCountry/model';
+import type { DropdownAccessibilityStrings } from './internal/a11y';
 
 export {
   Dropdown,
@@ -12,4 +13,5 @@ export {
   IDropdownRef,
   IMultiSelectRef,
   ISelectCountryRef,
+  DropdownAccessibilityStrings,
 };

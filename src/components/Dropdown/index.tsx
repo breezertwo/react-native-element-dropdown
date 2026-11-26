@@ -216,8 +216,11 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
           visible={visible}
           onPress={showOrClose}
           testID={testID}
-          accessibilityLabel={accessibilityLabel}
-          listId={nativeId}
+          accessibilityLabel={accessibilityLabel ?? placeholder}
+          accessibilityValue={
+            hasSelection ? String(_get(currentValue, labelField)) : undefined
+          }
+          disabled={disable}
           text={hasSelection ? _get(currentValue, labelField) : placeholder}
           textStyle={hasSelection ? selectedTextStyle : placeholderStyle}
           textProps={selectedTextProps}

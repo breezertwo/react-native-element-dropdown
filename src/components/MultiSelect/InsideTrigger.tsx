@@ -14,7 +14,11 @@ interface InsideTriggerProps {
   visible: boolean;
   onPress: () => void;
   testID?: string;
-  accessibilityLabel?: string;
+  /** The field's name for screen readers. */
+  accessibilityLabel: string;
+  /** What is selected, read after the name (e.g. "2 selected"). */
+  accessibilityValue?: string;
+  disabled?: boolean;
   /** The chips; the placeholder shows when there are none. */
   chips: ReactNode;
   placeholder: string;
@@ -32,6 +36,8 @@ export function InsideTrigger({
   onPress,
   testID,
   accessibilityLabel,
+  accessibilityValue,
+  disabled = false,
   chips,
   placeholder,
   placeholderStyle,
@@ -44,8 +50,13 @@ export function InsideTrigger({
   return (
     <TouchableWithoutFeedback
       testID={testID}
-      accessible={!!accessibilityLabel}
       accessibilityLabel={accessibilityLabel}
+      accessibilityRole="combobox"
+      accessibilityValue={
+        accessibilityValue ? { text: accessibilityValue } : undefined
+      }
+      aria-expanded={visible}
+      aria-disabled={disabled}
       onPress={onPress}
     >
       <View style={styles.field}>
