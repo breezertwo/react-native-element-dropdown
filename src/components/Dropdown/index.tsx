@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import _debounce from 'lodash/debounce';
-import _differenceWith from 'lodash/differenceWith';
 import _findIndex from 'lodash/findIndex';
 import _get from 'lodash/get';
 import _isEqual from 'lodash/isEqual';
@@ -33,22 +32,13 @@ import {
   useDropdownPlacement,
   type TriggerInstance,
 } from '../../internal/placement/useDropdownPlacement';
+import { NO_ITEMS, useSearch } from '../../internal/useSearch';
 import CInput from '../TextInput';
 import { DropdownProps, IDropdownRef } from './model';
 import { styles } from './styles';
 
 const { isTablet } = useDetectDevice;
 const ic_down = require('../../assets/down.png');
-
-// Stable defaults, so the derived list isn't recomputed on every render.
-const NO_ITEMS: any[] = [];
-
-const normalizeSearchText = (text: string) =>
-  text
-    .toLowerCase()
-    .replace(/\s/g, '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
 
 const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
   (props, currentRef) => {
@@ -111,7 +101,6 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
     const refList = useRef<FlatList>(null);
     const [visible, setVisible] = useState<boolean>(false);
     const [currentValue, setCurrentValue] = useState<any>(null);
-    const [searchText, setSearchText] = useState('');
     const nativeId = useRef(
       `dropdown-${Math.random().toString(16).slice(2)}`
     ).current;
@@ -162,52 +151,16 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const isSameItem = useCallback(
-      (a: any, b: any) => _get(a, valueField) === _get(b, valueField),
-      [valueField]
-    );
-
-    // The list is derived from the data, the search text and the excluded
-    // items. It used to be state that an effect re-filtered, which broke
-    // search: without onChangeText the effect reset the list right away, with
-    // it the effect looped endlessly.
-    const listData = useMemo(() => {
-      const available =
-        excludeItems.length > 0
-          ? _differenceWith(data, excludeItems, isSameItem)
-          : data;
-      if (searchText.length === 0) {
-        return available;
-      }
-
-      const key = normalizeSearchText(searchText);
-      const matches = available.filter((item: any) => {
-        const label = _get(item, searchField || labelField);
-        return searchQuery
-          ? !!searchQuery(searchText, label)
-          : normalizeSearchText(String(label ?? '')).includes(key);
-      });
-      return excludeSearchItems.length > 0
-        ? _differenceWith(matches, excludeSearchItems, isSameItem)
-        : matches;
-    }, [
+    const { searchText, listData, onSearch, clearSearch } = useSearch({
       data,
-      excludeItems,
-      excludeSearchItems,
-      isSameItem,
       labelField,
+      valueField,
       searchField,
       searchQuery,
-      searchText,
-    ]);
-
-    const onSearch = useCallback(
-      (text: string) => {
-        setSearchText(text);
-        onChangeText?.(text);
-      },
-      [onChangeText]
-    );
+      excludeItems,
+      excludeSearchItems,
+      onChangeText,
+    });
 
     const eventOpen = useCallback(() => {
       if (!disable) {
@@ -309,10 +262,8 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         }
 
         if (!visibleStatus) {
-          if (onChangeText) {
-            onChangeText('');
-          }
-          setSearchText('');
+          onChangeText?.('');
+          clearSearch();
         }
 
         _measure();
@@ -334,6 +285,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       visible,
       _measure,
       onChangeText,
+      clearSearch,
       onFocus,
       onBlur,
     ]);
@@ -348,10 +300,8 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         onChange(item);
 
         if (closeModalWhenSelectedItem) {
-          if (onChangeText) {
-            onChangeText('');
-          }
-          setSearchText('');
+          onChangeText?.('');
+          clearSearch();
           eventClose();
         }
       },
@@ -360,6 +310,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         eventClose,
         onChange,
         onChangeText,
+        clearSearch,
         onConfirmSelectItem,
         closeModalWhenSelectedItem,
       ]

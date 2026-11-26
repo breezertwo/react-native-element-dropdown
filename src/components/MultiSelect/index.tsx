@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-shadow */
-import _differenceWith from 'lodash/differenceWith';
 import _get from 'lodash/get';
 import React, {
   useCallback,
@@ -29,6 +28,7 @@ import {
   useDropdownPlacement,
   type TriggerInstance,
 } from '../../internal/placement/useDropdownPlacement';
+import { NO_ITEMS, useSearch } from '../../internal/useSearch';
 import CInput from '../TextInput';
 import { IMultiSelectRef, MultiSelectProps } from './model';
 import { styles } from './styles';
@@ -95,17 +95,15 @@ const MultiSelectComponent = React.forwardRef<
     itemAccessibilityLabelField,
     visibleSelectedItem = true,
     mode = 'default',
-    excludeItems = [],
-    excludeSearchItems = [],
+    excludeItems = NO_ITEMS,
+    excludeSearchItems = NO_ITEMS,
     safeAreaInsets,
   } = props;
 
   const ref = useRef<TriggerInstance>(null);
   const [visible, setVisible] = useState<boolean>(false);
   const [currentValue, setCurrentValue] = useState<any[]>([]);
-  const [listData, setListData] = useState<any[]>(data);
   const [, setKey] = useState<number>(Math.random());
-  const [searchText, setSearchText] = useState('');
   const nativeId = useRef(
     `multiselectdropdown-${Math.random().toString(16).slice(2)}`
   ).current;
@@ -156,90 +154,16 @@ const MultiSelectComponent = React.forwardRef<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const excludeData = useCallback(
-    (data: any[]) => {
-      if (excludeItems.length > 0) {
-        const getData = _differenceWith(
-          data,
-          excludeItems,
-          (obj1, obj2) => _get(obj1, valueField) === _get(obj2, valueField)
-        );
-        return getData || [];
-      } else {
-        return data || [];
-      }
-    },
-    [excludeItems, valueField]
-  );
-
-  useEffect(() => {
-    if (data && searchText.length === 0) {
-      const filterData = excludeData(data);
-      setListData([...filterData]);
-    }
-
-    if (searchText) {
-      onSearch(searchText);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, searchText]);
-
-  const onSearch = useCallback(
-    (text: string) => {
-      if (text.length > 0) {
-        const defaultFilterFunction = (e: any) => {
-          const item = _get(e, searchField || labelField)
-            ?.toLowerCase()
-            .replace(/\s/g, '')
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');
-          const key = text
-            .toLowerCase()
-            .replace(/\s/g, '')
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');
-
-          return item.indexOf(key) >= 0;
-        };
-
-        const propSearchFunction = (e: any) => {
-          const labelText = _get(e, searchField || labelField);
-
-          return searchQuery?.(text, labelText);
-        };
-
-        const dataSearch = data.filter(
-          searchQuery ? propSearchFunction : defaultFilterFunction
-        );
-
-        if (excludeSearchItems.length > 0 || excludeItems.length > 0) {
-          const excludeSearchData = _differenceWith(
-            dataSearch,
-            excludeSearchItems,
-            (obj1, obj2) => _get(obj1, valueField) === _get(obj2, valueField)
-          );
-
-          const filterData = excludeData(excludeSearchData);
-          setListData(filterData);
-        } else {
-          setListData(dataSearch);
-        }
-      } else {
-        const filterData = excludeData(data);
-        setListData(filterData);
-      }
-    },
-    [
-      data,
-      searchQuery,
-      excludeSearchItems,
-      excludeItems,
-      searchField,
-      labelField,
-      valueField,
-      excludeData,
-    ]
-  );
+  const { searchText, listData, onSearch, clearSearch } = useSearch({
+    data,
+    labelField,
+    valueField,
+    searchField,
+    searchQuery,
+    excludeItems,
+    excludeSearchItems,
+    onChangeText,
+  });
 
   const eventOpen = useCallback(() => {
     if (!disable) {
@@ -248,12 +172,8 @@ const MultiSelectComponent = React.forwardRef<
       if (onFocus) {
         onFocus();
       }
-
-      if (searchText.length > 0) {
-        onSearch(searchText);
-      }
     }
-  }, [disable, onFocus, searchText, onSearch, _measure]);
+  }, [disable, onFocus, _measure]);
 
   const eventClose = useCallback(() => {
     if (!disable) {
@@ -298,13 +218,12 @@ const MultiSelectComponent = React.forwardRef<
         return Keyboard.dismiss();
       }
 
+      if (!visibleStatus) {
+        clearSearch();
+      }
+
       _measure();
       setVisible(visibleStatus);
-
-      if (data) {
-        const filterData = excludeData(data);
-        setListData(filterData);
-      }
 
       if (visibleStatus) {
         if (onFocus) {
@@ -315,19 +234,13 @@ const MultiSelectComponent = React.forwardRef<
           onBlur();
         }
       }
-
-      if (searchText.length > 0) {
-        onSearch(searchText);
-      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     disable,
     isKeyboardVisible,
     visible,
     _measure,
-    data,
-    searchText,
+    clearSearch,
     onFocus,
     onBlur,
   ]);
@@ -489,13 +402,7 @@ const MultiSelectComponent = React.forwardRef<
   const renderSearch = useCallback(() => {
     if (search) {
       if (renderInputSearch) {
-        return renderInputSearch((text) => {
-          if (onChangeText) {
-            setSearchText(text);
-            onChangeText(text);
-          }
-          onSearch(text);
-        });
+        return renderInputSearch(onSearch);
       } else {
         return (
           <CInput
@@ -503,15 +410,10 @@ const MultiSelectComponent = React.forwardRef<
             accessibilityLabel={accessibilityLabel + ' input'}
             style={[styles.input, inputSearchStyle]}
             inputStyle={[inputSearchStyle, font()]}
+            value={searchText}
             autoCorrect={false}
             placeholder={searchPlaceholder}
-            onChangeText={(e) => {
-              if (onChangeText) {
-                setSearchText(e);
-                onChangeText(e);
-              }
-              onSearch(e);
-            }}
+            onChangeText={onSearch}
             showIcon
             placeholderTextColor={searchPlaceholderTextColor}
             iconStyle={[{ tintColor: iconColor }, iconStyle]}
@@ -526,12 +428,12 @@ const MultiSelectComponent = React.forwardRef<
     iconColor,
     iconStyle,
     inputSearchStyle,
-    onChangeText,
     onSearch,
     renderInputSearch,
     search,
     searchPlaceholder,
     searchPlaceholderTextColor,
+    searchText,
     testID,
   ]);
 

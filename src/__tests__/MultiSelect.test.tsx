@@ -291,6 +291,39 @@ describe('MultiSelect', () => {
       expect(screen.queryByText('Apple')).toBeNull();
     });
 
+    it('filters and reports the text when onChangeText is set', async () => {
+      const onChangeText = jest.fn();
+      await renderMultiSelect({ search: true, onChangeText });
+      await open();
+
+      await fireEvent.changeText(
+        screen.getByTestId('multiselect input'),
+        'ban'
+      );
+
+      expect(onChangeText).toHaveBeenLastCalledWith('ban');
+      expect(screen.getByText('Banana')).toBeTruthy();
+      expect(screen.queryByText('Apple')).toBeNull();
+    });
+
+    it('starts with an empty search and the full list after reopening', async () => {
+      const onChangeText = jest.fn();
+      await renderMultiSelect({ search: true, onChangeText });
+      await open();
+      await fireEvent.changeText(
+        screen.getByTestId('multiselect input'),
+        'ban'
+      );
+
+      await pressTrigger();
+      await open();
+
+      expect(screen.getByTestId('multiselect input').props.value).toBe('');
+      expect(screen.getByText('Apple')).toBeTruthy();
+      // Unlike Dropdown, closing doesn't report an empty search text.
+      expect(onChangeText).not.toHaveBeenCalledWith('');
+    });
+
     it('hides excludeItems from the list', async () => {
       await renderMultiSelect({ excludeItems: [fruits[0]!] });
       await open();
