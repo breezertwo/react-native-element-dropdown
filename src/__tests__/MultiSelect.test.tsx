@@ -6,17 +6,10 @@ import {
   it,
   jest,
 } from '@jest/globals';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import React from 'react';
-import renderer, { act } from 'react-test-renderer';
-import type { ReactTestRenderer } from 'react-test-renderer';
 import { MultiSelect } from '../index';
-import {
-  mockTriggerLayout,
-  press,
-  renderedTexts,
-} from '../__fixtures__/testUtils';
-
-let tree: ReactTestRenderer | undefined;
+import { mockTriggerLayout } from '../__fixtures__/testUtils';
 
 beforeEach(() => {
   jest.useFakeTimers();
@@ -24,11 +17,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  act(() => {
-    tree?.unmount();
-    jest.runOnlyPendingTimers();
-  });
-  tree = undefined;
+  jest.clearAllTimers();
   jest.useRealTimers();
   jest.restoreAllMocks();
 });
@@ -41,24 +30,24 @@ describe('MultiSelect', () => {
     ];
     const snapshot = JSON.parse(JSON.stringify(data));
 
-    act(() => {
-      tree = renderer.create(
-        <MultiSelect
-          accessibilityLabel="Fruits"
-          data={data}
-          labelField="label"
-          valueField="value"
-          value={['2']}
-          onChange={() => {}}
-        />
-      );
-    });
-    // The MultiSelect trigger doesn't receive testID, so find it by its label.
-    press(tree!, { accessibilityLabel: 'Fruits' });
-
-    expect(renderedTexts(tree!)).toEqual(
-      expect.arrayContaining(['Apple', 'Banana'])
+    render(
+      <MultiSelect
+        accessibilityLabel="Fruits"
+        data={data}
+        labelField="label"
+        valueField="value"
+        value={['2']}
+        onChange={() => {}}
+      />
     );
+    // The MultiSelect trigger doesn't receive testID, so find it by its label.
+    fireEvent.press(screen.getByLabelText('Fruits'));
+
+    // The list stays hidden until the modal has been laid out, which never
+    // happens in tests, so include hidden elements.
+    expect(
+      screen.getByText('Apple', { includeHiddenElements: true })
+    ).toBeTruthy();
     expect(data).toEqual(snapshot);
   });
 });

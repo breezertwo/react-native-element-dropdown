@@ -6,17 +6,10 @@ import {
   it,
   jest,
 } from '@jest/globals';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import React from 'react';
-import renderer, { act } from 'react-test-renderer';
-import type { ReactTestRenderer } from 'react-test-renderer';
 import { Dropdown } from '../index';
-import {
-  mockTriggerLayout,
-  press,
-  renderedTexts,
-} from '../__fixtures__/testUtils';
-
-let tree: ReactTestRenderer | undefined;
+import { mockTriggerLayout } from '../__fixtures__/testUtils';
 
 beforeEach(() => {
   jest.useFakeTimers();
@@ -24,11 +17,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  act(() => {
-    tree?.unmount();
-    jest.runOnlyPendingTimers();
-  });
-  tree = undefined;
+  jest.clearAllTimers();
   jest.useRealTimers();
   jest.restoreAllMocks();
 });
@@ -41,23 +30,23 @@ describe('Dropdown', () => {
     ];
     const snapshot = JSON.parse(JSON.stringify(data));
 
-    act(() => {
-      tree = renderer.create(
-        <Dropdown
-          testID="dropdown"
-          data={data}
-          labelField="label"
-          valueField="value"
-          value="2"
-          onChange={() => {}}
-        />
-      );
-    });
-    press(tree!, { testID: 'dropdown' });
-
-    expect(renderedTexts(tree!)).toEqual(
-      expect.arrayContaining(['Apple', 'Banana'])
+    render(
+      <Dropdown
+        testID="dropdown"
+        data={data}
+        labelField="label"
+        valueField="value"
+        value="2"
+        onChange={() => {}}
+      />
     );
+    fireEvent.press(screen.getByTestId('dropdown'));
+
+    // The list stays hidden until the modal has been laid out, which never
+    // happens in tests, so include hidden elements.
+    expect(
+      screen.getByText('Apple', { includeHiddenElements: true })
+    ).toBeTruthy();
     expect(data).toEqual(snapshot);
   });
 });

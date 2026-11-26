@@ -1,6 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals';
+import { render } from '@testing-library/react-native';
 import React from 'react';
-import renderer, { act } from 'react-test-renderer';
 import { Dropdown, MultiSelect, SelectCountry } from '../index';
 import { SELECT_COUNTRY_DEPRECATION_MESSAGE } from '../components/SelectCountry';
 
@@ -30,7 +30,7 @@ describe('SelectCountry deprecation', () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
     const renderSelectCountry = () =>
-      renderer.create(
+      render(
         <SelectCountry
           data={countries}
           labelField="label"
@@ -41,10 +41,8 @@ describe('SelectCountry deprecation', () => {
         />
       );
 
-    act(() => {
-      renderSelectCountry();
-      renderSelectCountry();
-    });
+    renderSelectCountry();
+    renderSelectCountry();
 
     expect(warn).toHaveBeenCalledTimes(1);
     expect(warn).toHaveBeenCalledWith(SELECT_COUNTRY_DEPRECATION_MESSAGE);
