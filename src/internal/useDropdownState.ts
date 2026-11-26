@@ -1,4 +1,9 @@
-import { useCallback, useImperativeHandle } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useImperativeHandle,
+} from 'react';
 import type { Ref } from 'react';
 import { Keyboard } from 'react-native';
 
@@ -98,6 +103,13 @@ export const useDropdownState = ({
   ]);
 
   useImperativeHandle(ref, () => ({ open, close, toggle }));
+
+  const blurIfOpen = useEffectEvent(() => {
+    if (visible) {
+      onBlur?.();
+    }
+  });
+  useEffect(() => () => blurIfOpen(), []);
 
   return { open, close, toggle, onPress };
 };

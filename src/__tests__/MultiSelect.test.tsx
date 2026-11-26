@@ -105,13 +105,52 @@ describe('MultiSelect', () => {
       expect(isOpen()).toBe(false);
     });
 
-    it('does not call onBlur when it unmounts', async () => {
+    it('does not call onBlur when it unmounts while closed', async () => {
       const onBlur = jest.fn();
       const { unmount } = await renderMultiSelect({ onBlur });
+      await open();
+      await pressTrigger();
+      expect(onBlur).toHaveBeenCalledTimes(1);
 
       await unmount();
 
-      expect(onBlur).not.toHaveBeenCalled();
+      expect(onBlur).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls onBlur once when it unmounts while open', async () => {
+      const onFocus = jest.fn();
+      const onBlur = jest.fn();
+      const { unmount } = await renderMultiSelect({ onFocus, onBlur });
+      await open();
+
+      await unmount();
+
+      expect(onFocus).toHaveBeenCalledTimes(1);
+      expect(onBlur).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls the latest onBlur when it unmounts while open', async () => {
+      const firstOnBlur = jest.fn();
+      const latestOnBlur = jest.fn();
+      const { rerender, unmount } = await renderMultiSelect({
+        onBlur: firstOnBlur,
+      });
+      await open();
+
+      await rerender(
+        <MultiSelect
+          testID="multiselect"
+          data={fruits}
+          labelField="label"
+          valueField="value"
+          onChange={() => {}}
+          onBlur={latestOnBlur}
+        />
+      );
+      await unmount();
+
+      expect(firstOnBlur).not.toHaveBeenCalled();
+      expect(latestOnBlur).toHaveBeenCalledTimes(1);
     });
   });
 
