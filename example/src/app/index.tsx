@@ -40,6 +40,11 @@ const scenarios: Scenario[] = [
     summary: 'Chips below the field and inside the field.',
   },
   {
+    href: '/disabled-items',
+    title: 'Disabled items',
+    summary: 'Items that can be neither selected nor removed.',
+  },
+  {
     href: '/large-list',
     title: 'Large list',
     summary: '1,000 items with auto-scroll to the selected item.',

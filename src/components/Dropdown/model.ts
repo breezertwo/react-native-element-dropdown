@@ -65,6 +65,13 @@ export interface DropdownProps<T, V extends keyof T = keyof T> {
   placeholder?: string;
   labelField: keyof T;
   valueField: V;
+  /**
+   * Item field that disables the item when truthy: its row can't be
+   * pressed, is dimmed and is reported as disabled to screen readers.
+   */
+  disabledField?: keyof T;
+  /** Style of disabled rows (default: half opacity). */
+  disabledItemStyle?: StyleProp<ViewStyle>;
   searchField?: keyof T;
   search?: boolean;
   searchPlaceholder?: string;

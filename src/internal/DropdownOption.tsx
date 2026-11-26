@@ -18,6 +18,10 @@ interface DropdownOptionProps<T> {
   item: T;
   label: ReactNode;
   selected: boolean;
+  /** Can't be pressed; dimmed and reported as disabled. */
+  disabled?: boolean;
+  /** Style of the row while disabled (default: half opacity). */
+  disabledStyle?: StyleProp<ViewStyle>;
   onPress: () => void;
   testID?: string;
   accessibilityLabel?: string;
@@ -59,6 +63,8 @@ export function DropdownOption<T>({
   item,
   label,
   selected,
+  disabled = false,
+  disabledStyle,
   onPress,
   testID,
   accessibilityLabel,
@@ -76,7 +82,8 @@ export function DropdownOption<T>({
     <TouchableHighlight
       ref={ref}
       accessibilityRole={accessibilityRole}
-      accessibilityState={{ checked: selected }}
+      accessibilityState={{ checked: selected, disabled }}
+      disabled={disabled}
       testID={testID}
       accessibilityLabel={accessibilityLabel}
       underlayColor={activeColor}
@@ -86,6 +93,7 @@ export function DropdownOption<T>({
         style={StyleSheet.flatten([
           itemContainerStyle,
           selected && { backgroundColor: activeColor, ...selectedStyle },
+          disabled && [styles.disabled, disabledStyle],
         ])}
       >
         {renderItem ? (
@@ -126,6 +134,9 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
+  },
+  disabled: {
+    opacity: 0.5,
   },
   checkmark: {
     width: 7,

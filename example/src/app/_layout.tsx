@@ -33,6 +33,10 @@ export default function RootLayout() {
           options={{ title: 'RTL and landscape' }}
         />
         <Stack.Screen name="multi-select" options={{ title: 'MultiSelect' }} />
+        <Stack.Screen
+          name="disabled-items"
+          options={{ title: 'Disabled items' }}
+        />
         <Stack.Screen name="large-list" options={{ title: 'Large list' }} />
         <Stack.Screen name="frozen-data" options={{ title: 'Frozen data' }} />
         <Stack.Screen name="large-text" options={{ title: 'Large text' }} />

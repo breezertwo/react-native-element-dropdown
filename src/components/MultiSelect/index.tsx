@@ -45,6 +45,8 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
     hitSlop,
     labelField,
     valueField,
+    disabledField,
+    disabledItemStyle,
     searchField,
     selectedStyle,
     selectedTextStyle,
@@ -231,6 +233,11 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
     />
   );
 
+  const isDisabledItem = useCallback(
+    (item: T) => disabledField != null && !!_get(item, disabledField),
+    [disabledField]
+  );
+
   const checkSelected = useCallback(
     (item: T) => currentValue.includes(item[valueField]),
     [currentValue, valueField]
@@ -259,6 +266,8 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
         item={item}
         label={_get(item, labelField)}
         selected={checkSelected(item)}
+        disabled={isDisabledItem(item)}
+        disabledStyle={disabledItemStyle}
         onPress={() => onSelect(item)}
         testID={_get(item, itemTestIDField || labelField)}
         accessibilityLabel={_get(
@@ -277,6 +286,8 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
     [
       activeColor,
       checkSelected,
+      disabledItemStyle,
+      isDisabledItem,
       focusRowIndex,
       fontFamily,
       itemAccessibilityLabelField,
@@ -350,8 +361,9 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
     );
   };
 
+  // Disabled items stay selected: their chips can't remove them.
   const unSelect = (item: T) => {
-    if (!disable) {
+    if (!disable && !isDisabledItem(item)) {
       onSelect(item);
     }
   };
@@ -360,11 +372,14 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
     currentValue.includes(item[valueField])
   );
 
+  const removableItems = selectedItems.filter((item) => !isDisabledItem(item));
+
   const _renderItemSelected = (inside: boolean) => {
     return (
       <SelectedChips
         textScaling={textScaling}
         items={selectedItems}
+        isDisabled={isDisabledItem}
         inside={inside}
         onUnselect={unSelect}
         labelField={labelField}
@@ -401,7 +416,7 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
               : undefined
           }
           disabled={disable}
-          removeActions={selectedItems.map((item) => ({
+          removeActions={removableItems.map((item) => ({
             label: strings.removeItem(
               String(_get(item, itemAccessibilityLabelField || labelField))
             ),

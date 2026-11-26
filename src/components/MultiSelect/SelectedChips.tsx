@@ -20,6 +20,8 @@ interface SelectedChipsProps<T> {
   textScaling?: TextScaling;
   /** The selected items, in data order. */
   items: T[];
+  /** Disabled items can't be removed; their chips are dimmed. */
+  isDisabled: (item: T) => boolean;
   /** Rendered inside the field instead of below it (`inside` prop). */
   inside: boolean;
   onUnselect: (item: T) => void;
@@ -41,6 +43,7 @@ interface SelectedChipsProps<T> {
 export function SelectedChips<T>({
   textScaling,
   items,
+  isDisabled,
   inside,
   onUnselect,
   labelField,
@@ -57,8 +60,11 @@ export function SelectedChips<T>({
     <View style={StyleSheet.flatten([styles.chips, inside && styles.inside])}>
       {items.map((item) => {
         const label = _get(item, labelField);
+        const disabled = isDisabled(item);
         return (
           <TouchableWithoutFeedback
+            disabled={disabled}
+            accessibilityState={{ disabled }}
             testID={_get(item, itemTestIDField || labelField)}
             accessibilityRole="button"
             accessibilityLabel={strings.removeItem(
@@ -69,9 +75,18 @@ export function SelectedChips<T>({
             onPress={() => onUnselect(item)}
           >
             {renderSelectedItem ? (
-              renderSelectedItem(item, () => onUnselect(item))
+              renderSelectedItem(
+                item,
+                disabled ? undefined : () => onUnselect(item)
+              )
             ) : (
-              <View style={StyleSheet.flatten([styles.chip, selectedStyle])}>
+              <View
+                style={StyleSheet.flatten([
+                  styles.chip,
+                  selectedStyle,
+                  disabled && styles.disabled,
+                ])}
+              >
                 <Text
                   {...textScaling}
                   style={StyleSheet.flatten([
@@ -118,6 +133,9 @@ const styles = StyleSheet.create({
     marginVertical: 6,
     marginRight: 8,
     flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+  },
+  disabled: {
+    opacity: 0.5,
   },
   removeIcon: {
     marginLeft: 5,

@@ -16,7 +16,7 @@ import { Dropdown, type DropdownProps, type IDropdownRef } from '../index';
 import { FIELD_ROLE } from '../internal/a11y';
 import { layoutOpenList, mockTriggerLayout } from '../__fixtures__/testUtils';
 
-type Fruit = { label: string; value: string };
+type Fruit = { label: string; value: string; soldOut?: boolean };
 
 const fruits: Fruit[] = [
   { label: 'Apple', value: 'apple' },
@@ -661,6 +661,53 @@ describe('Dropdown', () => {
           maxFontSizeMultiplier: 1.5,
         });
       }
+    });
+  });
+
+  describe('disabled items', () => {
+    const withSoldOut = fruits.map((fruit) =>
+      fruit.value === 'banana' ? { ...fruit, soldOut: true } : fruit
+    );
+
+    it('ignores presses on disabled rows and reports them as disabled', async () => {
+      const onChange = jest.fn();
+      await renderDropdown({
+        data: withSoldOut,
+        disabledField: 'soldOut',
+        onChange,
+      });
+      await open();
+
+      const banana = screen.getByRole('radio', { name: 'Banana' });
+      expect(banana).toBeDisabled();
+      expect(screen.getByRole('radio', { name: 'Apple' })).toBeEnabled();
+
+      await fireEvent.press(banana);
+      expect(onChange).not.toHaveBeenCalled();
+      expect(isOpen()).toBe(true);
+    });
+
+    it('dims disabled rows, with a custom style if given', async () => {
+      await renderDropdown({
+        data: withSoldOut,
+        disabledField: 'soldOut',
+        disabledItemStyle: { backgroundColor: 'pink' },
+      });
+      await open();
+
+      // The row's style is on the view inside the touchable.
+      const rowContent = (name: string) => {
+        const [content] = screen.getByRole('radio', { name }).children;
+        if (typeof content !== 'object') {
+          throw new Error(`Row ${name} has no content view`);
+        }
+        return content;
+      };
+      expect(rowContent('Banana')).toHaveStyle({
+        opacity: 0.5,
+        backgroundColor: 'pink',
+      });
+      expect(rowContent('Apple')).not.toHaveStyle({ opacity: 0.5 });
     });
   });
 

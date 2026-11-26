@@ -68,6 +68,13 @@ export interface MultiSelectProps<T, V extends keyof T = keyof T> {
   placeholder?: string;
   labelField: keyof T;
   valueField: V;
+  /**
+   * Item field that disables the item when truthy: its row can't be
+   * pressed, is dimmed and is reported as disabled to screen readers.
+   */
+  disabledField?: keyof T;
+  /** Style of disabled rows (default: half opacity). */
+  disabledItemStyle?: StyleProp<ViewStyle>;
   searchField?: keyof T;
   search?: boolean;
   disable?: boolean;
@@ -101,6 +108,10 @@ export interface MultiSelectProps<T, V extends keyof T = keyof T> {
   renderLeftIcon?: (visible?: boolean) => React.ReactElement | null;
   renderRightIcon?: (visible?: boolean) => React.ReactElement | null;
   renderItem?: (item: T, selected?: boolean) => React.ReactElement | null;
+  /**
+   * Replaces a chip. `unSelect` removes the item; it is undefined for
+   * disabled items, which can't be removed.
+   */
   renderSelectedItem?: (
     item: T,
     unSelect?: (item: T) => void

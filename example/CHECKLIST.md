@@ -81,6 +81,13 @@ These apply to every dropdown on every screen:
   With chips inside the field, the field offers "Remove <item>" as actions
   (iOS: actions rotor; Android: actions menu).
 
+### Disabled items
+
+- Visual: Banana, Kiwi and Mango are dimmed; pressing them does nothing. The
+  Banana chip stays when pressed; the Apple chip removes Apple.
+- Screen reader: disabled rows are announced as "dimmed" (iOS) or "disabled"
+  (Android), and so is the Banana chip.
+
 ### Large list
 
 - Visual: the list opens scrolled to item 750 without jumping back; scrolling

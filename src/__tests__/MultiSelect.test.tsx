@@ -20,7 +20,7 @@ import {
 import { FIELD_ROLE } from '../internal/a11y';
 import { layoutOpenList, mockTriggerLayout } from '../__fixtures__/testUtils';
 
-type Fruit = { label: string; value: string };
+type Fruit = { label: string; value: string; locked?: boolean };
 
 const fruits: Fruit[] = [
   { label: 'Apple', value: 'apple' },
@@ -617,6 +617,84 @@ describe('MultiSelect', () => {
         includeHiddenElements: true,
       })
     ).toHaveLength(2);
+  });
+
+  describe('disabled items', () => {
+    const withLocked = fruits.map((fruit) =>
+      fruit.value === 'banana' ? { ...fruit, locked: true } : fruit
+    );
+
+    it('ignores presses on disabled rows', async () => {
+      const onChange = jest.fn();
+      await renderMultiSelect({
+        data: withLocked,
+        disabledField: 'locked',
+        onChange,
+      });
+      await open();
+
+      const banana = screen.getByRole('checkbox', { name: 'Banana' });
+      expect(banana).toBeDisabled();
+
+      await fireEvent.press(banana);
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('keeps a selected disabled item: its chip does not remove it', async () => {
+      const onChange = jest.fn();
+      await renderMultiSelect({
+        data: withLocked,
+        disabledField: 'locked',
+        value: ['apple', 'banana'],
+        onChange,
+      });
+
+      const chip = screen.getByRole('button', { name: 'Remove Banana' });
+      expect(chip).toBeDisabled();
+      await fireEvent.press(chip);
+      expect(onChange).not.toHaveBeenCalled();
+
+      await fireEvent.press(
+        screen.getByRole('button', { name: 'Remove Apple' })
+      );
+      expect(onChange).toHaveBeenCalledWith(['banana']);
+    });
+
+    it('gives renderSelectedItem no unSelect for disabled items', async () => {
+      const renderSelectedItem = jest.fn(
+        (item: Fruit, _unSelect?: (item: Fruit) => void) => (
+          <Text>{item.label}</Text>
+        )
+      );
+      await renderMultiSelect({
+        data: withLocked,
+        disabledField: 'locked',
+        value: ['apple', 'banana'],
+        renderSelectedItem,
+      });
+
+      const unSelectOf = (label: string) =>
+        renderSelectedItem.mock.calls.find(
+          ([item]) => item.label === label
+        )?.[1];
+      expect(unSelectOf('Apple')).toEqual(expect.any(Function));
+      expect(unSelectOf('Banana')).toBeUndefined();
+    });
+
+    it('offers no remove action for disabled items with inside', async () => {
+      await renderMultiSelect({
+        data: withLocked,
+        disabledField: 'locked',
+        inside: true,
+        accessibilityLabel: 'Fruits',
+        value: ['apple', 'banana'],
+      });
+
+      expect(
+        screen.getByRole(FIELD_ROLE, { name: 'Fruits' }).props
+          .accessibilityActions
+      ).toEqual([{ name: 'remove-0', label: 'Remove Apple' }]);
+    });
   });
 
   describe('hitSlop', () => {

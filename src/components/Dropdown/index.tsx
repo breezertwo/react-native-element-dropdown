@@ -59,6 +59,8 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
     data = NO_ITEMS,
     labelField,
     valueField,
+    disabledField,
+    disabledItemStyle,
     searchField,
     value,
     activeColor = '#F6F7F8',
@@ -189,6 +191,11 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
     getValue();
   }, [getValue]);
 
+  const isDisabledItem = useCallback(
+    (item: T) => disabledField != null && !!_get(item, disabledField),
+    [disabledField]
+  );
+
   const isSelectedItem = useCallback(
     (item: T) =>
       currentValue != null &&
@@ -290,6 +297,8 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
           item={item}
           label={_get(item, labelField)}
           selected={selected}
+          disabled={isDisabledItem(item)}
+          disabledStyle={disabledItemStyle}
           onPress={() => onSelect(item)}
           testID={_get(item, itemTestIDField || labelField)}
           accessibilityLabel={_get(
@@ -307,7 +316,9 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
     },
     [
       activeColor,
+      disabledItemStyle,
       focusRowIndex,
+      isDisabledItem,
       fontFamily,
       isSelectedItem,
       itemAccessibilityLabelField,
