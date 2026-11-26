@@ -9,19 +9,19 @@ For every screen, check two things:
 - **Screen reader:** the walkthrough below, once with VoiceOver (iOS) and once
   with TalkBack (Android).
 
-The screen reader steps describe the **target** behaviour of v3 (plan phase 5).
-Until then, note where the current behaviour differs instead of failing the run.
-
 ## General screen reader expectations
 
 These apply to every dropdown on every screen:
 
-1. The field is announced with its label, its role ("combo box" or "pop-up
-   button" / "drop down list") and whether it is expanded.
-2. Double-tap opens the list; focus moves into the list (search field, or the
-   selected or first row).
-3. Rows are announced with their label, role (radio button / checkbox) and
-   whether they are selected ("checked").
+1. The field is announced with its label (or the placeholder), its value (the
+   selected item, or "2 selected") and a role: "button" on iOS, "drop-down
+   list" on Android. When open, iOS adds "expanded"; TalkBack says
+   "expanded" / "collapsed".
+2. Double-tap opens the list; focus moves into the list: the search field, or
+   else the selected row (otherwise the first row).
+3. Rows are announced with their label, "radio button" (Dropdown) or
+   "checkbox" (MultiSelect), and "checked" / "unchecked". Selected rows also
+   show a checkmark.
 4. Swiping only moves through the list while it is open; nothing behind it is
    reachable.
 5. Selecting an item (single select) closes the list and returns focus to the
@@ -43,7 +43,8 @@ These apply to every dropdown on every screen:
   keyboard when it changes height or closes.
 - Screen reader: after opening, focus lands in the search field and it is
   announced as a search field with its placeholder. Typing filters the list;
-  the number of results is announced.
+  after a short pause the number of results is announced. The clear button
+  is announced as "Clear search".
 
 ### Inside a Modal
 
@@ -75,8 +76,10 @@ These apply to every dropdown on every screen:
 - Visual: chips match the selection; removing a chip deselects the item; the
   limited field stops at three items.
 - Screen reader: rows are announced as checkboxes with their checked state;
-  selecting or removing an item is announced; every chip is a button named
-  "Remove <item>".
+  selecting or removing an item is announced ("Banana selected", "Banana
+  removed"); every chip below the field is a button named "Remove <item>".
+  With chips inside the field, the field offers "Remove <item>" as actions
+  (iOS: actions rotor; Android: actions menu).
 
 ### Large list
 
