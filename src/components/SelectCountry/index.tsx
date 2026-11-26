@@ -81,10 +81,10 @@ const SelectCountryComponent = React.forwardRef<
       {...props}
       renderItem={_renderItem}
       renderLeftIcon={() => {
-        if (selectItem?.image) {
+        if (selectItem?.[imageField]) {
           return (
             <Image
-              source={selectItem.image}
+              source={selectItem[imageField]}
               style={[styles.image, imageStyle]}
             />
           );
