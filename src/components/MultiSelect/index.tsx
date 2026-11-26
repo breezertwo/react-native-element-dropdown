@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-shadow */
 import { DEFAULT_GRAY } from '../../internal/colors';
 import { getField, getFieldText } from '../../internal/fields';
 import { useCallback, useId, useMemo, useRef, useState } from 'react';

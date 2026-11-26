@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-shadow */
 import { DEFAULT_GRAY } from '../../internal/colors';
 import { getField, getFieldText, isEqualValue } from '../../internal/fields';
 
