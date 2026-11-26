@@ -38,6 +38,8 @@ export interface DropdownProps<T, V extends keyof T = keyof T> {
   selectedTextProps?: TextProps;
   itemContainerStyle?: StyleProp<ViewStyle>;
   itemTextStyle?: StyleProp<TextStyle>;
+  /** Style of the label in selected rows, on top of itemTextStyle. */
+  selectedItemTextStyle?: StyleProp<TextStyle>;
   inputSearchStyle?: StyleProp<TextStyle>;
   iconStyle?: StyleProp<ImageStyle>;
   maxHeight?: number;

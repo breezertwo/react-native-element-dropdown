@@ -9,7 +9,13 @@ import {
   it,
   jest,
 } from '@jest/globals';
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from '@testing-library/react-native';
 import React, { createRef } from 'react';
 import { AccessibilityInfo, Text, TextInput } from 'react-native';
 import { Dropdown, type DropdownProps, type IDropdownRef } from '../index';
@@ -689,6 +695,21 @@ describe('Dropdown', () => {
       // Not added on top by an inner view either.
       const [inner] = rowContent('Apple').children;
       expect(inner).not.toHaveStyle({ padding: 17 });
+    });
+
+    it('styles the label of the selected row with selectedItemTextStyle', async () => {
+      await renderDropdown({
+        value: 'banana',
+        itemTextStyle: { fontSize: 14 },
+        selectedItemTextStyle: { fontWeight: 'bold' },
+      });
+      await open();
+
+      const label = (name: string) =>
+        within(screen.getByRole('radio', { name })).getByText(name);
+      expect(label('Banana')).toHaveStyle({ fontSize: 14, fontWeight: 'bold' });
+      expect(label('Apple')).toHaveStyle({ fontSize: 14 });
+      expect(label('Apple')).not.toHaveStyle({ fontWeight: 'bold' });
     });
 
     it('does not pad rows of renderItem', async () => {

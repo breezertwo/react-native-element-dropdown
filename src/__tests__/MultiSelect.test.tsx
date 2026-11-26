@@ -9,7 +9,13 @@ import {
   it,
   jest,
 } from '@jest/globals';
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from '@testing-library/react-native';
 import React, { createRef } from 'react';
 import { AccessibilityInfo, Text } from 'react-native';
 import {
@@ -617,6 +623,22 @@ describe('MultiSelect', () => {
         includeHiddenElements: true,
       })
     ).toHaveLength(2);
+  });
+
+  describe('row style', () => {
+    it('styles the labels of selected rows with selectedItemTextStyle', async () => {
+      await renderMultiSelect({
+        value: ['apple', 'cherry'],
+        selectedItemTextStyle: { fontWeight: 'bold' },
+      });
+      await open();
+
+      const label = (name: string) =>
+        within(screen.getByRole('checkbox', { name })).getByText(name);
+      expect(label('Apple')).toHaveStyle({ fontWeight: 'bold' });
+      expect(label('Cherry')).toHaveStyle({ fontWeight: 'bold' });
+      expect(label('Banana')).not.toHaveStyle({ fontWeight: 'bold' });
+    });
   });
 
   describe('disabled items', () => {

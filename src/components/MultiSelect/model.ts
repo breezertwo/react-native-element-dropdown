@@ -41,6 +41,8 @@ export interface MultiSelectProps<T, V extends keyof T = keyof T> {
   selectedTextStyle?: StyleProp<TextStyle>;
   itemContainerStyle?: StyleProp<ViewStyle>;
   itemTextStyle?: StyleProp<TextStyle>;
+  /** Style of the label in selected rows, on top of itemTextStyle. */
+  selectedItemTextStyle?: StyleProp<TextStyle>;
   iconStyle?: StyleProp<ImageStyle>;
   maxHeight?: number;
   minHeight?: number;

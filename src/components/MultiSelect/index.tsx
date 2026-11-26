@@ -52,6 +52,7 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
     selectedTextStyle,
     itemContainerStyle,
     itemTextStyle,
+    selectedItemTextStyle,
     iconStyle,
     selectedTextProps = {},
     activeColor = '#F6F7F8',
@@ -279,6 +280,7 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
         selectedStyle={styles.wrapItem}
         itemContainerStyle={itemContainerStyle}
         itemTextStyle={itemTextStyle}
+        selectedItemTextStyle={selectedItemTextStyle}
         fontFamily={fontFamily}
         renderItem={renderItem}
       />
@@ -295,6 +297,7 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
       itemTestIDField,
       itemTextStyle,
       labelField,
+      selectedItemTextStyle,
       onSelect,
       renderItem,
       iconColor,

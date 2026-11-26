@@ -33,6 +33,8 @@ interface DropdownOptionProps<T> {
   selectedStyle?: ViewStyle;
   itemContainerStyle?: StyleProp<ViewStyle>;
   itemTextStyle?: StyleProp<TextStyle>;
+  /** Extra style of the label while selected. */
+  selectedItemTextStyle?: StyleProp<TextStyle>;
   fontFamily?: string;
   renderItem?: (item: T, selected?: boolean) => ReactElement | null;
   /** Color of the default checkmark on selected rows. */
@@ -73,6 +75,7 @@ export function DropdownOption<T>({
   selectedStyle,
   itemContainerStyle,
   itemTextStyle,
+  selectedItemTextStyle,
   fontFamily,
   renderItem,
   selectedIconColor,
@@ -108,6 +111,7 @@ export function DropdownOption<T>({
               style={StyleSheet.flatten([
                 styles.text,
                 itemTextStyle,
+                selected && selectedItemTextStyle,
                 fontFamily ? { fontFamily } : {},
               ])}
             >
