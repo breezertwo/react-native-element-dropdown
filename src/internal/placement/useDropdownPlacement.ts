@@ -13,6 +13,7 @@ import {
   Keyboard,
   Platform,
   StatusBar,
+  useWindowDimensions,
 } from 'react-native';
 import type {
   EmitterSubscription,
@@ -223,6 +224,7 @@ export const useDropdownPlacement = ({
     );
   }, []);
 
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const verticalMargins = getVerticalMargins(containerStyle);
   const insetTop = safeAreaInsets?.top;
   const insetBottom = safeAreaInsets?.bottom;
@@ -233,7 +235,7 @@ export const useDropdownPlacement = ({
         trigger,
         isTriggerFresh,
         modalSize,
-        windowSize: Dimensions.get('window'),
+        windowSize: { width: windowWidth, height: windowHeight },
         contentHeight,
         keyboard: keyboardAvoiding ? keyboard : null,
         isFull,
@@ -260,6 +262,8 @@ export const useDropdownPlacement = ({
       maxHeight,
       verticalMargins,
       dropdownPosition,
+      windowWidth,
+      windowHeight,
     ]
   );
 

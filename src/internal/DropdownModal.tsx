@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Dimensions, Modal, StyleSheet, View } from 'react-native';
+import { Modal, StyleSheet, View, useWindowDimensions } from 'react-native';
 import type { LayoutChangeEvent, StyleProp, ViewStyle } from 'react-native';
 import type { DropdownPlacement } from './placement/computePlacement';
 import { hiddenStyle } from './placement/useDropdownPlacement';
@@ -39,7 +39,7 @@ export function DropdownModal({
   children,
 }: DropdownModalProps) {
   const { isReady, left, width, maxHeight, wrapperStyle } = placement;
-  const windowWidth = Dimensions.get('window').width;
+  const { width: windowWidth } = useWindowDimensions();
 
   const positionStyle: ViewStyle = isFull
     ? {
