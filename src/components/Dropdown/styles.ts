@@ -24,12 +24,4 @@ export const styles = StyleSheet.create({
     width: 20,
     height: 20,
   },
-  input: {
-    borderWidth: 0.5,
-    borderColor: '#DDDDDD',
-    paddingHorizontal: 8,
-    marginBottom: 8,
-    margin: 6,
-    height: 45,
-  },
 });

@@ -1,0 +1,66 @@
+import type { ReactElement } from 'react';
+import { StyleSheet } from 'react-native';
+import type { ImageStyle, StyleProp, TextStyle } from 'react-native';
+import SearchInput from './SearchInput';
+
+interface DropdownSearchProps {
+  searchText: string;
+  onSearch: (text: string) => void;
+  /** Replaces the built-in input (`renderInputSearch` prop). */
+  renderInputSearch?: (onSearch: (text: string) => void) => ReactElement | null;
+  testID?: string;
+  accessibilityLabel?: string;
+  placeholder?: string;
+  placeholderTextColor: string;
+  /** Applied to both the input's container and the input (2.x behaviour). */
+  inputSearchStyle?: StyleProp<TextStyle>;
+  fontFamily?: string;
+  iconColor: string;
+  iconStyle?: StyleProp<ImageStyle>;
+}
+
+/** The search input above (or below) the list. */
+export function DropdownSearch({
+  searchText,
+  onSearch,
+  renderInputSearch,
+  testID,
+  accessibilityLabel,
+  placeholder,
+  placeholderTextColor,
+  inputSearchStyle,
+  fontFamily,
+  iconColor,
+  iconStyle,
+}: DropdownSearchProps) {
+  if (renderInputSearch) {
+    return renderInputSearch(onSearch);
+  }
+
+  return (
+    <SearchInput
+      testID={testID + ' input'}
+      accessibilityLabel={accessibilityLabel + ' input'}
+      style={[styles.input, inputSearchStyle]}
+      inputStyle={[inputSearchStyle, fontFamily ? { fontFamily } : {}]}
+      value={searchText}
+      autoCorrect={false}
+      placeholder={placeholder}
+      onChangeText={onSearch}
+      placeholderTextColor={placeholderTextColor}
+      showIcon
+      iconStyle={[{ tintColor: iconColor }, iconStyle]}
+    />
+  );
+}
+
+const styles = StyleSheet.create({
+  input: {
+    borderWidth: 0.5,
+    borderColor: '#DDDDDD',
+    paddingHorizontal: 8,
+    marginBottom: 8,
+    margin: 6,
+    height: 45,
+  },
+});

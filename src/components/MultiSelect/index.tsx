@@ -18,8 +18,8 @@ import {
 import { useDropdownState } from '../../internal/useDropdownState';
 import { DropdownList } from '../../internal/DropdownList';
 import { DropdownModal } from '../../internal/DropdownModal';
+import { DropdownSearch } from '../../internal/DropdownSearch';
 import { NO_ITEMS, useSearch } from '../../internal/useSearch';
-import CInput from '../TextInput';
 import { IMultiSelectRef, MultiSelectProps } from './model';
 import { styles } from './styles';
 
@@ -316,44 +316,6 @@ const MultiSelectComponent = React.forwardRef<
     ]
   );
 
-  const renderSearch = useCallback(() => {
-    if (search) {
-      if (renderInputSearch) {
-        return renderInputSearch(onSearch);
-      } else {
-        return (
-          <CInput
-            testID={testID + ' input'}
-            accessibilityLabel={accessibilityLabel + ' input'}
-            style={[styles.input, inputSearchStyle]}
-            inputStyle={[inputSearchStyle, font()]}
-            value={searchText}
-            autoCorrect={false}
-            placeholder={searchPlaceholder}
-            onChangeText={onSearch}
-            showIcon
-            placeholderTextColor={searchPlaceholderTextColor}
-            iconStyle={[{ tintColor: iconColor }, iconStyle]}
-          />
-        );
-      }
-    }
-    return null;
-  }, [
-    accessibilityLabel,
-    font,
-    iconColor,
-    iconStyle,
-    inputSearchStyle,
-    onSearch,
-    renderInputSearch,
-    search,
-    searchPlaceholder,
-    searchPlaceholderTextColor,
-    searchText,
-    testID,
-  ]);
-
   const _renderModal = () => {
     if (!visible || !placement) {
       return null;
@@ -374,7 +336,23 @@ const MultiSelectComponent = React.forwardRef<
         <DropdownList
           isTopPosition={placement.isTopPosition}
           inverted={inverted}
-          search={renderSearch()}
+          search={
+            search ? (
+              <DropdownSearch
+                searchText={searchText}
+                onSearch={onSearch}
+                renderInputSearch={renderInputSearch}
+                testID={testID}
+                accessibilityLabel={accessibilityLabel}
+                placeholder={searchPlaceholder}
+                placeholderTextColor={searchPlaceholderTextColor}
+                inputSearchStyle={inputSearchStyle}
+                fontFamily={fontFamily}
+                iconColor={iconColor}
+                iconStyle={iconStyle}
+              />
+            ) : null
+          }
           captureTouches
           defaultListProps={{
             testID: testID + ' flatlist',

@@ -23,8 +23,8 @@ import {
 import { useDropdownState } from '../../internal/useDropdownState';
 import { DropdownList } from '../../internal/DropdownList';
 import { DropdownModal } from '../../internal/DropdownModal';
+import { DropdownSearch } from '../../internal/DropdownSearch';
 import { NO_ITEMS, useSearch } from '../../internal/useSearch';
-import CInput from '../TextInput';
 import { DropdownProps, IDropdownRef } from './model';
 import { styles } from './styles';
 
@@ -340,44 +340,6 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       ]
     );
 
-    const renderSearch = useCallback(() => {
-      if (search) {
-        if (renderInputSearch) {
-          return renderInputSearch(onSearch);
-        } else {
-          return (
-            <CInput
-              testID={testID + ' input'}
-              accessibilityLabel={accessibilityLabel + ' input'}
-              style={[styles.input, inputSearchStyle]}
-              inputStyle={[inputSearchStyle, font()]}
-              value={searchText}
-              autoCorrect={false}
-              placeholder={searchPlaceholder}
-              onChangeText={onSearch}
-              placeholderTextColor={searchPlaceholderTextColor}
-              showIcon
-              iconStyle={[{ tintColor: iconColor }, iconStyle]}
-            />
-          );
-        }
-      }
-      return null;
-    }, [
-      accessibilityLabel,
-      font,
-      iconColor,
-      iconStyle,
-      inputSearchStyle,
-      onSearch,
-      renderInputSearch,
-      search,
-      searchPlaceholder,
-      searchPlaceholderTextColor,
-      testID,
-      searchText,
-    ]);
-
     const _renderModal = () => {
       if (!visible || !placement) {
         return null;
@@ -398,7 +360,23 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
           <DropdownList
             isTopPosition={placement.isTopPosition}
             inverted={inverted}
-            search={renderSearch()}
+            search={
+              search ? (
+                <DropdownSearch
+                  searchText={searchText}
+                  onSearch={onSearch}
+                  renderInputSearch={renderInputSearch}
+                  testID={testID}
+                  accessibilityLabel={accessibilityLabel}
+                  placeholder={searchPlaceholder}
+                  placeholderTextColor={searchPlaceholderTextColor}
+                  inputSearchStyle={inputSearchStyle}
+                  fontFamily={fontFamily}
+                  iconColor={iconColor}
+                  iconStyle={iconStyle}
+                />
+              ) : null
+            }
             defaultListProps={{
               accessibilityRole: 'radiogroup',
               testID: testID + ' flatlist',
