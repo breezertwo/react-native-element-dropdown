@@ -55,6 +55,8 @@ const MultiSelectComponent = React.forwardRef<
     maxFontSizeMultiplier,
     placeholderStyle,
     iconColor = DEFAULT_GRAY,
+    selectedIconColor,
+    renderSelectedIcon,
     inputSearchStyle,
     searchPlaceholder,
     searchPlaceholderTextColor = DEFAULT_GRAY,
@@ -251,6 +253,8 @@ const MultiSelectComponent = React.forwardRef<
   const _renderItem = useCallback(
     ({ item, index }: { item: any; index: number }) => (
       <DropdownOption
+        selectedIconColor={selectedIconColor ?? iconColor}
+        renderSelectedIcon={renderSelectedIcon}
         textScaling={textScaling}
         ref={index === focusRowIndex ? focusRowRef : undefined}
         item={item}
@@ -283,6 +287,9 @@ const MultiSelectComponent = React.forwardRef<
       labelField,
       onSelect,
       renderItem,
+      iconColor,
+      renderSelectedIcon,
+      selectedIconColor,
       textScaling,
     ]
   );

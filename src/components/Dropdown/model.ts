@@ -50,6 +50,13 @@ export interface DropdownProps<T> {
   /** Largest font scale for the texts, e.g. 1.5. */
   maxFontSizeMultiplier?: number;
   iconColor?: string;
+  /** Color of the checkmark on selected rows (default: iconColor). */
+  selectedIconColor?: string;
+  /**
+   * Replaces the checkmark on selected rows; return null to hide it. Not
+   * used with renderItem, which gets `selected` to draw its own mark.
+   */
+  renderSelectedIcon?: () => React.ReactElement | null;
   activeColor?: string;
   data: T[];
   value?: T | string | null | undefined;

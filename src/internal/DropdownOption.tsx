@@ -31,6 +31,25 @@ interface DropdownOptionProps<T> {
   itemTextStyle?: StyleProp<TextStyle>;
   fontFamily?: string;
   renderItem?: (item: T, selected?: boolean) => ReactElement | null;
+  /** Color of the default checkmark on selected rows. */
+  selectedIconColor: string;
+  /** Replaces the checkmark; return null to hide it. */
+  renderSelectedIcon?: () => ReactElement | null;
+}
+
+/**
+ * The default mark of a selected row, drawn with two borders so it takes the
+ * color directly. Decorative: screen readers get the checked state instead.
+ */
+function Checkmark({ color }: { color: string }) {
+  return (
+    <View
+      testID="dropdown-selected-icon"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={[styles.checkmark, { borderColor: color }]}
+    />
+  );
 }
 
 /** One row in the list: `renderItem`, or the label in a padded row. */
@@ -50,6 +69,8 @@ export function DropdownOption<T>({
   itemTextStyle,
   fontFamily,
   renderItem,
+  selectedIconColor,
+  renderSelectedIcon,
 }: DropdownOptionProps<T>) {
   return (
     <TouchableHighlight
@@ -81,6 +102,12 @@ export function DropdownOption<T>({
             >
               {label}
             </Text>
+            {selected &&
+              (renderSelectedIcon ? (
+                renderSelectedIcon()
+              ) : (
+                <Checkmark color={selectedIconColor} />
+              ))}
           </View>
         )}
       </View>
@@ -99,5 +126,14 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
+  },
+  checkmark: {
+    width: 7,
+    height: 13,
+    marginHorizontal: 4,
+    marginBottom: 3,
+    borderRightWidth: 2,
+    borderBottomWidth: 2,
+    transform: [{ rotate: '45deg' }],
   },
 });

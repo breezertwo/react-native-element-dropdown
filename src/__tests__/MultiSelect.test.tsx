@@ -603,6 +603,17 @@ describe('MultiSelect', () => {
     });
   });
 
+  it('marks every selected row with a checkmark', async () => {
+    await renderMultiSelect({ value: ['apple', 'cherry'] });
+    await open();
+
+    expect(
+      screen.queryAllByTestId('dropdown-selected-icon', {
+        includeHiddenElements: true,
+      })
+    ).toHaveLength(2);
+  });
+
   describe('hitSlop', () => {
     it('extends the touch area of the field', async () => {
       const hitSlop = { top: 4, bottom: 4, left: 0, right: 0 };

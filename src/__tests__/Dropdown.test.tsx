@@ -573,6 +573,59 @@ describe('Dropdown', () => {
     );
   });
 
+  describe('selected checkmark', () => {
+    const checkmarks = () =>
+      screen.queryAllByTestId('dropdown-selected-icon', {
+        includeHiddenElements: true,
+      });
+
+    it('marks the selected row, in iconColor by default', async () => {
+      await renderDropdown({ value: 'banana', iconColor: '#333333' });
+      await open();
+
+      expect(checkmarks()).toHaveLength(1);
+      expect(checkmarks()[0]?.props.style).toContainEqual({
+        borderColor: '#333333',
+      });
+    });
+
+    it('uses selectedIconColor', async () => {
+      await renderDropdown({ value: 'banana', selectedIconColor: 'green' });
+      await open();
+
+      expect(checkmarks()[0]?.props.style).toContainEqual({
+        borderColor: 'green',
+      });
+    });
+
+    it('is replaced by renderSelectedIcon, or hidden when it returns null', async () => {
+      await renderDropdown({
+        value: 'banana',
+        renderSelectedIcon: () => <Text>✔︎ custom</Text>,
+      });
+      await open();
+      expect(screen.getByText('✔︎ custom')).toBeTruthy();
+      expect(checkmarks()).toHaveLength(0);
+    });
+
+    it('is not added to rows from renderItem', async () => {
+      await renderDropdown({
+        value: 'banana',
+        renderItem: (item: Fruit) => <Text>{item.label}</Text>,
+      });
+      await open();
+
+      expect(checkmarks()).toHaveLength(0);
+    });
+
+    it('is hidden from screen readers', async () => {
+      await renderDropdown({ value: 'banana' });
+      await open();
+
+      expect(screen.queryAllByTestId('dropdown-selected-icon')).toHaveLength(0);
+    });
+  });
+
   describe('hitSlop', () => {
     it('extends the touch area of the field', async () => {
       const hitSlop = { top: 4, bottom: 4, left: 0, right: 0 };

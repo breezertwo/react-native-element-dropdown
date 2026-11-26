@@ -59,6 +59,8 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       allowFontScaling,
       maxFontSizeMultiplier,
       iconColor = DEFAULT_GRAY,
+      selectedIconColor,
+      renderSelectedIcon,
       searchPlaceholder,
       searchPlaceholderTextColor = DEFAULT_GRAY,
       placeholder = 'Select item',
@@ -278,6 +280,8 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         const selected = isSelectedItem(item);
         return (
           <DropdownOption
+            selectedIconColor={selectedIconColor ?? iconColor}
+            renderSelectedIcon={renderSelectedIcon}
             textScaling={textScaling}
             ref={index === focusRowIndex ? focusRowRef : undefined}
             item={item}
@@ -310,6 +314,9 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         labelField,
         onSelect,
         renderItem,
+        iconColor,
+        renderSelectedIcon,
+        selectedIconColor,
         textScaling,
       ]
     );
