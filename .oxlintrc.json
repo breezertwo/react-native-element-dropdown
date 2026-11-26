@@ -51,9 +51,6 @@
     "no-underscore-dangle": "off",
 
     "rn-a11y/has-valid-accessibility-descriptors": "error",
-
-    // Known issues in the 2.x code, raised back to "error" once fixed:
-    // React Compiler rule violations (phase 7).
-    "react/set-state-in-effect": "warn"
+    "react/set-state-in-effect": "error"
   }
 }

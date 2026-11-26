@@ -2,14 +2,7 @@
 import { DEFAULT_GRAY } from '../../internal/colors';
 import { getField, getFieldText, isEqualValue } from '../../internal/fields';
 
-import {
-  useCallback,
-  useId,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type { ComponentRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { TextInput } from 'react-native';
@@ -108,7 +101,14 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
 
   const ref = useRef<TriggerInstance>(null);
   const [visible, setVisible] = useState<boolean>(false);
-  const [currentValue, setCurrentValue] = useState<T | null>(null);
+  // The item the user picked, kept while `value` and `data` are the ones it
+  // was picked with; it shows the selection before (or without) the app
+  // updating `value`.
+  const [picked, setPicked] = useState<{
+    item: T;
+    value: typeof value;
+    data: typeof data;
+  } | null>(null);
   const nativeId = `dropdown-${useId()}`;
 
   const { isFull, isLandscape } = useFullScreenMode(mode);
@@ -179,20 +179,20 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
     onDismiss: dismissSearch,
   });
 
-  const getValue = useCallback(() => {
-    const defaultValue =
+  // `value` is an item or its value; the selection is the item in `data`.
+  const valueItem = useMemo(() => {
+    const selectedValue =
       typeof value === 'object' ? getField(value as T, valueField) : value;
-
-    const getItem = data.filter((e) =>
-      isEqualValue(defaultValue, getField(e, valueField))
+    return (
+      data.find((item) =>
+        isEqualValue(selectedValue, getField(item, valueField))
+      ) ?? null
     );
-
-    setCurrentValue(getItem[0] ?? null);
   }, [data, value, valueField]);
-
-  useEffect(() => {
-    getValue();
-  }, [getValue]);
+  const currentValue =
+    picked && picked.value === value && picked.data === data
+      ? picked.item
+      : valueItem;
 
   const isDisabledItem = useCallback(
     (item: T) => disabledField != null && !!getField(item, disabledField),
@@ -229,7 +229,7 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
         return onConfirmSelectItem(item);
       }
 
-      setCurrentValue(item);
+      setPicked({ item, value, data });
       onChange(item);
 
       if (closeModalWhenSelectedItem) {
@@ -246,6 +246,8 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
       clearSearch,
       onConfirmSelectItem,
       closeModalWhenSelectedItem,
+      value,
+      data,
     ]
   );
 

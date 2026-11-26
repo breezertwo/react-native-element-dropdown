@@ -242,6 +242,39 @@ describe('Dropdown', () => {
       expect(screen.getByText('Banana')).toBeTruthy();
     });
 
+    describe('after a pick', () => {
+      const renderWithValue = (value: string | null) => (
+        <Dropdown
+          testID="dropdown"
+          data={fruits}
+          labelField="label"
+          valueField="value"
+          value={value}
+          onChange={() => {}}
+        />
+      );
+
+      it('keeps showing the pick while the app re-renders with the same value', async () => {
+        const view = await render(renderWithValue('apple'));
+        await open();
+        await fireEvent.press(screen.getByText('Banana'));
+
+        await view.rerender(renderWithValue('apple'));
+
+        expect(trigger()).toHaveAccessibilityValue({ text: 'Banana' });
+      });
+
+      it('shows a new value from the app', async () => {
+        const view = await render(renderWithValue('apple'));
+        await open();
+        await fireEvent.press(screen.getByText('Banana'));
+
+        await view.rerender(renderWithValue('creme'));
+
+        expect(trigger()).toHaveAccessibilityValue({ text: 'Crème brûlée' });
+      });
+    });
+
     it('stays open when closeModalWhenSelectedItem is false', async () => {
       const onChange = jest.fn();
       await renderDropdown({ onChange, closeModalWhenSelectedItem: false });
