@@ -24,6 +24,7 @@ const TextInputComponent: CTextInput = (props) => {
     clearButtonLabel = 'Clear search',
     inputStyle,
     iconStyle,
+    renderClearIcon,
     onChangeText = (_value: string) => {},
     renderLeftIcon,
     renderRightIcon,
@@ -54,10 +55,14 @@ const TextInputComponent: CTextInput = (props) => {
             accessibilityLabel={clearButtonLabel}
             onPress={() => onChange('')}
           >
-            <Image
-              source={ic_close}
-              style={StyleSheet.flatten([styles.icon, iconStyle])}
-            />
+            {renderClearIcon ? (
+              renderClearIcon()
+            ) : (
+              <Image
+                source={ic_close}
+                style={StyleSheet.flatten([styles.icon, iconStyle])}
+              />
+            )}
           </TouchableOpacity>
         );
       }

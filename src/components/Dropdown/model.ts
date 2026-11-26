@@ -40,7 +40,12 @@ export interface DropdownProps<T, V extends keyof T = keyof T> {
   itemTextStyle?: StyleProp<TextStyle>;
   /** Style of the label in selected rows, on top of itemTextStyle. */
   selectedItemTextStyle?: StyleProp<TextStyle>;
+  /** The box around the search input and its clear button. */
+  searchContainerStyle?: StyleProp<ViewStyle>;
+  /** The search text input. */
   inputSearchStyle?: StyleProp<TextStyle>;
+  /** Replaces the icon of the search's clear button (the button stays). */
+  renderSearchClearIcon?: () => React.ReactElement | null;
   iconStyle?: StyleProp<ImageStyle>;
   maxHeight?: number;
   minHeight?: number;

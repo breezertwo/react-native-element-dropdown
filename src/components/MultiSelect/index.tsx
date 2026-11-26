@@ -65,7 +65,9 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
     iconColor = DEFAULT_GRAY,
     selectedIconColor,
     renderSelectedIcon,
+    searchContainerStyle,
     inputSearchStyle,
+    renderSearchClearIcon,
     searchPlaceholder,
     searchPlaceholderTextColor = DEFAULT_GRAY,
     placeholder = 'Select item',
@@ -343,7 +345,9 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
                 strings={strings}
                 placeholder={searchPlaceholder}
                 placeholderTextColor={searchPlaceholderTextColor}
+                searchContainerStyle={searchContainerStyle}
                 inputSearchStyle={inputSearchStyle}
+                renderSearchClearIcon={renderSearchClearIcon}
                 fontFamily={fontFamily}
                 iconColor={iconColor}
                 iconStyle={iconStyle}

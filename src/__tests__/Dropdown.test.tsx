@@ -317,6 +317,37 @@ describe('Dropdown', () => {
       await fireEvent.changeText(screen.getByTestId('dropdown input'), text);
     };
 
+    it('styles the box with searchContainerStyle and the input with inputSearchStyle', async () => {
+      await renderDropdown({
+        search: true,
+        searchContainerStyle: { borderRadius: 8 },
+        inputSearchStyle: { fontSize: 14 },
+      });
+      await open();
+
+      const input = screen.getByTestId('dropdown input');
+      const box = input.parent?.parent;
+      expect(input).toHaveStyle({ fontSize: 14 });
+      expect(input).not.toHaveStyle({ borderRadius: 8 });
+      expect(box).toHaveStyle({ borderRadius: 8, borderWidth: 0.5 });
+      expect(box).not.toHaveStyle({ fontSize: 14 });
+    });
+
+    it('renders renderSearchClearIcon inside the clear button', async () => {
+      await renderDropdown({
+        search: true,
+        renderSearchClearIcon: () => <Text>×</Text>,
+      });
+      await open();
+      await search('ban');
+
+      const clear = screen.getByRole('button', { name: 'Clear search' });
+      expect(within(clear).getByText('×')).toBeTruthy();
+
+      await fireEvent.press(clear);
+      expect(screen.getByTestId('dropdown input').props.value).toBe('');
+    });
+
     it('filters by label, ignoring case, whitespace and accents', async () => {
       await renderDropdown({ search: true });
       await open();

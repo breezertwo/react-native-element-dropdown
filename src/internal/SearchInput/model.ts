@@ -17,6 +17,8 @@ interface Props extends TextInputProps {
   showIcon?: boolean;
   /** Screen reader label of the clear button. */
   clearButtonLabel?: string;
+  /** Replaces the clear button's icon; the button itself stays. */
+  renderClearIcon?: () => React.ReactElement | null;
   renderRightIcon?: () => React.ReactElement | null;
   renderLeftIcon?: () => React.ReactElement | null;
 }

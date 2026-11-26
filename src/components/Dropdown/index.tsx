@@ -54,7 +54,9 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
     itemContainerStyle,
     itemTextStyle,
     selectedItemTextStyle,
+    searchContainerStyle,
     inputSearchStyle,
+    renderSearchClearIcon,
     iconStyle,
     selectedTextProps = {},
     data = NO_ITEMS,
@@ -370,7 +372,9 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
                 strings={strings}
                 placeholder={searchPlaceholder}
                 placeholderTextColor={searchPlaceholderTextColor}
+                searchContainerStyle={searchContainerStyle}
                 inputSearchStyle={inputSearchStyle}
+                renderSearchClearIcon={renderSearchClearIcon}
                 fontFamily={fontFamily}
                 iconColor={iconColor}
                 iconStyle={iconStyle}

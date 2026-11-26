@@ -42,7 +42,12 @@ export interface MultiSelectProps<T, V extends keyof T = keyof T> {
    * the placeholder.
    */
   selectedPlaceholderStyle?: StyleProp<TextStyle>;
+  /** The box around the search input and its clear button. */
+  searchContainerStyle?: StyleProp<ViewStyle>;
+  /** The search text input. */
   inputSearchStyle?: StyleProp<TextStyle>;
+  /** Replaces the icon of the search's clear button (the button stays). */
+  renderSearchClearIcon?: () => React.ReactElement | null;
   selectedStyle?: StyleProp<ViewStyle>;
   selectedTextProps?: TextProps;
   selectedTextStyle?: StyleProp<TextStyle>;

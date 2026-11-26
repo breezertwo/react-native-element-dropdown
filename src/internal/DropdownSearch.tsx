@@ -1,6 +1,12 @@
 import type { ComponentRef, ReactElement, Ref } from 'react';
 import { StyleSheet } from 'react-native';
-import type { ImageStyle, StyleProp, TextInput, TextStyle } from 'react-native';
+import type {
+  ImageStyle,
+  StyleProp,
+  TextInput,
+  TextStyle,
+  ViewStyle,
+} from 'react-native';
 import type { DropdownAccessibilityStrings, TextScaling } from './a11y';
 import SearchInput from './SearchInput';
 
@@ -17,8 +23,12 @@ interface DropdownSearchProps {
   placeholder?: string;
   strings: DropdownAccessibilityStrings;
   placeholderTextColor: string;
-  /** Applied to both the input's container and the input (2.x behaviour). */
+  /** The box around the input and the clear button. */
+  searchContainerStyle?: StyleProp<ViewStyle>;
+  /** The text input. */
   inputSearchStyle?: StyleProp<TextStyle>;
+  /** Replaces the clear button's icon (the button stays). */
+  renderSearchClearIcon?: () => ReactElement | null;
   fontFamily?: string;
   iconColor: string;
   iconStyle?: StyleProp<ImageStyle>;
@@ -35,7 +45,9 @@ export function DropdownSearch({
   placeholder,
   strings,
   placeholderTextColor,
+  searchContainerStyle,
   inputSearchStyle,
+  renderSearchClearIcon,
   fontFamily,
   iconColor,
   iconStyle,
@@ -52,7 +64,7 @@ export function DropdownSearch({
       accessibilityLabel={placeholder || strings.search}
       accessibilityRole="search"
       clearButtonLabel={strings.clearSearch}
-      style={[styles.input, inputSearchStyle]}
+      style={[styles.input, searchContainerStyle]}
       inputStyle={[inputSearchStyle, fontFamily ? { fontFamily } : {}]}
       value={searchText}
       autoCorrect={false}
@@ -60,6 +72,7 @@ export function DropdownSearch({
       onChangeText={onSearch}
       placeholderTextColor={placeholderTextColor}
       showIcon
+      renderClearIcon={renderSearchClearIcon}
       iconStyle={[{ tintColor: iconColor }, iconStyle]}
     />
   );
