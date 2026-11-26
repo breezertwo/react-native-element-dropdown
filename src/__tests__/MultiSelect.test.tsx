@@ -1,3 +1,6 @@
+// Characterisation tests: they describe how MultiSelect behaves in 2.13, so
+// the v3 refactor can't change behaviour by accident. Known bugs are written
+// as the desired behaviour and marked `it.failing`; fixing one flips its test.
 import {
   afterEach,
   beforeEach,
@@ -6,10 +9,48 @@ import {
   it,
   jest,
 } from '@jest/globals';
-import { fireEvent, render, screen } from '@testing-library/react-native';
-import React from 'react';
-import { MultiSelect } from '../index';
-import { mockTriggerLayout } from '../__fixtures__/testUtils';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import React, { createRef } from 'react';
+import { Text } from 'react-native';
+import { MultiSelect, type IMultiSelectRef } from '../index';
+import { layoutOpenList, mockTriggerLayout } from '../__fixtures__/testUtils';
+
+type Fruit = { label: string; value: string };
+
+const fruits: Fruit[] = [
+  { label: 'Apple', value: 'apple' },
+  { label: 'Banana', value: 'banana' },
+  { label: 'Cherry', value: 'cherry' },
+];
+
+const renderMultiSelect = (
+  props: Partial<React.ComponentProps<typeof MultiSelect>> = {}
+) =>
+  render(
+    <MultiSelect
+      testID="multiselect"
+      data={fruits}
+      labelField="label"
+      valueField="value"
+      onChange={() => {}}
+      {...props}
+    />
+  );
+
+// The trigger doesn't receive testID (see the accessibility tests), so press
+// its placeholder text instead.
+const pressTrigger = () => fireEvent.press(screen.getByText('Select item'));
+
+const open = async () => {
+  await pressTrigger();
+  await layoutOpenList();
+};
+
+// The list counts as open while it waits for its layout and is still hidden.
+const isOpen = () =>
+  screen.queryByTestId('multiselect flatlist', {
+    includeHiddenElements: true,
+  }) !== null;
 
 beforeEach(() => {
   jest.useFakeTimers();
@@ -23,72 +64,302 @@ afterEach(() => {
 });
 
 describe('MultiSelect', () => {
-  it('does not mutate the items passed in data', async () => {
-    const data = [
-      { label: 'Apple', value: '1' },
-      { label: 'Banana', value: '2' },
-    ];
-    const snapshot = JSON.parse(JSON.stringify(data));
+  describe('opening and closing', () => {
+    it('always shows the placeholder in the field', async () => {
+      await renderMultiSelect({ value: ['apple'] });
 
-    await render(
-      <MultiSelect
-        accessibilityLabel="Fruits"
-        data={data}
-        labelField="label"
-        valueField="value"
-        value={['2']}
-        onChange={() => {}}
-      />
-    );
-    // The MultiSelect trigger doesn't receive testID, so find it by its label.
-    await fireEvent.press(screen.getByLabelText('Fruits'));
+      expect(screen.getByText('Select item')).toBeTruthy();
+    });
 
-    // The list stays hidden until the modal has been laid out, which never
-    // happens in tests, so include hidden elements.
-    expect(
-      screen.getByText('Apple', { includeHiddenElements: true })
-    ).toBeTruthy();
-    expect(data).toEqual(snapshot);
+    it('opens on press, calls onFocus, and closes on a second press calling onBlur', async () => {
+      const onFocus = jest.fn();
+      const onBlur = jest.fn();
+      await renderMultiSelect({ onFocus, onBlur });
+
+      await open();
+      expect(isOpen()).toBe(true);
+      expect(onFocus).toHaveBeenCalledTimes(1);
+
+      await pressTrigger();
+      expect(isOpen()).toBe(false);
+      expect(onBlur).toHaveBeenCalledTimes(1);
+    });
+
+    it('can be opened, closed and toggled through its ref', async () => {
+      const ref = createRef<IMultiSelectRef>();
+      await renderMultiSelect({ ref });
+
+      await act(async () => ref.current?.open());
+      expect(isOpen()).toBe(true);
+
+      await act(async () => ref.current?.close());
+      expect(isOpen()).toBe(false);
+
+      await act(async () => ref.current?.toggle());
+      expect(isOpen()).toBe(true);
+    });
+
+    it('does nothing when disabled', async () => {
+      await renderMultiSelect({ disable: true });
+
+      await pressTrigger();
+
+      expect(isOpen()).toBe(false);
+    });
   });
 
-  describe('selected chips', () => {
-    const data = [
-      { label: 'Apple', value: '1' },
-      { label: 'Banana', value: '2' },
-    ];
+  describe('selecting', () => {
+    it('adds an item to the selection and stays open', async () => {
+      const onChange = jest.fn();
+      await renderMultiSelect({ value: ['apple'], onChange });
+      await open();
 
+      await fireEvent.press(screen.getByText('Banana'));
+
+      expect(onChange).toHaveBeenCalledWith(['apple', 'banana']);
+      expect(isOpen()).toBe(true);
+    });
+
+    it('removes a selected item from the selection', async () => {
+      const onChange = jest.fn();
+      await renderMultiSelect({ value: ['apple', 'banana'], onChange });
+      await open();
+
+      await fireEvent.press(screen.getByText('Apple'));
+
+      expect(onChange).toHaveBeenCalledWith(['banana']);
+    });
+
+    it('stops adding at maxSelect but still calls onChange', async () => {
+      const onChange = jest.fn();
+      await renderMultiSelect({
+        value: ['apple', 'banana'],
+        maxSelect: 2,
+        onChange,
+      });
+      await open();
+
+      await fireEvent.press(screen.getByText('Cherry'));
+
+      expect(onChange).toHaveBeenCalledWith(['apple', 'banana']);
+    });
+
+    it('calls onConfirmSelectItem instead of onChange when confirmSelectItem is set', async () => {
+      const onChange = jest.fn();
+      const onConfirmSelectItem = jest.fn();
+      await renderMultiSelect({
+        value: ['apple'],
+        confirmSelectItem: true,
+        onConfirmSelectItem,
+        onChange,
+      });
+      await open();
+
+      await fireEvent.press(screen.getByText('Banana'));
+      expect(onConfirmSelectItem).toHaveBeenCalledWith(['apple', 'banana']);
+      expect(onChange).not.toHaveBeenCalled();
+
+      // Unselecting still goes through onChange without confirmUnSelectItem.
+      await fireEvent.press(screen.getByText('Apple'));
+      expect(onChange).toHaveBeenCalledWith([]);
+    });
+
+    it('calls onConfirmSelectItem for unselecting when confirmUnSelectItem is set', async () => {
+      const onChange = jest.fn();
+      const onConfirmSelectItem = jest.fn();
+      await renderMultiSelect({
+        value: ['apple'],
+        confirmUnSelectItem: true,
+        onConfirmSelectItem,
+        onChange,
+      });
+      await open();
+
+      await fireEvent.press(screen.getByText('Apple'));
+
+      expect(onConfirmSelectItem).toHaveBeenCalledWith([]);
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('passes item and selected state to renderItem', async () => {
+      await renderMultiSelect({
+        value: ['banana'],
+        renderItem: (item: Fruit, selected?: boolean) => (
+          <Text>{`${item.label}${selected ? ' (selected)' : ''}`}</Text>
+        ),
+      });
+      await open();
+
+      expect(screen.getByText('Apple')).toBeTruthy();
+      expect(screen.getByText('Banana (selected)')).toBeTruthy();
+    });
+  });
+
+  describe('chips', () => {
     // While the list is closed, item labels only appear as chips.
     it.each([undefined, null, []])(
       'shows no chips when value is %p',
       async (value) => {
-        await render(
-          <MultiSelect
-            data={data}
-            labelField="label"
-            valueField="value"
-            value={value}
-            onChange={() => {}}
-          />
-        );
+        await renderMultiSelect({ value });
 
         expect(screen.queryByText('Apple')).toBeNull();
         expect(screen.queryByText('Banana')).toBeNull();
       }
     );
 
-    it('shows a chip only for selected items', async () => {
-      await render(
-        <MultiSelect
-          data={data}
-          labelField="label"
-          valueField="value"
-          value={['2']}
-          onChange={() => {}}
-        />
-      );
+    it('shows a chip for each selected item below the field', async () => {
+      await renderMultiSelect({ value: ['banana', 'cherry'] });
 
       expect(screen.queryByText('Apple')).toBeNull();
       expect(screen.getByText('Banana')).toBeTruthy();
+      expect(screen.getByText('Cherry')).toBeTruthy();
+    });
+
+    it('unselects an item when its chip is pressed', async () => {
+      const onChange = jest.fn();
+      await renderMultiSelect({ value: ['banana', 'cherry'], onChange });
+
+      await fireEvent.press(screen.getByText('Banana'));
+
+      expect(onChange).toHaveBeenCalledWith(['cherry']);
+    });
+
+    it('hides the chips while the list is open', async () => {
+      await renderMultiSelect({ value: ['banana'] });
+      await open();
+
+      // Only the list row is left.
+      expect(screen.getAllByText('Banana')).toHaveLength(1);
+    });
+
+    it('keeps the chips while open with alwaysRenderSelectedItem', async () => {
+      await renderMultiSelect({
+        value: ['banana'],
+        alwaysRenderSelectedItem: true,
+      });
+      await open();
+
+      expect(screen.getAllByText('Banana')).toHaveLength(2);
+    });
+
+    it('shows no chips with visibleSelectedItem={false}', async () => {
+      await renderMultiSelect({
+        value: ['banana'],
+        visibleSelectedItem: false,
+      });
+
+      expect(screen.queryByText('Banana')).toBeNull();
+    });
+
+    it('shows chips inside the field instead of the placeholder with inside', async () => {
+      await renderMultiSelect({ value: ['banana'], inside: true });
+
+      expect(screen.getByText('Banana')).toBeTruthy();
+      expect(screen.queryByText('Select item')).toBeNull();
+    });
+
+    it('renders custom chips with renderSelectedItem', async () => {
+      const onChange = jest.fn();
+      await renderMultiSelect({
+        value: ['banana'],
+        onChange,
+        renderSelectedItem: (item: Fruit, unSelect) => (
+          <Text onPress={() => unSelect?.(item)}>{`chip ${item.label}`}</Text>
+        ),
+      });
+
+      await fireEvent.press(screen.getByText('chip Banana'));
+
+      expect(onChange).toHaveBeenCalledWith([]);
+    });
+  });
+
+  describe('search', () => {
+    it('filters by label, ignoring case, whitespace and accents', async () => {
+      await renderMultiSelect({
+        search: true,
+        data: [...fruits, { label: 'Crème brûlée', value: 'creme' }],
+      });
+      await open();
+
+      await fireEvent.changeText(
+        screen.getByTestId('multiselect input'),
+        'CREME BRU'
+      );
+
+      expect(screen.getByText('Crème brûlée')).toBeTruthy();
+      expect(screen.queryByText('Apple')).toBeNull();
+    });
+
+    it('hides excludeItems from the list', async () => {
+      await renderMultiSelect({ excludeItems: [fruits[0]!] });
+      await open();
+
+      expect(screen.queryByText('Apple')).toBeNull();
+      expect(screen.getByText('Banana')).toBeTruthy();
+    });
+  });
+
+  describe('accessibility (2.13 behaviour)', () => {
+    it('exposes the trigger as an expandable button when accessibilityLabel is set', async () => {
+      await renderMultiSelect({ accessibilityLabel: 'Fruits' });
+
+      expect(
+        screen.getByRole('button', { name: 'Fruits', expanded: false })
+      ).toBeTruthy();
+
+      await open();
+
+      expect(
+        screen.getByRole('button', { name: 'Fruits', expanded: true })
+      ).toBeTruthy();
+    });
+
+    it('names rows by their label, without a role, when accessibilityLabel is set', async () => {
+      await renderMultiSelect({ accessibilityLabel: 'Fruits' });
+      await open();
+
+      expect(screen.getByLabelText('Banana')).toBeTruthy();
+      expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
+    });
+
+    // Known bug (v3 plan, phase 4): the trigger ignores testID.
+    it.failing('puts testID on the trigger', async () => {
+      await renderMultiSelect();
+
+      expect(screen.getByTestId('multiselect')).toBeTruthy();
+    });
+
+    // Target behaviour (v3 plan, phase 5).
+    it.failing(
+      'exposes rows as checkboxes with their checked state',
+      async () => {
+        await renderMultiSelect({ value: ['banana'] });
+        await open();
+
+        expect(
+          screen.getByRole('checkbox', { name: 'Banana', checked: true })
+        ).toBeTruthy();
+        expect(
+          screen.getByRole('checkbox', { name: 'Apple', checked: false })
+        ).toBeTruthy();
+      }
+    );
+  });
+
+  describe('data', () => {
+    it('does not mutate the items passed in data', async () => {
+      const data = [
+        { label: 'Apple', value: '1' },
+        { label: 'Banana', value: '2' },
+      ];
+      const snapshot = JSON.parse(JSON.stringify(data));
+
+      await renderMultiSelect({ data, value: ['2'] });
+      await open();
+
+      expect(screen.getByText('Apple')).toBeTruthy();
+      expect(data).toEqual(snapshot);
     });
   });
 });
