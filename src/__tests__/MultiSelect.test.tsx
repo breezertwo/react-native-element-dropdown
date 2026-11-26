@@ -625,6 +625,39 @@ describe('MultiSelect', () => {
     ).toHaveLength(2);
   });
 
+  describe('field style', () => {
+    it('adds selectedPlaceholderStyle to the placeholder while items are selected', async () => {
+      const props = {
+        placeholder: 'Pick fruits',
+        placeholderStyle: { fontSize: 14 },
+        selectedPlaceholderStyle: { color: 'black' },
+      };
+      const view = await renderMultiSelect(props);
+
+      expect(screen.getByText('Pick fruits')).toHaveStyle({ fontSize: 14 });
+      expect(screen.getByText('Pick fruits')).not.toHaveStyle({
+        color: 'black',
+      });
+
+      await view.rerender(
+        <MultiSelect
+          testID="multiselect"
+          data={fruits}
+          labelField="label"
+          valueField="value"
+          value={['apple']}
+          onChange={() => {}}
+          {...props}
+        />
+      );
+
+      expect(screen.getByText('Pick fruits')).toHaveStyle({
+        fontSize: 14,
+        color: 'black',
+      });
+    });
+  });
+
   describe('row style', () => {
     it('styles the labels of selected rows with selectedItemTextStyle', async () => {
       await renderMultiSelect({

@@ -61,6 +61,7 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
     allowFontScaling,
     maxFontSizeMultiplier,
     placeholderStyle,
+    selectedPlaceholderStyle,
     iconColor = DEFAULT_GRAY,
     selectedIconColor,
     renderSelectedIcon,
@@ -224,7 +225,10 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
       }
       disabled={disable}
       text={placeholder}
-      textStyle={placeholderStyle}
+      textStyle={[
+        placeholderStyle,
+        currentValue.length > 0 && selectedPlaceholderStyle,
+      ]}
       textProps={selectedTextProps}
       fontFamily={fontFamily}
       renderLeftIcon={renderLeftIcon}

@@ -35,6 +35,13 @@ export interface MultiSelectProps<T, V extends keyof T = keyof T> {
   hitSlop?: Insets | number;
   containerStyle?: StyleProp<ViewStyle>;
   placeholderStyle?: StyleProp<TextStyle>;
+  /**
+   * Style of the placeholder in the field while items are selected, on top
+   * of placeholderStyle (the field keeps showing the placeholder; the
+   * selection is in the chips). Not used with `inside`, where chips replace
+   * the placeholder.
+   */
+  selectedPlaceholderStyle?: StyleProp<TextStyle>;
   inputSearchStyle?: StyleProp<TextStyle>;
   selectedStyle?: StyleProp<ViewStyle>;
   selectedTextProps?: TextProps;
