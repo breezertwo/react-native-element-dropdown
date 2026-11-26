@@ -23,14 +23,14 @@ afterEach(() => {
 });
 
 describe('Dropdown', () => {
-  it('does not mutate the items passed in data', () => {
+  it('does not mutate the items passed in data', async () => {
     const data = [
       { label: 'Apple', value: '1' },
       { label: 'Banana', value: '2' },
     ];
     const snapshot = JSON.parse(JSON.stringify(data));
 
-    render(
+    await render(
       <Dropdown
         testID="dropdown"
         data={data}
@@ -40,7 +40,7 @@ describe('Dropdown', () => {
         onChange={() => {}}
       />
     );
-    fireEvent.press(screen.getByTestId('dropdown'));
+    await fireEvent.press(screen.getByTestId('dropdown'));
 
     // The list stays hidden until the modal has been laid out, which never
     // happens in tests, so include hidden elements.

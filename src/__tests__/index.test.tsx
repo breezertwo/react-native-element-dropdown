@@ -26,7 +26,7 @@ describe('package exports', () => {
 });
 
 describe('SelectCountry deprecation', () => {
-  it('warns once in development, no matter how many instances render', () => {
+  it('warns once in development, no matter how many instances render', async () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
     const renderSelectCountry = () =>
@@ -41,8 +41,8 @@ describe('SelectCountry deprecation', () => {
         />
       );
 
-    renderSelectCountry();
-    renderSelectCountry();
+    await renderSelectCountry();
+    await renderSelectCountry();
 
     expect(warn).toHaveBeenCalledTimes(1);
     expect(warn).toHaveBeenCalledWith(SELECT_COUNTRY_DEPRECATION_MESSAGE);

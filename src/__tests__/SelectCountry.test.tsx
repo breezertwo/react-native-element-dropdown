@@ -16,9 +16,9 @@ const countries = [
 ];
 
 const renderedImageSources = () =>
-  screen.root
-    .findAll((node) => node.props.source !== undefined)
-    .map((node) => node.props.source);
+  (screen.root?.queryAll((node) => node.type === 'Image') ?? []).map(
+    (node) => node.props.source
+  );
 
 beforeEach(() => {
   // SelectCountry is deprecated and warns once in development.
@@ -30,8 +30,8 @@ afterEach(() => {
 });
 
 describe('SelectCountry', () => {
-  it('shows the image of the selected item from imageField', () => {
-    render(
+  it('shows the image of the selected item from imageField', async () => {
+    await render(
       <SelectCountry
         data={countries}
         labelField="name"

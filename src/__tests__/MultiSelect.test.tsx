@@ -23,14 +23,14 @@ afterEach(() => {
 });
 
 describe('MultiSelect', () => {
-  it('does not mutate the items passed in data', () => {
+  it('does not mutate the items passed in data', async () => {
     const data = [
       { label: 'Apple', value: '1' },
       { label: 'Banana', value: '2' },
     ];
     const snapshot = JSON.parse(JSON.stringify(data));
 
-    render(
+    await render(
       <MultiSelect
         accessibilityLabel="Fruits"
         data={data}
@@ -41,7 +41,7 @@ describe('MultiSelect', () => {
       />
     );
     // The MultiSelect trigger doesn't receive testID, so find it by its label.
-    fireEvent.press(screen.getByLabelText('Fruits'));
+    await fireEvent.press(screen.getByLabelText('Fruits'));
 
     // The list stays hidden until the modal has been laid out, which never
     // happens in tests, so include hidden elements.
@@ -60,8 +60,8 @@ describe('MultiSelect', () => {
     // While the list is closed, item labels only appear as chips.
     it.each([undefined, null, []])(
       'shows no chips when value is %p',
-      (value) => {
-        render(
+      async (value) => {
+        await render(
           <MultiSelect
             data={data}
             labelField="label"
@@ -76,8 +76,8 @@ describe('MultiSelect', () => {
       }
     );
 
-    it('shows a chip only for selected items', () => {
-      render(
+    it('shows a chip only for selected items', async () => {
+      await render(
         <MultiSelect
           data={data}
           labelField="label"

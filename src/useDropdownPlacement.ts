@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { RefObject } from 'react';
+import type { ComponentRef, RefObject } from 'react';
 import {
   Dimensions,
   I18nManager,
@@ -24,6 +24,9 @@ const EDGE_MARGIN = 8;
 const TRACK_MIN_DURATION = 500;
 const TRACK_MAX_DURATION = 1500;
 const TRACK_STABLE_FRAMES = 3;
+
+/** Host instance of the trigger `View` (what `measureInWindow` is called on). */
+export type TriggerInstance = ComponentRef<typeof View>;
 
 export type DropdownPosition = 'auto' | 'top' | 'bottom';
 
@@ -59,7 +62,7 @@ interface KeyboardFrame {
 }
 
 interface UseDropdownPlacementParams {
-  triggerRef: RefObject<View | null>;
+  triggerRef: RefObject<TriggerInstance | null>;
   visible: boolean;
   isFull: boolean;
   dropdownPosition: DropdownPosition;

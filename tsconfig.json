@@ -1,29 +1,14 @@
 {
+  "extends": "@react-native/typescript-config",
   "compilerOptions": {
-    "baseUrl": "./",
-    "typeRoots": [],
-    "paths": {
-      "react-native-element-dropdown": ["./src/index"]
-    },
+    "types": [],
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
-    "esModuleInterop": true,
-    "importsNotUsedAsValues": "remove",
-    "forceConsistentCasingInFileNames": true,
-    "jsx": "react",
-    "lib": ["esnext"],
-    "module": "esnext",
-    "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
-    "noImplicitUseStrict": false,
-    "noStrictGenericChecks": false,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "target": "esnext"
-  }
+    "noUnusedParameters": true
+  },
+  "include": ["src"]
 }

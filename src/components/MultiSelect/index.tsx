@@ -24,7 +24,11 @@ import {
 } from 'react-native';
 import { useDetectDevice } from '../../toolkits';
 import { useDeviceOrientation } from '../../useDeviceOrientation';
-import { hiddenStyle, useDropdownPlacement } from '../../useDropdownPlacement';
+import {
+  hiddenStyle,
+  useDropdownPlacement,
+  type TriggerInstance,
+} from '../../useDropdownPlacement';
 import CInput from '../TextInput';
 import { IMultiSelectRef, MultiSelectProps } from './model';
 import { styles } from './styles';
@@ -96,7 +100,7 @@ const MultiSelectComponent = React.forwardRef<
     safeAreaInsets,
   } = props;
 
-  const ref = useRef<View>(null);
+  const ref = useRef<TriggerInstance>(null);
   const [visible, setVisible] = useState<boolean>(false);
   const [currentValue, setCurrentValue] = useState<any[]>([]);
   const [listData, setListData] = useState<any[]>(data);

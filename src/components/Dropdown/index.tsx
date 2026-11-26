@@ -28,7 +28,11 @@ import {
 } from 'react-native';
 import { useDetectDevice } from '../../toolkits';
 import { useDeviceOrientation } from '../../useDeviceOrientation';
-import { hiddenStyle, useDropdownPlacement } from '../../useDropdownPlacement';
+import {
+  hiddenStyle,
+  useDropdownPlacement,
+  type TriggerInstance,
+} from '../../useDropdownPlacement';
 import CInput from '../TextInput';
 import { DropdownProps, IDropdownRef } from './model';
 import { styles } from './styles';
@@ -93,7 +97,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       safeAreaInsets,
     } = props;
 
-    const ref = useRef<View>(null);
+    const ref = useRef<TriggerInstance>(null);
     const refList = useRef<FlatList>(null);
     const [visible, setVisible] = useState<boolean>(false);
     const [currentValue, setCurrentValue] = useState<any>(null);
