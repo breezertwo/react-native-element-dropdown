@@ -5,7 +5,9 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar style="dark" />
-      <Stack>
+      {/* An opaque header, so screens start below it (on iOS 26 content
+          otherwise scrolls under the glass header). */}
+      <Stack screenOptions={{ headerTransparent: false }}>
         <Stack.Screen name="index" options={{ title: 'Element Dropdown' }} />
         <Stack.Screen name="placement" options={{ title: 'Placement' }} />
         <Stack.Screen
