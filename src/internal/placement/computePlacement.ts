@@ -59,6 +59,11 @@ export interface PlacementInput {
   safeAreaInsets?: DropdownSafeAreaInsets;
   /** Top inset when `safeAreaInsets.top` isn't given (Android: status bar). */
   defaultTopInset: number;
+  /**
+   * Bottom inset when `safeAreaInsets.bottom` isn't given (Android with
+   * React Native's edge-to-edge flag: the navigation bar).
+   */
+  defaultBottomInset?: number;
   /** Vertical margins of the list container (`containerStyle`). */
   verticalMargins: number;
 }
@@ -85,6 +90,7 @@ export const computePlacement = ({
   minHeight,
   safeAreaInsets,
   defaultTopInset,
+  defaultBottomInset = 0,
   verticalMargins,
 }: PlacementInput): DropdownPlacement | null => {
   if (!trigger || !(trigger.width > 0)) {
@@ -101,7 +107,7 @@ export const computePlacement = ({
   const left = isRTL ? screenWidth - trigger.width - trigger.x : trigger.x;
 
   const topInset = safeAreaInsets?.top ?? defaultTopInset;
-  const bottomInset = safeAreaInsets?.bottom ?? 0;
+  const bottomInset = safeAreaInsets?.bottom ?? defaultBottomInset;
   const keyboardTop = keyboard
     ? Math.min(
         screenHeight,

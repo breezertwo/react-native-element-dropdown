@@ -32,7 +32,7 @@ import {
   type Rect,
   type Size,
 } from './computePlacement';
-import { getWindowOffsetY } from './edgeToEdge';
+import { getDefaultBottomInset, getWindowOffsetY } from './edgeToEdge';
 import {
   getCurrentKeyboardFrame,
   readKeyboardFrame,
@@ -254,6 +254,7 @@ export const useDropdownPlacement = ({
         safeAreaInsets: { top: insetTop, bottom: insetBottom },
         defaultTopInset:
           Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0,
+        defaultBottomInset: getDefaultBottomInset(),
         verticalMargins,
       }),
     [

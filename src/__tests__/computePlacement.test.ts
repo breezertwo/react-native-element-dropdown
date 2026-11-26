@@ -4,7 +4,10 @@ import {
   getVerticalMargins,
   type PlacementInput,
 } from '../internal/placement/computePlacement';
-import { windowOffsetY } from '../internal/placement/edgeToEdge';
+import {
+  defaultBottomInset,
+  windowOffsetY,
+} from '../internal/placement/edgeToEdge';
 import { toKeyboardFrame } from '../internal/placement/keyboard';
 
 // 400 x 800 screen, trigger 200 x 40 at x = 16, list content 200 high,
@@ -257,6 +260,24 @@ describe('computePlacement', () => {
     });
   });
 
+  it('uses defaultBottomInset (Android navigation bar) when no bottom inset is given', () => {
+    const tall = { trigger: at(300), maxHeight: 1000, contentHeight: 1000 };
+    // Below: 800 - 48 - 8 - 342 = 402; above: 298 - 8 = 290.
+    expect(
+      computePlacement(input({ ...tall, defaultBottomInset: 48 }))
+    ).toMatchObject({ isTopPosition: false, maxHeight: 402 });
+    // safeAreaInsets.bottom wins: 800 - 20 - 8 - 342 = 430.
+    expect(
+      computePlacement(
+        input({
+          ...tall,
+          defaultBottomInset: 48,
+          safeAreaInsets: { bottom: 20 },
+        })
+      )
+    ).toMatchObject({ isTopPosition: false, maxHeight: 430 });
+  });
+
   it('mirrors the horizontal position in right-to-left layouts', () => {
     expect(computePlacement(input({ isRTL: true }))?.left).toBe(184); // 400 - 200 - 16
   });
@@ -273,6 +294,26 @@ describe('windowOffsetY', () => {
     ],
   ] as const)('is %p → %p', (_, context, expected) => {
     expect(windowOffsetY({ ...context, statusBarHeight: 24 })).toBe(expected);
+  });
+});
+
+describe('defaultBottomInset', () => {
+  it.each([
+    ['iOS', { platform: 'ios', isEdgeToEdgeFlagOn: false }, 0],
+    // The Modal reaches under the navigation bar.
+    [
+      'Android, edge-to-edge flag',
+      { platform: 'android', isEdgeToEdgeFlagOn: true },
+      48,
+    ],
+    // The Modal ends above the navigation bar.
+    [
+      'Android, no edge-to-edge flag',
+      { platform: 'android', isEdgeToEdgeFlagOn: false },
+      0,
+    ],
+  ] as const)('is %p → %p', (_, context, expected) => {
+    expect(defaultBottomInset(context)).toBe(expected);
   });
 });
 

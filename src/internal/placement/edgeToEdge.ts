@@ -21,31 +21,72 @@ export const windowOffsetY = ({
 }: WindowOffsetInput): number =>
   platform === 'android' && !isEdgeToEdge ? statusBarHeight : 0;
 
-let edgeToEdge: boolean | undefined;
+type EdgeToEdgeState = { flag: boolean; library: boolean };
+let edgeToEdge: EdgeToEdgeState | undefined;
 
 /**
- * Whether the Android app draws edge-to-edge: through React Native's own
- * flag (`edgeToEdgeEnabled`) or the react-native-edge-to-edge library.
- * Read once; it can't change while the app runs.
+ * React Native's own edge-to-edge flag (`edgeToEdgeEnabled`, on in Expo
+ * SDK 54+ builds) and the react-native-edge-to-edge library. Read once;
+ * neither can change while the app runs.
  */
-export const isAndroidEdgeToEdge = (): boolean => {
+const readEdgeToEdge = (): EdgeToEdgeState => {
   if (Platform.OS !== 'android') {
-    return false;
+    return { flag: false, library: false };
   }
   if (edgeToEdge === undefined) {
     try {
       const deviceInfo = TurboModuleRegistry.get('DeviceInfo') as unknown as {
         getConstants?: () => { isEdgeToEdge?: boolean };
       } | null;
-      edgeToEdge =
-        TurboModuleRegistry.get('RNEdgeToEdge') != null ||
-        deviceInfo?.getConstants?.().isEdgeToEdge === true;
+      edgeToEdge = {
+        flag: deviceInfo?.getConstants?.().isEdgeToEdge === true,
+        library: TurboModuleRegistry.get('RNEdgeToEdge') != null,
+      };
     } catch {
-      edgeToEdge = false;
+      edgeToEdge = { flag: false, library: false };
     }
   }
   return edgeToEdge;
 };
+
+/** Whether the Android app draws edge-to-edge, through the flag or the library. */
+export const isAndroidEdgeToEdge = (): boolean => {
+  const { flag, library } = readEdgeToEdge();
+  return flag || library;
+};
+
+/**
+ * Height of the Android navigation bar on phones with 3-button navigation,
+ * the tallest kind; gesture navigation is lower.
+ */
+export const ANDROID_NAVIGATION_BAR_HEIGHT = 48;
+
+/**
+ * The bottom inset when `safeAreaInsets.bottom` isn't given.
+ *
+ * With React Native's edge-to-edge flag, every Modal reaches under the
+ * navigation bar (React Native forces `navigationBarTranslucent`), so the
+ * list must stay above it. React Native doesn't report the bar's height in
+ * that mode (the window is as tall as the screen), so this reserves the
+ * tallest bar. Without the flag, the Modal ends above the navigation bar.
+ */
+export const defaultBottomInset = ({
+  platform,
+  isEdgeToEdgeFlagOn,
+}: {
+  platform: typeof Platform.OS;
+  isEdgeToEdgeFlagOn: boolean;
+}): number =>
+  platform === 'android' && isEdgeToEdgeFlagOn
+    ? ANDROID_NAVIGATION_BAR_HEIGHT
+    : 0;
+
+/** `defaultBottomInset` for the running app. */
+export const getDefaultBottomInset = (): number =>
+  defaultBottomInset({
+    platform: Platform.OS,
+    isEdgeToEdgeFlagOn: readEdgeToEdge().flag,
+  });
 
 /** `windowOffsetY` for the running app. */
 export const getWindowOffsetY = (): number =>
