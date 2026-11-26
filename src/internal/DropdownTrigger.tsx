@@ -1,4 +1,4 @@
-import type { TextScaling } from './a11y';
+import { FIELD_ROLE, type TextScaling } from './a11y';
 import type { TriggerInstance } from './placement/useDropdownPlacement';
 import type { ReactElement, Ref } from 'react';
 import {
@@ -92,7 +92,7 @@ export function DropdownTrigger({
     <TouchableWithoutFeedback
       hitSlop={hitSlop}
       accessibilityLabel={accessibilityLabel}
-      accessibilityRole="combobox"
+      accessibilityRole={FIELD_ROLE}
       accessibilityValue={
         accessibilityValue ? { text: accessibilityValue } : undefined
       }

@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 /**
  * Texts the dropdowns give to screen readers. Pass `accessibilityStrings` to
  * translate or reword any of them.
@@ -41,3 +43,24 @@ export interface TextScaling {
   allowFontScaling?: boolean;
   maxFontSizeMultiplier?: number;
 }
+
+type FieldRole = 'button' | 'dropdownlist' | 'combobox';
+
+/**
+ * The field's role, per platform, so screen readers announce it like a native
+ * dropdown and as something to activate:
+ * - iOS: `button`. VoiceOver has no combo box trait, and React Native gives
+ *   `combobox` no trait or announcement there, so the field wouldn't sound
+ *   activatable. (Like a native pop-up button: name, value, "button".)
+ * - Android: `dropdownlist`, which React Native maps to the native Spinner
+ *   class; TalkBack announces it as a drop-down list.
+ * - Elsewhere (web): `combobox`.
+ */
+export const fieldRoleFor = (platform: typeof Platform.OS): FieldRole =>
+  platform === 'ios'
+    ? 'button'
+    : platform === 'android'
+      ? 'dropdownlist'
+      : 'combobox';
+
+export const FIELD_ROLE = fieldRoleFor(Platform.OS);

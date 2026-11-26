@@ -13,6 +13,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import React, { createRef } from 'react';
 import { AccessibilityInfo, Text, TextInput } from 'react-native';
 import { Dropdown, type IDropdownRef } from '../index';
+import { FIELD_ROLE } from '../internal/a11y';
 import { layoutOpenList, mockTriggerLayout } from '../__fixtures__/testUtils';
 
 type Fruit = { label: string; value: string };
@@ -427,17 +428,17 @@ describe('Dropdown', () => {
 
   describe('accessibility', () => {
     describe('field', () => {
-      it('is a combo box named by accessibilityLabel that reports whether it is expanded', async () => {
+      it('is named by accessibilityLabel that reports whether it is expanded', async () => {
         await renderDropdown({ accessibilityLabel: 'Fruit' });
 
         expect(
-          screen.getByRole('combobox', { name: 'Fruit', expanded: false })
+          screen.getByRole(FIELD_ROLE, { name: 'Fruit', expanded: false })
         ).toBeTruthy();
 
         await open();
 
         expect(
-          screen.getByRole('combobox', { name: 'Fruit', expanded: true })
+          screen.getByRole(FIELD_ROLE, { name: 'Fruit', expanded: true })
         ).toBeTruthy();
       });
 
@@ -445,7 +446,7 @@ describe('Dropdown', () => {
         await renderDropdown({ placeholder: 'Pick a fruit' });
 
         expect(
-          screen.getByRole('combobox', { name: 'Pick a fruit' })
+          screen.getByRole(FIELD_ROLE, { name: 'Pick a fruit' })
         ).toBeTruthy();
       });
 
@@ -453,7 +454,7 @@ describe('Dropdown', () => {
         await renderDropdown({ accessibilityLabel: 'Fruit', value: 'banana' });
 
         expect(
-          screen.getByRole('combobox', {
+          screen.getByRole(FIELD_ROLE, {
             name: 'Fruit',
             value: { text: 'Banana' },
           })
@@ -464,7 +465,7 @@ describe('Dropdown', () => {
         await renderDropdown({ accessibilityLabel: 'Fruit', disable: true });
 
         expect(
-          screen.getByRole('combobox', { name: 'Fruit', disabled: true })
+          screen.getByRole(FIELD_ROLE, { name: 'Fruit', disabled: true })
         ).toBeTruthy();
       });
     });
@@ -636,7 +637,7 @@ describe('Dropdown', () => {
       await renderDropdown({ accessibilityLabel: 'Fruit', hitSlop });
 
       expect(
-        screen.getByRole('combobox', { name: 'Fruit' }).props.hitSlop
+        screen.getByRole(FIELD_ROLE, { name: 'Fruit' }).props.hitSlop
       ).toEqual(hitSlop);
     });
   });

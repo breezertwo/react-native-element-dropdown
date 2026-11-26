@@ -1,4 +1,4 @@
-import type { TextScaling } from '../../internal/a11y';
+import { FIELD_ROLE, type TextScaling } from '../../internal/a11y';
 import type { TriggerInstance } from '../../internal/placement/useDropdownPlacement';
 import type { ReactElement, ReactNode, Ref } from 'react';
 import {
@@ -69,7 +69,7 @@ export function InsideTrigger({
       hitSlop={hitSlop}
       testID={testID}
       accessibilityLabel={accessibilityLabel}
-      accessibilityRole="combobox"
+      accessibilityRole={FIELD_ROLE}
       accessibilityValue={
         accessibilityValue ? { text: accessibilityValue } : undefined
       }

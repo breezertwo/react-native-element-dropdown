@@ -13,6 +13,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import React, { createRef } from 'react';
 import { AccessibilityInfo, Text } from 'react-native';
 import { MultiSelect, type IMultiSelectRef } from '../index';
+import { FIELD_ROLE } from '../internal/a11y';
 import { layoutOpenList, mockTriggerLayout } from '../__fixtures__/testUtils';
 
 type Fruit = { label: string; value: string };
@@ -415,17 +416,17 @@ describe('MultiSelect', () => {
 
   describe('accessibility', () => {
     describe('field', () => {
-      it('is a combo box named by accessibilityLabel that reports whether it is expanded', async () => {
+      it('is named by accessibilityLabel that reports whether it is expanded', async () => {
         await renderMultiSelect({ accessibilityLabel: 'Fruits' });
 
         expect(
-          screen.getByRole('combobox', { name: 'Fruits', expanded: false })
+          screen.getByRole(FIELD_ROLE, { name: 'Fruits', expanded: false })
         ).toBeTruthy();
 
         await open();
 
         expect(
-          screen.getByRole('combobox', { name: 'Fruits', expanded: true })
+          screen.getByRole(FIELD_ROLE, { name: 'Fruits', expanded: true })
         ).toBeTruthy();
       });
 
@@ -436,7 +437,7 @@ describe('MultiSelect', () => {
         });
 
         expect(
-          screen.getByRole('combobox', {
+          screen.getByRole(FIELD_ROLE, {
             name: 'Pick fruits',
             value: { text: '2 selected' },
           })
@@ -451,7 +452,7 @@ describe('MultiSelect', () => {
         });
 
         expect(
-          screen.getByRole('combobox', {
+          screen.getByRole(FIELD_ROLE, {
             name: 'Obst',
             value: { text: '1 ausgewählt' },
           })
@@ -467,7 +468,7 @@ describe('MultiSelect', () => {
         });
 
         expect(
-          screen.getByRole('combobox', {
+          screen.getByRole(FIELD_ROLE, {
             name: 'Fruits',
             value: { text: '1 selected' },
             expanded: false,
@@ -508,7 +509,7 @@ describe('MultiSelect', () => {
           value: ['apple', 'banana'],
           onChange,
         });
-        const field = screen.getByRole('combobox', { name: 'Fruits' });
+        const field = screen.getByRole(FIELD_ROLE, { name: 'Fruits' });
 
         expect(field.props.accessibilityActions).toEqual([
           { name: 'remove-0', label: 'Remove Apple' },
@@ -620,7 +621,7 @@ describe('MultiSelect', () => {
       await renderMultiSelect({ accessibilityLabel: 'Fruits', hitSlop });
 
       expect(
-        screen.getByRole('combobox', { name: 'Fruits' }).props.hitSlop
+        screen.getByRole(FIELD_ROLE, { name: 'Fruits' }).props.hitSlop
       ).toEqual(hitSlop);
     });
 
@@ -632,7 +633,7 @@ describe('MultiSelect', () => {
       });
 
       expect(
-        screen.getByRole('combobox', { name: 'Fruits' }).props.hitSlop
+        screen.getByRole(FIELD_ROLE, { name: 'Fruits' }).props.hitSlop
       ).toBe(8);
     });
   });
