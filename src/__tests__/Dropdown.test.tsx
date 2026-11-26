@@ -562,6 +562,17 @@ describe('Dropdown', () => {
     });
   });
 
+  it('uses a gray with WCAG AA contrast for the icon and search placeholder by default', async () => {
+    await renderDropdown({ search: true });
+    await open();
+
+    const icon = screen.root?.queryAll((node) => node.type === 'Image')[0];
+    expect(icon?.props.style).toMatchObject({ tintColor: '#767676' });
+    expect(screen.getByRole('search').props.placeholderTextColor).toBe(
+      '#767676'
+    );
+  });
+
   describe('hitSlop', () => {
     it('extends the touch area of the field', async () => {
       const hitSlop = { top: 4, bottom: 4, left: 0, right: 0 };

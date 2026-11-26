@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-shadow */
+import { DEFAULT_GRAY } from '../../internal/colors';
 import _get from 'lodash/get';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { ComponentRef } from 'react';
@@ -53,10 +54,10 @@ const MultiSelectComponent = React.forwardRef<
     allowFontScaling,
     maxFontSizeMultiplier,
     placeholderStyle,
-    iconColor = 'gray',
+    iconColor = DEFAULT_GRAY,
     inputSearchStyle,
     searchPlaceholder,
-    searchPlaceholderTextColor = 'gray',
+    searchPlaceholderTextColor = DEFAULT_GRAY,
     placeholder = 'Select item',
     search = false,
     maxHeight = 340,

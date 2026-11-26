@@ -1,3 +1,4 @@
+import { DEFAULT_GRAY } from '../../internal/colors';
 import type { TextScaling } from '../../internal/a11y';
 import _get from 'lodash/get';
 import type { ReactElement } from 'react';
@@ -117,7 +118,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 0.5,
-    borderColor: 'gray',
+    borderColor: DEFAULT_GRAY,
     paddingHorizontal: 8,
     marginVertical: 6,
     marginRight: 8,
@@ -125,13 +126,13 @@ const styles = StyleSheet.create({
   },
   removeIcon: {
     marginLeft: 5,
-    color: 'gray',
+    color: DEFAULT_GRAY,
     fontSize: 16,
     writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
   },
   chipText: {
     fontSize: 12,
-    color: 'gray',
+    color: DEFAULT_GRAY,
     writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
   },
 });

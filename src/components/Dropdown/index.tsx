@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-shadow */
+import { DEFAULT_GRAY } from '../../internal/colors';
 import _get from 'lodash/get';
 import _isEqual from 'lodash/isEqual';
 
@@ -57,9 +58,9 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       fontFamily,
       allowFontScaling,
       maxFontSizeMultiplier,
-      iconColor = 'gray',
+      iconColor = DEFAULT_GRAY,
       searchPlaceholder,
-      searchPlaceholderTextColor = 'gray',
+      searchPlaceholderTextColor = DEFAULT_GRAY,
       placeholder = 'Select item',
       search = false,
       maxHeight = 340,
