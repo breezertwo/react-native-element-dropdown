@@ -52,7 +52,9 @@ export function Field({
 
 export const dropdownStyles = StyleSheet.create({
   dropdown: {
-    height: 50,
+    // A minimum, not a fixed height: the field grows with large text and
+    // with chips inside it (MultiSelect inside).
+    minHeight: 50,
     paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: '#767676',
