@@ -31,11 +31,11 @@ const TextInputComponent: CTextInput = (props) => {
   const isControlled = value !== undefined;
   const text = isControlled ? value : ownText;
 
-  const onChange = (text: string) => {
+  const onChange = (nextText: string) => {
     if (!isControlled) {
-      setOwnText(text);
+      setOwnText(nextText);
     }
-    onChangeText(text);
+    onChangeText(nextText);
   };
 
   const _renderRightIcon = () => {

@@ -390,17 +390,17 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
 
   const removableItems = selectedItems.filter((item) => !isDisabledItem(item));
 
-  const _renderItemSelected = (inside: boolean) => {
+  const _renderItemSelected = (isInside: boolean) => {
     return (
       <SelectedChips
         testID={testID}
         overflow={chipsOverflow}
         renderChipsOverflow={renderChipsOverflow}
-        onPressMore={inside ? undefined : showOrClose}
+        onPressMore={isInside ? undefined : showOrClose}
         textScaling={textScaling}
         items={selectedItems}
         isDisabled={isDisabledItem}
-        inside={inside}
+        inside={isInside}
         onUnselect={unSelect}
         labelField={labelField}
         valueField={valueField}
