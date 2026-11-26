@@ -1,7 +1,12 @@
 # Device checklist
 
 Run before every beta and release, on a current iOS device or simulator and a
-current Android device or emulator (Android: edge-to-edge is always on).
+current Android device or emulator.
+
+On Android, use a development build (`pnpm example exec expo run:android`),
+not Expo Go: Expo Go runs without React Native's edge-to-edge flag, which
+Expo SDK 54+ builds turn on and which puts the list's Modal under the
+navigation bar.
 
 For every screen, check two things:
 
@@ -34,7 +39,9 @@ These apply to every dropdown on every screen:
 ### Placement
 
 - Visual: auto fields open downward near the top and upward near the bottom;
-  forced positions never change; nothing covers the status bar or navigation bar.
+  forced positions never change side, and their lists grow up to the status
+  bar or down to the navigation bar but never under them (Android: check
+  with 3-button navigation, the tallest bar).
 - Screen reader: general expectations for all five fields.
 
 ### Search and keyboard
