@@ -18,7 +18,7 @@ interface UseAutoScrollParams<T> {
   enabled: boolean;
   visible: boolean;
   /** The items the list shows. */
-  listData: T[];
+  listData: readonly T[];
   isSelected: (item: T) => boolean;
   /** The list's `initialNumToRender`, if the consumer sets it. */
   initialNumToRender?: number;

@@ -4,7 +4,7 @@
  * Always returns a new array.
  */
 export const toggleValue = <V>(
-  values: V[],
+  values: readonly V[],
   value: V,
   maxSelect?: number
 ): { values: V[]; removed: boolean } => {

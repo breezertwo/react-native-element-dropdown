@@ -12,7 +12,7 @@ import {
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import React, { createRef } from 'react';
 import { AccessibilityInfo, Text, TextInput } from 'react-native';
-import { Dropdown, type IDropdownRef } from '../index';
+import { Dropdown, type DropdownProps, type IDropdownRef } from '../index';
 import { FIELD_ROLE } from '../internal/a11y';
 import { layoutOpenList, mockTriggerLayout } from '../__fixtures__/testUtils';
 
@@ -25,9 +25,7 @@ const fruits: Fruit[] = [
   { label: 'Dragon fruit', value: 'dragon' },
 ];
 
-const renderDropdown = (
-  props: Partial<React.ComponentProps<typeof Dropdown>> = {}
-) =>
+const renderDropdown = (props: Partial<DropdownProps<Fruit, 'value'>> = {}) =>
   render(
     <Dropdown
       testID="dropdown"

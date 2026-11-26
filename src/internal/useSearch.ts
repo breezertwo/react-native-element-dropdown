@@ -3,7 +3,7 @@ import _get from 'lodash/get';
 import { useCallback, useMemo, useState } from 'react';
 
 /** Stable default for the exclude props, so the list isn't recomputed on every render. */
-export const NO_ITEMS: any[] = [];
+export const NO_ITEMS: readonly never[] = [];
 
 /** Lowercase, without whitespace and accents, so "Crème Brûlée" matches "cremebru". */
 export const normalizeSearchText = (text: string) =>
@@ -14,15 +14,15 @@ export const normalizeSearchText = (text: string) =>
     .replace(/[\u0300-\u036f]/g, '');
 
 interface UseSearchParams<T> {
-  data: T[];
+  data: readonly T[];
   labelField: keyof T;
   valueField: keyof T;
   searchField?: keyof T;
   searchQuery?: (keyword: string, labelValue: string) => boolean;
   /** Never shown. */
-  excludeItems: T[];
+  excludeItems: readonly T[];
   /** Not shown while searching. */
-  excludeSearchItems: T[];
+  excludeSearchItems: readonly T[];
   onChangeText?: (search: string) => void;
 }
 

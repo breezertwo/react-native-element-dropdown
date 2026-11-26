@@ -1,13 +1,10 @@
 import Dropdown from './components/Dropdown';
 import MultiSelect from './components/MultiSelect';
-import type { IDropdownRef } from './components/Dropdown/model';
-import type { IMultiSelectRef } from './components/MultiSelect/model';
-import type { DropdownAccessibilityStrings } from './internal/a11y';
 
-export {
-  Dropdown,
-  MultiSelect,
-  IDropdownRef,
+export { Dropdown, MultiSelect };
+export type { DropdownProps, IDropdownRef } from './components/Dropdown/model';
+export type {
   IMultiSelectRef,
-  DropdownAccessibilityStrings,
-};
+  MultiSelectProps,
+} from './components/MultiSelect/model';
+export type { DropdownAccessibilityStrings } from './internal/a11y';

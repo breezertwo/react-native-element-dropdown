@@ -12,7 +12,11 @@ import {
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import React, { createRef } from 'react';
 import { AccessibilityInfo, Text } from 'react-native';
-import { MultiSelect, type IMultiSelectRef } from '../index';
+import {
+  MultiSelect,
+  type IMultiSelectRef,
+  type MultiSelectProps,
+} from '../index';
 import { FIELD_ROLE } from '../internal/a11y';
 import { layoutOpenList, mockTriggerLayout } from '../__fixtures__/testUtils';
 
@@ -25,7 +29,7 @@ const fruits: Fruit[] = [
 ];
 
 const renderMultiSelect = (
-  props: Partial<React.ComponentProps<typeof MultiSelect>> = {}
+  props: Partial<MultiSelectProps<Fruit, 'value'>> = {}
 ) =>
   render(
     <MultiSelect

@@ -6,10 +6,10 @@ import type {
   ImageStyle,
   Insets,
   StyleProp,
+  TextProps,
   TextStyle,
   ViewStyle,
 } from 'react-native';
-import { TextProps } from 'react-native';
 
 export interface IMultiSelectRef {
   open: () => void;
@@ -17,14 +17,16 @@ export interface IMultiSelectRef {
   toggle: () => void;
 }
 
-export interface MultiSelectProps<T> {
-  ref?:
-    | React.RefObject<IMultiSelectRef>
-    | React.MutableRefObject<IMultiSelectRef>
-    | null
-    | undefined;
+/**
+ * Props of `MultiSelect`. `T` is the item type, inferred from `data`; `V` is
+ * the key of the value field, inferred from `valueField`. The value is an
+ * array of `T[V]`.
+ */
+export interface MultiSelectProps<T, V extends keyof T = keyof T> {
+  ref?: React.Ref<IMultiSelectRef>;
   testID?: string;
-  itemTestIDField?: string;
+  /** Item field with the row's and chip's testID (default: the label). */
+  itemTestIDField?: keyof T;
   style?: StyleProp<ViewStyle>;
   /**
    * Extends the field's touch area beyond its bounds, e.g. to reach the
@@ -60,11 +62,12 @@ export interface MultiSelectProps<T> {
    */
   renderSelectedIcon?: () => React.ReactElement | null;
   activeColor?: string;
-  data: T[];
-  value?: string[] | null | undefined;
+  data: readonly T[];
+  /** The values (the `valueField` of the items) of the selected items. */
+  value?: readonly T[V][] | null;
   placeholder?: string;
   labelField: keyof T;
-  valueField: keyof T;
+  valueField: V;
   searchField?: keyof T;
   search?: boolean;
   disable?: boolean;
@@ -72,7 +75,7 @@ export interface MultiSelectProps<T> {
   searchPlaceholder?: string;
   searchPlaceholderTextColor?: string;
   dropdownPosition?: 'auto' | 'top' | 'bottom';
-  flatListProps?: Omit<FlatListProps<any>, 'renderItem' | 'data'>;
+  flatListProps?: Omit<FlatListProps<T>, 'renderItem' | 'data'>;
   alwaysRenderSelectedItem?: boolean;
   visibleSelectedItem?: boolean;
   keyboardAvoiding?: boolean;
@@ -88,12 +91,13 @@ export interface MultiSelectProps<T> {
    * defaults.
    */
   accessibilityStrings?: Partial<DropdownAccessibilityStrings>;
-  itemAccessibilityLabelField?: string;
+  /** Item field with the screen reader label of rows and chips (default: the label). */
+  itemAccessibilityLabelField?: keyof T;
   inverted?: boolean;
   mode?: 'default' | 'modal' | 'auto';
-  excludeItems?: T[];
-  excludeSearchItems?: T[];
-  onChange: (value: string[]) => void;
+  excludeItems?: readonly T[];
+  excludeSearchItems?: readonly T[];
+  onChange: (values: T[V][]) => void;
   renderLeftIcon?: (visible?: boolean) => React.ReactElement | null;
   renderRightIcon?: (visible?: boolean) => React.ReactElement | null;
   renderItem?: (item: T, selected?: boolean) => React.ReactElement | null;
@@ -108,5 +112,10 @@ export interface MultiSelectProps<T> {
   onBlur?: () => void;
   searchQuery?: (keyword: string, labelValue: string) => boolean;
   onChangeText?: (search: string) => void;
-  onConfirmSelectItem?: (item: any) => void;
+  /**
+   * With `confirmSelectItem` / `confirmUnSelectItem`: called instead of
+   * `onChange`, with the values the selection would change to. Update your
+   * state once the user confirmed.
+   */
+  onConfirmSelectItem?: (values: T[V][]) => void;
 }

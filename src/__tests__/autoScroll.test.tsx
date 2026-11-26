@@ -15,18 +15,18 @@ import {
 } from '@testing-library/react-native';
 import React from 'react';
 import { FlatList } from 'react-native';
-import { Dropdown } from '../index';
+import { Dropdown, type DropdownProps } from '../index';
 import { useAutoScroll } from '../internal/useAutoScroll';
 import { layoutOpenList, mockTriggerLayout } from '../__fixtures__/testUtils';
 
-const items = Array.from({ length: 100 }, (_, index) => ({
+type Item = { label: string; value: string };
+
+const items: Item[] = Array.from({ length: 100 }, (_, index) => ({
   label: `Item ${index}`,
   value: `item-${index}`,
 }));
 
-const renderDropdown = (
-  props: Partial<React.ComponentProps<typeof Dropdown>> = {}
-) =>
+const renderDropdown = (props: Partial<DropdownProps<Item, 'value'>> = {}) =>
   render(
     <Dropdown
       testID="dropdown"

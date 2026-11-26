@@ -17,14 +17,15 @@ export type IDropdownRef = {
   toggle: () => void;
 };
 
-export interface DropdownProps<T> {
-  ref?:
-    | React.RefObject<IDropdownRef>
-    | React.MutableRefObject<IDropdownRef>
-    | null
-    | undefined;
+/**
+ * Props of `Dropdown`. `T` is the item type, inferred from `data`; `V` is the
+ * key of the value field, inferred from `valueField`.
+ */
+export interface DropdownProps<T, V extends keyof T = keyof T> {
+  ref?: React.Ref<IDropdownRef>;
   testID?: string;
-  itemTestIDField?: string;
+  /** Item field with the row's testID (default: the label). */
+  itemTestIDField?: keyof T;
   style?: StyleProp<ViewStyle>;
   /**
    * Extends the field's touch area beyond its bounds, e.g. to reach the
@@ -58,11 +59,12 @@ export interface DropdownProps<T> {
    */
   renderSelectedIcon?: () => React.ReactElement | null;
   activeColor?: string;
-  data: T[];
-  value?: T | string | null | undefined;
+  data: readonly T[];
+  /** The selected item, or its value (the `valueField` of an item). */
+  value?: T | T[V] | null;
   placeholder?: string;
   labelField: keyof T;
-  valueField: keyof T;
+  valueField: V;
   searchField?: keyof T;
   search?: boolean;
   searchPlaceholder?: string;
@@ -71,7 +73,7 @@ export interface DropdownProps<T> {
   autoScroll?: boolean;
   showsVerticalScrollIndicator?: boolean;
   dropdownPosition?: 'auto' | 'top' | 'bottom';
-  flatListProps?: Omit<FlatListProps<any>, 'renderItem' | 'data'>;
+  flatListProps?: Omit<FlatListProps<T>, 'renderItem' | 'data'>;
   keyboardAvoiding?: boolean;
   safeAreaInsets?: DropdownSafeAreaInsets;
   backgroundColor?: string;
@@ -83,12 +85,13 @@ export interface DropdownProps<T> {
    * defaults.
    */
   accessibilityStrings?: Partial<DropdownAccessibilityStrings>;
-  itemAccessibilityLabelField?: string;
+  /** Item field with the row's screen reader label (default: the label). */
+  itemAccessibilityLabelField?: keyof T;
   inverted?: boolean;
   mode?: 'default' | 'modal' | 'auto';
   closeModalWhenSelectedItem?: boolean;
-  excludeItems?: T[];
-  excludeSearchItems?: T[];
+  excludeItems?: readonly T[];
+  excludeSearchItems?: readonly T[];
   onChange: (item: T) => void;
   renderLeftIcon?: (visible?: boolean) => React.ReactElement | null;
   renderRightIcon?: (visible?: boolean) => React.ReactElement | null;

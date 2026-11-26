@@ -15,7 +15,7 @@ export interface DropdownHandle {
 }
 
 interface UseDropdownStateParams {
-  ref: Ref<DropdownHandle>;
+  ref?: Ref<DropdownHandle>;
   visible: boolean;
   setVisible: (visible: boolean) => void;
   disable: boolean;

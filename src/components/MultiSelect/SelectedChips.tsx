@@ -25,8 +25,8 @@ interface SelectedChipsProps<T> {
   onUnselect: (item: T) => void;
   labelField: keyof T;
   valueField: keyof T;
-  itemTestIDField?: string;
-  itemAccessibilityLabelField?: string;
+  itemTestIDField?: keyof T;
+  itemAccessibilityLabelField?: keyof T;
   strings: DropdownAccessibilityStrings;
   selectedStyle?: StyleProp<ViewStyle>;
   selectedTextStyle?: StyleProp<TextStyle>;
@@ -56,21 +56,16 @@ export function SelectedChips<T>({
   return (
     <View style={StyleSheet.flatten([styles.chips, inside && styles.inside])}>
       {items.map((item) => {
-        const label = _get(item, labelField as string);
+        const label = _get(item, labelField);
         return (
           <TouchableWithoutFeedback
-            testID={_get(item, itemTestIDField || (labelField as string))}
+            testID={_get(item, itemTestIDField || labelField)}
             accessibilityRole="button"
             accessibilityLabel={strings.removeItem(
-              String(
-                _get(
-                  item,
-                  itemAccessibilityLabelField || (labelField as string)
-                )
-              )
+              String(_get(item, itemAccessibilityLabelField || labelField))
             )}
             hitSlop={CHIP_HIT_SLOP}
-            key={String(_get(item, valueField as string))}
+            key={String(_get(item, valueField))}
             onPress={() => onUnselect(item)}
           >
             {renderSelectedItem ? (

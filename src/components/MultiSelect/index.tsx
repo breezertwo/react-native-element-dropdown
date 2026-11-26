@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import { DEFAULT_GRAY } from '../../internal/colors';
 import _get from 'lodash/get';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type { ComponentRef } from 'react';
 import { AccessibilityInfo, StyleSheet, View } from 'react-native';
 import type { TextInput } from 'react-native';
@@ -21,21 +21,25 @@ import { DropdownTrigger } from '../../internal/DropdownTrigger';
 import { useFullScreenMode } from '../../internal/useFullScreenMode';
 import { createKeyExtractor } from '../../internal/keyExtractor';
 import { NO_ITEMS, useSearch } from '../../internal/useSearch';
-import { IMultiSelectRef, MultiSelectProps } from './model';
+import type { MultiSelectProps } from './model';
 import { InsideTrigger } from './InsideTrigger';
 import { SelectedChips } from './SelectedChips';
 import { toggleValue } from './toggleValue';
 import { styles } from './styles';
 
-const MultiSelectComponent = React.forwardRef<
-  IMultiSelectRef,
-  MultiSelectProps<any>
->((props, currentRef) => {
+/**
+ * A dropdown to pick several items. `T` (the item type) is inferred from
+ * `data`, `V` from `valueField`; the value is an array of `T[V]`.
+ */
+function MultiSelectComponent<T, V extends keyof T = keyof T>(
+  props: MultiSelectProps<T, V>
+) {
   const {
+    ref: currentRef,
     testID,
     itemTestIDField,
     onChange,
-    data = [],
+    data = NO_ITEMS,
     value,
     style = {},
     hitSlop,
@@ -98,9 +102,7 @@ const MultiSelectComponent = React.forwardRef<
 
   const ref = useRef<TriggerInstance>(null);
   const [visible, setVisible] = useState<boolean>(false);
-  const nativeId = useRef(
-    `multiselectdropdown-${Math.random().toString(16).slice(2)}`
-  ).current;
+  const nativeId = `multiselectdropdown-${useId()}`;
 
   const { isFull, isLandscape } = useFullScreenMode(mode);
 
@@ -149,7 +151,7 @@ const MultiSelectComponent = React.forwardRef<
     onDismiss: clearSearch,
   });
 
-  const currentValue: any[] = value ?? NO_ITEMS;
+  const currentValue: readonly T[V][] = value ?? NO_ITEMS;
   const strings = useMemo(
     () => resolveAccessibilityStrings(accessibilityStrings),
     [accessibilityStrings]
@@ -166,10 +168,10 @@ const MultiSelectComponent = React.forwardRef<
   });
 
   const onSelect = useCallback(
-    (item: any) => {
+    (item: T) => {
       const { values, removed } = toggleValue(
         currentValue,
-        _get(item, valueField),
+        item[valueField],
         maxSelect
       );
       const confirm = removed ? confirmUnSelectItem : confirmSelectItem;
@@ -230,10 +232,7 @@ const MultiSelectComponent = React.forwardRef<
   );
 
   const checkSelected = useCallback(
-    (item: any) => {
-      const index = currentValue.findIndex((e) => e === _get(item, valueField));
-      return index > -1;
-    },
+    (item: T) => currentValue.includes(item[valueField]),
     [currentValue, valueField]
   );
 
@@ -251,7 +250,7 @@ const MultiSelectComponent = React.forwardRef<
   });
 
   const _renderItem = useCallback(
-    ({ item, index }: { item: any; index: number }) => (
+    ({ item, index }: { item: T; index: number }) => (
       <DropdownOption
         selectedIconColor={selectedIconColor ?? iconColor}
         renderSelectedIcon={renderSelectedIcon}
@@ -351,14 +350,14 @@ const MultiSelectComponent = React.forwardRef<
     );
   };
 
-  const unSelect = (item: any) => {
+  const unSelect = (item: T) => {
     if (!disable) {
       onSelect(item);
     }
   };
 
-  const selectedItems = data.filter((item: any) =>
-    currentValue.includes(_get(item, valueField))
+  const selectedItems = data.filter((item) =>
+    currentValue.includes(item[valueField])
   );
 
   const _renderItemSelected = (inside: boolean) => {
@@ -402,7 +401,7 @@ const MultiSelectComponent = React.forwardRef<
               : undefined
           }
           disabled={disable}
-          removeActions={selectedItems.map((item: any) => ({
+          removeActions={selectedItems.map((item) => ({
             label: strings.removeItem(
               String(_get(item, itemAccessibilityLabelField || labelField))
             ),
@@ -437,6 +436,6 @@ const MultiSelectComponent = React.forwardRef<
         _renderItemSelected(false)}
     </>
   );
-});
+}
 
 export default MultiSelectComponent;

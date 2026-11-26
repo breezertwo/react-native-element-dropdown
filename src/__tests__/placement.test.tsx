@@ -13,7 +13,7 @@ import {
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import React from 'react';
 import { Dimensions, Keyboard } from 'react-native';
-import { Dropdown } from '../index';
+import { Dropdown, type DropdownProps } from '../index';
 import {
   layoutOpenList,
   mockTriggerLayout,
@@ -21,7 +21,9 @@ import {
   openListWrapperStyle,
 } from '../__fixtures__/testUtils';
 
-const items = Array.from({ length: 20 }, (_, index) => ({
+type Item = { label: string; value: string };
+
+const items: Item[] = Array.from({ length: 20 }, (_, index) => ({
   label: `Item ${index + 1}`,
   value: String(index + 1),
 }));
@@ -32,7 +34,7 @@ const screenSize = { width: 400, height: 800 };
 
 const openAt = async (
   y: number,
-  props: Partial<React.ComponentProps<typeof Dropdown>> = {}
+  props: Partial<DropdownProps<Item, 'value'>> = {}
 ) => {
   mockTriggerLayout({ x: 16, y, width: 200, height: 40 });
   await render(
