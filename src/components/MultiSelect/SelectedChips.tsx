@@ -1,6 +1,6 @@
 import { DEFAULT_GRAY } from '../../internal/colors';
 import type { TextScaling } from '../../internal/a11y';
-import _get from 'lodash/get';
+import { getFieldText } from '../../internal/fields';
 import { useState, type ReactElement } from 'react';
 import { fitChips } from './fitChips';
 import {
@@ -108,7 +108,7 @@ export function SelectedChips<T>({
   const [measured, setMeasured] = useState<Measurements>({ chips: {} });
   const collapse = overflow === 'collapse';
 
-  const keyOf = (item: T) => String(_get(item, valueField));
+  const keyOf = (item: T) => String(getFieldText(item, valueField));
 
   const textStyle = StyleSheet.flatten([
     styles.chipText,
@@ -134,7 +134,7 @@ export function SelectedChips<T>({
         ])}
       >
         <Text {...textScaling} style={textStyle}>
-          {_get(item, labelField)}
+          {getFieldText(item, labelField)}
         </Text>
         {renderChipRemoveIcon ? (
           renderChipRemoveIcon(item)
@@ -171,10 +171,10 @@ export function SelectedChips<T>({
       <TouchableWithoutFeedback
         disabled={disabled}
         accessibilityState={{ disabled }}
-        testID={_get(item, itemTestIDField || labelField)}
+        testID={getFieldText(item, itemTestIDField || labelField)}
         accessibilityRole="button"
         accessibilityLabel={strings.removeItem(
-          String(_get(item, itemAccessibilityLabelField || labelField))
+          getFieldText(item, itemAccessibilityLabelField || labelField) ?? ''
         )}
         hitSlop={CHIP_HIT_SLOP}
         key={keyOf(item)}

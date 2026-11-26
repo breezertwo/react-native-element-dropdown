@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import { DEFAULT_GRAY } from '../../internal/colors';
-import _get from 'lodash/get';
+import { getField, getFieldText } from '../../internal/fields';
 import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type { ComponentRef } from 'react';
 import { AccessibilityInfo, StyleSheet, View } from 'react-native';
@@ -194,9 +194,8 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
       onChange(values);
 
       if (values.length !== currentValue.length) {
-        const label = String(
-          _get(item, itemAccessibilityLabelField || labelField)
-        );
+        const label =
+          getFieldText(item, itemAccessibilityLabelField || labelField) ?? '';
         AccessibilityInfo.announceForAccessibility(
           removed ? strings.itemRemoved(label) : strings.itemSelected(label)
         );
@@ -246,7 +245,7 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
   );
 
   const isDisabledItem = useCallback(
-    (item: T) => disabledField != null && !!_get(item, disabledField),
+    (item: T) => disabledField != null && !!getField(item, disabledField),
     [disabledField]
   );
 
@@ -276,13 +275,13 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
         textScaling={textScaling}
         ref={index === focusRowIndex ? focusRowRef : undefined}
         item={item}
-        label={_get(item, labelField)}
+        label={getFieldText(item, labelField)}
         selected={checkSelected(item)}
         disabled={isDisabledItem(item)}
         disabledStyle={disabledItemStyle}
         onPress={() => onSelect(item)}
-        testID={_get(item, itemTestIDField || labelField)}
-        accessibilityLabel={_get(
+        testID={getFieldText(item, itemTestIDField || labelField)}
+        accessibilityLabel={getFieldText(
           item,
           itemAccessibilityLabelField || labelField
         )}
@@ -441,7 +440,8 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
           disabled={disable}
           removeActions={removableItems.map((item) => ({
             label: strings.removeItem(
-              String(_get(item, itemAccessibilityLabelField || labelField))
+              getFieldText(item, itemAccessibilityLabelField || labelField) ??
+                ''
             ),
             onRemove: () => unSelect(item),
           }))}

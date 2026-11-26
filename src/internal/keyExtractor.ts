@@ -1,5 +1,3 @@
-import _get from 'lodash/get';
-
 /**
  * Keys list rows by their value, so a row keeps its identity when the list is
  * filtered or reordered. Items without a value fall back to their position.
@@ -7,6 +5,9 @@ import _get from 'lodash/get';
 export const createKeyExtractor =
   (valueField: PropertyKey) =>
   (item: unknown, index: number): string => {
-    const value = _get(item, valueField as string);
+    const value =
+      item != null && typeof item === 'object'
+        ? (item as Record<PropertyKey, unknown>)[valueField]
+        : undefined;
     return value != null ? `value-${String(value)}` : `index-${index}`;
   };

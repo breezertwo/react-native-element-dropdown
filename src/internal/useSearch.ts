@@ -1,5 +1,4 @@
-import _differenceWith from 'lodash/differenceWith';
-import _get from 'lodash/get';
+import { getField, getFieldText } from './fields';
 import { useCallback, useMemo, useState } from 'react';
 
 /** Stable default for the exclude props, so the list isn't recomputed on every render. */
@@ -12,6 +11,14 @@ export const normalizeSearchText = (text: string) =>
     .replace(/\s/g, '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
+
+/** The items that match none of `excluded`. */
+const without = <T>(
+  items: readonly T[],
+  excluded: readonly T[],
+  isSame: (a: T, b: T) => boolean
+): readonly T[] =>
+  items.filter((item) => !excluded.some((other) => isSame(item, other)));
 
 interface UseSearchParams<T> {
   data: readonly T[];
@@ -44,29 +51,26 @@ export const useSearch = <T>({
   const [searchText, setSearchText] = useState('');
 
   const isSameItem = useCallback(
-    (a: T, b: T) =>
-      _get(a, valueField as string) === _get(b, valueField as string),
+    (a: T, b: T) => getField(a, valueField) === getField(b, valueField),
     [valueField]
   );
 
   const listData = useMemo(() => {
     const available =
-      excludeItems.length > 0
-        ? _differenceWith(data, excludeItems, isSameItem)
-        : data;
+      excludeItems.length > 0 ? without(data, excludeItems, isSameItem) : data;
     if (searchText.length === 0) {
       return available;
     }
 
     const key = normalizeSearchText(searchText);
     const matches = available.filter((item) => {
-      const label = _get(item, (searchField || labelField) as string);
+      const label = getFieldText(item, searchField || labelField) ?? '';
       return searchQuery
         ? !!searchQuery(searchText, label)
-        : normalizeSearchText(String(label ?? '')).includes(key);
+        : normalizeSearchText(label).includes(key);
     });
     return excludeSearchItems.length > 0
-      ? _differenceWith(matches, excludeSearchItems, isSameItem)
+      ? without(matches, excludeSearchItems, isSameItem)
       : matches;
   }, [
     data,

@@ -33,10 +33,10 @@
     "no-restricted-imports": [
       "error",
       {
-        "paths": [
+        "patterns": [
           {
-            "name": "lodash",
-            "message": "Import single methods (e.g. 'lodash/get') so apps don't bundle all of lodash."
+            "group": ["lodash", "lodash/*"],
+            "message": "The library has no runtime dependencies. Use the helpers in src/internal (e.g. fields.ts)."
           }
         ]
       }

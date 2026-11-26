@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import { DEFAULT_GRAY } from '../../internal/colors';
-import _get from 'lodash/get';
-import _isEqual from 'lodash/isEqual';
+import { getField, getFieldText, isEqualValue } from '../../internal/fields';
 
 import {
   useCallback,
@@ -181,10 +180,10 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
 
   const getValue = useCallback(() => {
     const defaultValue =
-      typeof value === 'object' ? _get(value, valueField) : value;
+      typeof value === 'object' ? getField(value as T, valueField) : value;
 
     const getItem = data.filter((e) =>
-      _isEqual(defaultValue, _get(e, valueField))
+      isEqualValue(defaultValue, getField(e, valueField))
     );
 
     setCurrentValue(getItem[0] ?? null);
@@ -195,14 +194,17 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
   }, [getValue]);
 
   const isDisabledItem = useCallback(
-    (item: T) => disabledField != null && !!_get(item, disabledField),
+    (item: T) => disabledField != null && !!getField(item, disabledField),
     [disabledField]
   );
 
   const isSelectedItem = useCallback(
     (item: T) =>
       currentValue != null &&
-      _isEqual(_get(item, valueField), _get(currentValue, valueField)),
+      isEqualValue(
+        getField(item, valueField),
+        getField(currentValue, valueField)
+      ),
     [currentValue, valueField]
   );
 
@@ -258,11 +260,13 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
         testID={testID}
         accessibilityLabel={accessibilityLabel ?? placeholder}
         accessibilityValue={
-          hasSelection ? String(_get(currentValue, labelField)) : undefined
+          hasSelection ? getFieldText(currentValue, labelField) : undefined
         }
         disabled={disable}
         text={
-          hasSelection ? String(_get(currentValue, labelField)) : placeholder
+          hasSelection
+            ? (getFieldText(currentValue, labelField) ?? '')
+            : placeholder
         }
         textStyle={hasSelection ? selectedTextStyle : placeholderStyle}
         textProps={selectedTextProps}
@@ -298,13 +302,13 @@ function DropdownComponent<T, V extends keyof T = keyof T>(
           textScaling={textScaling}
           ref={index === focusRowIndex ? focusRowRef : undefined}
           item={item}
-          label={_get(item, labelField)}
+          label={getFieldText(item, labelField)}
           selected={selected}
           disabled={isDisabledItem(item)}
           disabledStyle={disabledItemStyle}
           onPress={() => onSelect(item)}
-          testID={_get(item, itemTestIDField || labelField)}
-          accessibilityLabel={_get(
+          testID={getFieldText(item, itemTestIDField || labelField)}
+          accessibilityLabel={getFieldText(
             item,
             itemAccessibilityLabelField || labelField
           )}
