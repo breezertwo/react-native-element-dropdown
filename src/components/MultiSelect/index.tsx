@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import _get from 'lodash/get';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import {
   useDropdownPlacement,
   type TriggerInstance,
@@ -11,15 +11,13 @@ import { DropdownList } from '../../internal/DropdownList';
 import { DropdownModal } from '../../internal/DropdownModal';
 import { DropdownOption } from '../../internal/DropdownOption';
 import { DropdownSearch } from '../../internal/DropdownSearch';
-import {
-  ChevronIcon,
-  DropdownTrigger,
-  triggerStyles,
-} from '../../internal/DropdownTrigger';
+import { DropdownTrigger } from '../../internal/DropdownTrigger';
 import { useFullScreenMode } from '../../internal/useFullScreenMode';
 import { NO_ITEMS, useSearch } from '../../internal/useSearch';
 import { IMultiSelectRef, MultiSelectProps } from './model';
+import { InsideTrigger } from './InsideTrigger';
 import { SelectedChips } from './SelectedChips';
+import { toggleValue } from './toggleValue';
 import { styles } from './styles';
 
 const MultiSelectComponent = React.forwardRef<
@@ -146,40 +144,19 @@ const MultiSelectComponent = React.forwardRef<
 
   const onSelect = useCallback(
     (item: any) => {
-      const newCurrentValue = [...currentValue];
-      const index = newCurrentValue.findIndex(
-        (e) => e === _get(item, valueField)
+      const { values, removed } = toggleValue(
+        currentValue,
+        _get(item, valueField),
+        maxSelect
       );
-      if (index > -1) {
-        newCurrentValue.splice(index, 1);
+      const confirm = removed ? confirmUnSelectItem : confirmSelectItem;
+      if (onConfirmSelectItem && confirm) {
+        onConfirmSelectItem(values);
       } else {
-        if (maxSelect) {
-          if (newCurrentValue.length < maxSelect) {
-            newCurrentValue.push(_get(item, valueField));
-          }
-        } else {
-          newCurrentValue.push(_get(item, valueField));
-        }
+        onChange(values);
       }
 
-      if (onConfirmSelectItem) {
-        if (index > -1) {
-          if (confirmUnSelectItem) {
-            onConfirmSelectItem(newCurrentValue);
-          } else {
-            onChange(newCurrentValue);
-          }
-        } else {
-          if (confirmSelectItem) {
-            onConfirmSelectItem(newCurrentValue);
-          } else {
-            onChange(newCurrentValue);
-          }
-        }
-      } else {
-        onChange(newCurrentValue);
-      }
-
+      // 2.x behaviour, removed in v3 plan phase 4: forces a re-render.
       setKey(Math.random());
     },
     [
@@ -336,54 +313,29 @@ const MultiSelectComponent = React.forwardRef<
     );
   };
 
-  const _renderInside = () => {
+  if (inside) {
     return (
       <View
         style={StyleSheet.flatten([styles.mainWrap, style])}
         ref={ref}
         onLayout={_measure}
       >
-        {_renderDropdownInside()}
+        <InsideTrigger
+          onPress={showOrClose}
+          testID={testID}
+          accessibilityLabel={accessibilityLabel}
+          chips={value && value.length > 0 ? _renderItemSelected(true) : null}
+          placeholder={placeholder}
+          placeholderStyle={placeholderStyle}
+          fontFamily={fontFamily}
+          renderLeftIcon={renderLeftIcon}
+          renderRightIcon={renderRightIcon}
+          iconColor={iconColor}
+          iconStyle={iconStyle}
+        />
         {_renderModal()}
       </View>
     );
-  };
-
-  const _renderDropdownInside = () => {
-    return (
-      <TouchableWithoutFeedback
-        testID={testID}
-        accessible={!!accessibilityLabel}
-        accessibilityLabel={accessibilityLabel}
-        onPress={showOrClose}
-      >
-        <View style={styles.dropdownInside}>
-          {renderLeftIcon?.()}
-          {value && value?.length > 0 ? (
-            _renderItemSelected(true)
-          ) : (
-            <Text
-              style={StyleSheet.flatten([
-                triggerStyles.text,
-                placeholderStyle,
-                fontFamily ? { fontFamily } : {},
-              ])}
-            >
-              {placeholder}
-            </Text>
-          )}
-          {renderRightIcon ? (
-            renderRightIcon()
-          ) : (
-            <ChevronIcon color={iconColor} style={iconStyle} />
-          )}
-        </View>
-      </TouchableWithoutFeedback>
-    );
-  };
-
-  if (inside) {
-    return _renderInside();
   }
 
   return (
