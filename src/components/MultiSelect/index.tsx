@@ -3,7 +3,6 @@ import _get from 'lodash/get';
 import React, {
   useCallback,
   useEffect,
-  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -12,7 +11,6 @@ import {
   Dimensions,
   FlatList,
   Image,
-  Keyboard,
   Modal,
   StyleSheet,
   Text,
@@ -28,6 +26,7 @@ import {
   useDropdownPlacement,
   type TriggerInstance,
 } from '../../internal/placement/useDropdownPlacement';
+import { useDropdownState } from '../../internal/useDropdownState';
 import { NO_ITEMS, useSearch } from '../../internal/useSearch';
 import CInput from '../TextInput';
 import { IMultiSelectRef, MultiSelectProps } from './model';
@@ -145,15 +144,6 @@ const MultiSelectComponent = React.forwardRef<
     };
   }, [W, orientation]);
 
-  useImperativeHandle(currentRef, () => {
-    return { open: eventOpen, close: eventClose, toggle: eventToggle };
-  });
-
-  useEffect(() => {
-    return eventClose;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const { searchText, listData, onSearch, clearSearch } = useSearch({
     data,
     labelField,
@@ -165,32 +155,17 @@ const MultiSelectComponent = React.forwardRef<
     onChangeText,
   });
 
-  const eventOpen = useCallback(() => {
-    if (!disable) {
-      _measure();
-      setVisible(true);
-      if (onFocus) {
-        onFocus();
-      }
-    }
-  }, [disable, onFocus, _measure]);
-
-  const eventClose = useCallback(() => {
-    if (!disable) {
-      setVisible(false);
-      if (onBlur) {
-        onBlur();
-      }
-    }
-  }, [disable, onBlur]);
-
-  const eventToggle = useCallback(() => {
-    if (visible) {
-      eventClose();
-    } else {
-      eventOpen();
-    }
-  }, [visible, eventClose, eventOpen]);
+  const { onPress: showOrClose } = useDropdownState({
+    ref: currentRef,
+    visible,
+    setVisible,
+    disable,
+    measure: _measure,
+    isKeyboardVisible,
+    onFocus,
+    onBlur,
+    onDismiss: clearSearch,
+  });
 
   const font = useCallback(() => {
     if (fontFamily) {
@@ -209,41 +184,6 @@ const MultiSelectComponent = React.forwardRef<
   useEffect(() => {
     getValue();
   }, [getValue, value]);
-
-  const showOrClose = useCallback(() => {
-    if (!disable) {
-      const visibleStatus = !visible;
-
-      if (isKeyboardVisible && !visibleStatus) {
-        return Keyboard.dismiss();
-      }
-
-      if (!visibleStatus) {
-        clearSearch();
-      }
-
-      _measure();
-      setVisible(visibleStatus);
-
-      if (visibleStatus) {
-        if (onFocus) {
-          onFocus();
-        }
-      } else {
-        if (onBlur) {
-          onBlur();
-        }
-      }
-    }
-  }, [
-    disable,
-    isKeyboardVisible,
-    visible,
-    _measure,
-    clearSearch,
-    onFocus,
-    onBlur,
-  ]);
 
   const onSelect = useCallback(
     (item: any) => {

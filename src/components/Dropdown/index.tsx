@@ -7,7 +7,6 @@ import _isEqual from 'lodash/isEqual';
 import React, {
   useCallback,
   useEffect,
-  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -16,7 +15,6 @@ import {
   Dimensions,
   FlatList,
   Image,
-  Keyboard,
   Modal,
   StyleSheet,
   Text,
@@ -32,6 +30,7 @@ import {
   useDropdownPlacement,
   type TriggerInstance,
 } from '../../internal/placement/useDropdownPlacement';
+import { useDropdownState } from '../../internal/useDropdownState';
 import { NO_ITEMS, useSearch } from '../../internal/useSearch';
 import CInput from '../TextInput';
 import { DropdownProps, IDropdownRef } from './model';
@@ -142,15 +141,6 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       };
     }, [W, orientation]);
 
-    useImperativeHandle(currentRef, () => {
-      return { open: eventOpen, close: eventClose, toggle: eventToggle };
-    });
-
-    useEffect(() => {
-      return eventClose;
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
     const { searchText, listData, onSearch, clearSearch } = useSearch({
       data,
       labelField,
@@ -162,32 +152,22 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       onChangeText,
     });
 
-    const eventOpen = useCallback(() => {
-      if (!disable) {
-        _measure();
-        setVisible(true);
-        if (onFocus) {
-          onFocus();
-        }
-      }
-    }, [disable, onFocus, _measure]);
+    const dismissSearch = useCallback(() => {
+      onChangeText?.('');
+      clearSearch();
+    }, [onChangeText, clearSearch]);
 
-    const eventClose = useCallback(() => {
-      if (!disable) {
-        setVisible(false);
-        if (onBlur) {
-          onBlur();
-        }
-      }
-    }, [disable, onBlur]);
-
-    const eventToggle = useCallback(() => {
-      if (visible) {
-        eventClose();
-      } else {
-        eventOpen();
-      }
-    }, [visible, eventClose, eventOpen]);
+    const { close: eventClose, onPress: showOrClose } = useDropdownState({
+      ref: currentRef,
+      visible,
+      setVisible,
+      disable,
+      measure: _measure,
+      isKeyboardVisible,
+      onFocus,
+      onBlur,
+      onDismiss: dismissSearch,
+    });
 
     const font = useCallback(() => {
       if (fontFamily) {
@@ -252,43 +232,6 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       }, [autoScroll, data.length, value, valueField]), // to fix Maximum Depth Exceeded warning | removed listData from dependency array
       200
     );
-
-    const showOrClose = useCallback(() => {
-      if (!disable) {
-        const visibleStatus = !visible;
-
-        if (isKeyboardVisible && !visibleStatus) {
-          return Keyboard.dismiss();
-        }
-
-        if (!visibleStatus) {
-          onChangeText?.('');
-          clearSearch();
-        }
-
-        _measure();
-        setVisible(visibleStatus);
-
-        if (visibleStatus) {
-          if (onFocus) {
-            onFocus();
-          }
-        } else {
-          if (onBlur) {
-            onBlur();
-          }
-        }
-      }
-    }, [
-      disable,
-      isKeyboardVisible,
-      visible,
-      _measure,
-      onChangeText,
-      clearSearch,
-      onFocus,
-      onBlur,
-    ]);
 
     const onSelect = useCallback(
       (item: any) => {
