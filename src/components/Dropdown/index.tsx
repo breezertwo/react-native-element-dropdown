@@ -3,14 +3,7 @@ import _get from 'lodash/get';
 import _isEqual from 'lodash/isEqual';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableHighlight,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import {
   useDropdownPlacement,
   type TriggerInstance,
@@ -19,13 +12,13 @@ import { useAutoScroll } from '../../internal/useAutoScroll';
 import { useDropdownState } from '../../internal/useDropdownState';
 import { DropdownList } from '../../internal/DropdownList';
 import { DropdownModal } from '../../internal/DropdownModal';
+import { DropdownOption } from '../../internal/DropdownOption';
 import { DropdownSearch } from '../../internal/DropdownSearch';
+import { DropdownTrigger } from '../../internal/DropdownTrigger';
 import { useFullScreenMode } from '../../internal/useFullScreenMode';
 import { NO_ITEMS, useSearch } from '../../internal/useSearch';
 import { DropdownProps, IDropdownRef } from './model';
 import { styles } from './styles';
-
-const ic_down = require('../../assets/down.png');
 
 const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
   (props, currentRef) => {
@@ -138,16 +131,6 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       onDismiss: dismissSearch,
     });
 
-    const font = useCallback(() => {
-      if (fontFamily) {
-        return {
-          fontFamily: fontFamily,
-        };
-      } else {
-        return {};
-      }
-    }, [fontFamily]);
-
     const getValue = useCallback(() => {
       const defaultValue =
         typeof value === 'object' ? _get(value, valueField) : value;
@@ -203,96 +186,56 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
 
     const _renderDropdown = () => {
       const isSelected = currentValue && _get(currentValue, valueField);
+      const hasSelection = isSelected !== null;
       return (
-        <TouchableWithoutFeedback
-          accessibilityLabel={accessibilityLabel}
-          accessibilityRole="button"
-          accessible={!!accessibilityLabel}
-          aria-controls={nativeId}
-          aria-expanded={visible}
+        <DropdownTrigger
+          visible={visible}
           onPress={showOrClose}
           testID={testID}
-        >
-          <View style={styles.dropdown}>
-            {renderLeftIcon?.(visible)}
-            <Text
-              style={[
-                styles.textItem,
-                isSelected !== null ? selectedTextStyle : placeholderStyle,
-                font(),
-              ]}
-              {...selectedTextProps}
-            >
-              {isSelected !== null
-                ? _get(currentValue, labelField)
-                : placeholder}
-            </Text>
-            {renderRightIcon ? (
-              renderRightIcon(visible)
-            ) : (
-              <Image
-                source={ic_down}
-                style={StyleSheet.flatten([
-                  styles.icon,
-                  { tintColor: iconColor },
-                  iconStyle,
-                ])}
-              />
-            )}
-          </View>
-        </TouchableWithoutFeedback>
+          accessibilityLabel={accessibilityLabel}
+          listId={nativeId}
+          text={hasSelection ? _get(currentValue, labelField) : placeholder}
+          textStyle={hasSelection ? selectedTextStyle : placeholderStyle}
+          textProps={selectedTextProps}
+          fontFamily={fontFamily}
+          renderLeftIcon={renderLeftIcon}
+          renderRightIcon={renderRightIcon}
+          iconColor={iconColor}
+          iconStyle={iconStyle}
+        />
       );
     };
 
     const _renderItem = useCallback(
-      ({ item, index }: { item: any; index: number }) => {
+      ({ item }: { item: any }) => {
         const isSelected = currentValue && _get(currentValue, valueField);
         const selected = _isEqual(_get(item, valueField), isSelected);
         return (
-          <TouchableHighlight
-            accessibilityRole="radio"
-            key={index.toString()}
+          <DropdownOption
+            item={item}
+            label={_get(item, labelField)}
+            selected={selected}
+            onPress={() => onSelect(item)}
             testID={_get(item, itemTestIDField || labelField)}
             accessible={!!accessibilityLabel}
             accessibilityLabel={_get(
               item,
               itemAccessibilityLabelField || labelField
             )}
-            underlayColor={activeColor}
-            onPress={() => onSelect(item)}
-          >
-            <View
-              style={StyleSheet.flatten([
-                itemContainerStyle,
-                selected && {
-                  backgroundColor: activeColor,
-                },
-              ])}
-            >
-              {renderItem ? (
-                renderItem(item, selected)
-              ) : (
-                <View style={styles.item}>
-                  <Text
-                    style={StyleSheet.flatten([
-                      styles.textItem,
-                      itemTextStyle,
-                      font(),
-                    ])}
-                  >
-                    {_get(item, labelField)}
-                  </Text>
-                </View>
-              )}
-            </View>
-          </TouchableHighlight>
+            accessibilityRole="radio"
+            activeColor={activeColor}
+            itemContainerStyle={itemContainerStyle}
+            itemTextStyle={itemTextStyle}
+            fontFamily={fontFamily}
+            renderItem={renderItem}
+          />
         );
       },
       [
         accessibilityLabel,
         activeColor,
         currentValue,
-        font,
+        fontFamily,
         itemAccessibilityLabelField,
         itemContainerStyle,
         itemTestIDField,

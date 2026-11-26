@@ -1,14 +1,7 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import _get from 'lodash/get';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableHighlight,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import { StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import {
   useDropdownPlacement,
   type TriggerInstance,
@@ -16,13 +9,18 @@ import {
 import { useDropdownState } from '../../internal/useDropdownState';
 import { DropdownList } from '../../internal/DropdownList';
 import { DropdownModal } from '../../internal/DropdownModal';
+import { DropdownOption } from '../../internal/DropdownOption';
 import { DropdownSearch } from '../../internal/DropdownSearch';
+import {
+  ChevronIcon,
+  DropdownTrigger,
+  triggerStyles,
+} from '../../internal/DropdownTrigger';
 import { useFullScreenMode } from '../../internal/useFullScreenMode';
 import { NO_ITEMS, useSearch } from '../../internal/useSearch';
 import { IMultiSelectRef, MultiSelectProps } from './model';
+import { SelectedChips } from './SelectedChips';
 import { styles } from './styles';
-
-const ic_down = require('../../assets/down.png');
 
 const MultiSelectComponent = React.forwardRef<
   IMultiSelectRef,
@@ -138,16 +136,6 @@ const MultiSelectComponent = React.forwardRef<
     onDismiss: clearSearch,
   });
 
-  const font = useCallback(() => {
-    if (fontFamily) {
-      return {
-        fontFamily: fontFamily,
-      };
-    } else {
-      return {};
-    }
-  }, [fontFamily]);
-
   const getValue = useCallback(() => {
     setCurrentValue(value ? [...value] : []);
   }, [value]);
@@ -205,44 +193,22 @@ const MultiSelectComponent = React.forwardRef<
     ]
   );
 
-  const _renderDropdown = () => {
-    return (
-      <TouchableWithoutFeedback
-        accessibilityLabel={accessibilityLabel}
-        accessibilityRole="button"
-        accessible={!!accessibilityLabel}
-        aria-controls={nativeId}
-        aria-expanded={visible}
-        onPress={showOrClose}
-      >
-        <View style={styles.dropdown}>
-          {renderLeftIcon?.(visible)}
-          <Text
-            style={StyleSheet.flatten([
-              styles.textItem,
-              placeholderStyle,
-              font(),
-            ])}
-            {...selectedTextProps}
-          >
-            {placeholder}
-          </Text>
-          {renderRightIcon ? (
-            renderRightIcon(visible)
-          ) : (
-            <Image
-              source={ic_down}
-              style={StyleSheet.flatten([
-                styles.icon,
-                { tintColor: iconColor },
-                iconStyle,
-              ])}
-            />
-          )}
-        </View>
-      </TouchableWithoutFeedback>
-    );
-  };
+  const _renderDropdown = () => (
+    <DropdownTrigger
+      visible={visible}
+      onPress={showOrClose}
+      accessibilityLabel={accessibilityLabel}
+      listId={nativeId}
+      text={placeholder}
+      textStyle={placeholderStyle}
+      textProps={selectedTextProps}
+      fontFamily={fontFamily}
+      renderLeftIcon={renderLeftIcon}
+      renderRightIcon={renderRightIcon}
+      iconColor={iconColor}
+      iconStyle={iconStyle}
+    />
+  );
 
   const checkSelected = useCallback(
     (item: any) => {
@@ -253,53 +219,31 @@ const MultiSelectComponent = React.forwardRef<
   );
 
   const _renderItem = useCallback(
-    ({ item, index }: { item: any; index: number }) => {
-      const selected = checkSelected(item);
-      return (
-        <TouchableHighlight
-          key={index.toString()}
-          testID={_get(item, itemTestIDField || labelField)}
-          accessible={!!accessibilityLabel}
-          accessibilityLabel={_get(
-            item,
-            itemAccessibilityLabelField || labelField
-          )}
-          underlayColor={activeColor}
-          onPress={() => onSelect(item)}
-        >
-          <View
-            style={StyleSheet.flatten([
-              itemContainerStyle,
-              selected && {
-                backgroundColor: activeColor,
-                ...styles.wrapItem,
-              },
-            ])}
-          >
-            {renderItem ? (
-              renderItem(item, selected)
-            ) : (
-              <View style={styles.item}>
-                <Text
-                  style={StyleSheet.flatten([
-                    styles.textItem,
-                    itemTextStyle,
-                    font(),
-                  ])}
-                >
-                  {_get(item, labelField)}
-                </Text>
-              </View>
-            )}
-          </View>
-        </TouchableHighlight>
-      );
-    },
+    ({ item }: { item: any }) => (
+      <DropdownOption
+        item={item}
+        label={_get(item, labelField)}
+        selected={checkSelected(item)}
+        onPress={() => onSelect(item)}
+        testID={_get(item, itemTestIDField || labelField)}
+        accessible={!!accessibilityLabel}
+        accessibilityLabel={_get(
+          item,
+          itemAccessibilityLabelField || labelField
+        )}
+        activeColor={activeColor}
+        selectedStyle={styles.wrapItem}
+        itemContainerStyle={itemContainerStyle}
+        itemTextStyle={itemTextStyle}
+        fontFamily={fontFamily}
+        renderItem={renderItem}
+      />
+    ),
     [
       accessibilityLabel,
       activeColor,
       checkSelected,
-      font,
+      fontFamily,
       itemAccessibilityLabelField,
       itemContainerStyle,
       itemTestIDField,
@@ -373,76 +317,22 @@ const MultiSelectComponent = React.forwardRef<
 
   const _renderItemSelected = (inside: boolean) => {
     const selectedValues = value ?? [];
-    const list = data.filter((e: any) =>
-      selectedValues.includes(_get(e, valueField))
-    );
-
     return (
-      <View
-        style={StyleSheet.flatten([
-          styles.rowSelectedItem,
-          inside && styles.flex1,
-        ])}
-      >
-        {list.map((e) => {
-          if (renderSelectedItem) {
-            return (
-              <TouchableWithoutFeedback
-                testID={_get(e, itemTestIDField || labelField)}
-                accessible={!!accessibilityLabel}
-                accessibilityLabel={_get(
-                  e,
-                  itemAccessibilityLabelField || labelField
-                )}
-                key={_get(e, labelField)}
-                onPress={() => unSelect(e)}
-              >
-                {renderSelectedItem(e, () => {
-                  unSelect(e);
-                })}
-              </TouchableWithoutFeedback>
-            );
-          } else {
-            return (
-              <TouchableWithoutFeedback
-                testID={_get(e, itemTestIDField || labelField)}
-                accessible={!!accessibilityLabel}
-                accessibilityLabel={_get(
-                  e,
-                  itemAccessibilityLabelField || labelField
-                )}
-                key={_get(e, labelField)}
-                onPress={() => unSelect(e)}
-              >
-                <View
-                  style={StyleSheet.flatten([
-                    styles.selectedItem,
-                    selectedStyle,
-                  ])}
-                >
-                  <Text
-                    style={StyleSheet.flatten([
-                      styles.selectedTextLeftItem,
-                      selectedTextStyle,
-                      font(),
-                    ])}
-                  >
-                    {_get(e, labelField)}
-                  </Text>
-                  <Text
-                    style={StyleSheet.flatten([
-                      styles.selectedTextItem,
-                      selectedTextStyle,
-                    ])}
-                  >
-                    ⓧ
-                  </Text>
-                </View>
-              </TouchableWithoutFeedback>
-            );
-          }
-        })}
-      </View>
+      <SelectedChips
+        items={data.filter((item: any) =>
+          selectedValues.includes(_get(item, valueField))
+        )}
+        inside={inside}
+        onUnselect={unSelect}
+        labelField={labelField}
+        itemTestIDField={itemTestIDField}
+        itemAccessibilityLabelField={itemAccessibilityLabelField}
+        accessible={!!accessibilityLabel}
+        selectedStyle={selectedStyle}
+        selectedTextStyle={selectedTextStyle}
+        fontFamily={fontFamily}
+        renderSelectedItem={renderSelectedItem}
+      />
     );
   };
 
@@ -474,9 +364,9 @@ const MultiSelectComponent = React.forwardRef<
           ) : (
             <Text
               style={StyleSheet.flatten([
-                styles.textItem,
+                triggerStyles.text,
                 placeholderStyle,
-                font(),
+                fontFamily ? { fontFamily } : {},
               ])}
             >
               {placeholder}
@@ -485,14 +375,7 @@ const MultiSelectComponent = React.forwardRef<
           {renderRightIcon ? (
             renderRightIcon()
           ) : (
-            <Image
-              source={ic_down}
-              style={StyleSheet.flatten([
-                styles.icon,
-                { tintColor: iconColor },
-                iconStyle,
-              ])}
-            />
+            <ChevronIcon color={iconColor} style={iconStyle} />
           )}
         </View>
       </TouchableWithoutFeedback>
