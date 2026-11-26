@@ -4,28 +4,8 @@ export const styles = StyleSheet.create({
   mainWrap: {
     justifyContent: 'center',
   },
-  container: {
-    flexShrink: 1,
-    backgroundColor: 'white',
-    borderWidth: 0.5,
-    borderColor: '#EEEEEE',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
-  },
   flex1: {
     flex: 1,
-  },
-  flexShrink: {
-    flexShrink: 1,
-  },
-  wrapTop: {
-    justifyContent: 'flex-end',
   },
   dropdown: {
     flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
@@ -37,11 +17,6 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     minHeight: 35,
-  },
-  title: {
-    marginVertical: 5,
-    fontSize: 16,
-    writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
   },
   wrapItem: {
     marginBottom: 0.5,
@@ -94,9 +69,5 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     color: 'gray',
     writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
-  },
-  fullScreen: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

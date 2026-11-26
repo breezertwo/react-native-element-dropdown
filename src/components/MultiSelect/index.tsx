@@ -1,32 +1,23 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import _get from 'lodash/get';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Dimensions,
-  FlatList,
   Image,
-  Modal,
   StyleSheet,
   Text,
   TouchableHighlight,
   TouchableWithoutFeedback,
   View,
-  ViewStyle,
 } from 'react-native';
 import { useDetectDevice } from '../../toolkits';
 import { useDeviceOrientation } from '../../useDeviceOrientation';
 import {
-  hiddenStyle,
   useDropdownPlacement,
   type TriggerInstance,
 } from '../../internal/placement/useDropdownPlacement';
 import { useDropdownState } from '../../internal/useDropdownState';
+import { DropdownList } from '../../internal/DropdownList';
+import { DropdownModal } from '../../internal/DropdownModal';
 import { NO_ITEMS, useSearch } from '../../internal/useSearch';
 import CInput from '../TextInput';
 import { IMultiSelectRef, MultiSelectProps } from './model';
@@ -129,20 +120,6 @@ const MultiSelectComponent = React.forwardRef<
     safeAreaInsets,
     containerStyle,
   });
-
-  const { width: W } = Dimensions.get('window');
-  const styleContainerVertical: ViewStyle = useMemo(() => {
-    return {
-      backgroundColor: 'rgba(0,0,0,0.1)',
-      alignItems: 'center',
-    };
-  }, []);
-  const styleHorizontal: ViewStyle = useMemo(() => {
-    return {
-      width: orientation === 'LANDSCAPE' ? W / 2 : '100%',
-      alignSelf: 'center',
-    };
-  }, [W, orientation]);
 
   const { searchText, listData, onSearch, clearSearch } = useSearch({
     data,
@@ -377,137 +354,44 @@ const MultiSelectComponent = React.forwardRef<
     testID,
   ]);
 
-  const _renderList = useCallback(
-    (isTopPosition: boolean) => {
-      const isInverted = !inverted ? false : isTopPosition;
-
-      const _renderListHelper = () => {
-        return (
-          <FlatList
-            testID={testID + ' flatlist'}
-            accessibilityLabel={accessibilityLabel + ' flatlist'}
-            {...flatListProps}
-            keyboardShouldPersistTaps="handled"
-            data={listData}
-            inverted={isTopPosition ? inverted : false}
-            nativeID={nativeId}
-            renderItem={_renderItem}
-            keyExtractor={(_item, index) => index.toString()}
-            showsVerticalScrollIndicator={showsVerticalScrollIndicator}
-          />
-        );
-      };
-
-      return (
-        <TouchableWithoutFeedback>
-          <View style={styles.flexShrink}>
-            {isInverted && _renderListHelper()}
-            {renderSearch()}
-            {!isInverted && _renderListHelper()}
-          </View>
-        </TouchableWithoutFeedback>
-      );
-    },
-    [
-      _renderItem,
-      accessibilityLabel,
-      flatListProps,
-      listData,
-      inverted,
-      renderSearch,
-      showsVerticalScrollIndicator,
-      testID,
-      nativeId,
-    ]
-  );
-
-  const _renderModal = useCallback(() => {
+  const _renderModal = () => {
     if (!visible || !placement) {
       return null;
     }
 
-    const {
-      isReady,
-      isTopPosition,
-      left,
-      width,
-      maxHeight: containerMaxHeight,
-      wrapperStyle,
-    } = placement;
-
-    const styleVertical: ViewStyle = {
-      left: left,
-      maxHeight: containerMaxHeight,
-      minHeight: minHeight,
-    };
-
     return (
-      <Modal
-        transparent
-        statusBarTranslucent
-        visible={visible}
-        supportedOrientations={['landscape', 'portrait']}
+      <DropdownModal
+        placement={placement}
+        isFull={isFull}
+        isLandscape={orientation === 'LANDSCAPE'}
+        minHeight={minHeight}
+        backgroundColor={backgroundColor}
+        containerStyle={containerStyle}
         onRequestClose={showOrClose}
+        onModalLayout={onModalLayout}
+        onContainerLayout={onContainerLayout}
       >
-        <View
-          onStartShouldSetResponder={() => true}
-          onResponderRelease={showOrClose}
-          onLayout={onModalLayout}
-          style={styles.flex1}
-        >
-          <View
-            style={StyleSheet.flatten([
-              styles.flex1,
-              isFull && styleContainerVertical,
-              !!backgroundColor && { backgroundColor: backgroundColor },
-            ])}
-          >
-            <View
-              style={StyleSheet.flatten([
-                styles.flex1,
-                wrapperStyle,
-                isFull && styles.fullScreen,
-              ])}
-            >
-              <View
-                onLayout={onContainerLayout}
-                accessibilityElementsHidden={!isReady}
-                importantForAccessibility={
-                  isReady ? 'auto' : 'no-hide-descendants'
-                }
-                style={StyleSheet.flatten([
-                  styles.container,
-                  isFull
-                    ? [styleHorizontal, { maxHeight: containerMaxHeight }]
-                    : styleVertical,
-                  {
-                    width,
-                  },
-                  containerStyle,
-                  !isReady && hiddenStyle,
-                ])}
-              >
-                {_renderList(isTopPosition)}
-              </View>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        <DropdownList
+          isTopPosition={placement.isTopPosition}
+          inverted={inverted}
+          search={renderSearch()}
+          captureTouches
+          defaultListProps={{
+            testID: testID + ' flatlist',
+            accessibilityLabel: accessibilityLabel + ' flatlist',
+          }}
+          flatListProps={flatListProps}
+          listProps={{
+            data: listData,
+            nativeID: nativeId,
+            renderItem: _renderItem,
+            keyExtractor: (_item, index) => index.toString(),
+            showsVerticalScrollIndicator,
+          }}
+        />
+      </DropdownModal>
     );
-  }, [
-    visible,
-    placement,
-    minHeight,
-    isFull,
-    showOrClose,
-    onModalLayout,
-    onContainerLayout,
-    styleContainerVertical,
-    backgroundColor,
-    containerStyle,
-    styleHorizontal,
-    _renderList,
-  ]);
+  };
 
   const unSelect = (item: any) => {
     if (!disable) {
