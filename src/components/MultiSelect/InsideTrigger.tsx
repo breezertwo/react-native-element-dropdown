@@ -1,7 +1,7 @@
 import { FIELD_ROLE, type TextScaling } from '../../internal/a11y';
 import type { TriggerInstance } from '../../internal/placement/useDropdownPlacement';
 import type { ReactElement, ReactNode, Ref } from 'react';
-import { I18nManager, Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import type { ImageStyle, Insets, StyleProp, TextStyle } from 'react-native';
 import { ChevronIcon, triggerStyles } from '../../internal/DropdownTrigger';
 
@@ -105,7 +105,7 @@ export function InsideTrigger({
 
 const styles = StyleSheet.create({
   field: {
-    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     minHeight: 35,

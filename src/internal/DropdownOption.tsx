@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     padding: 17,
   },
   item: {
-    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },

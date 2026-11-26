@@ -293,7 +293,7 @@ export function SelectedChips<T>({
 
 const styles = StyleSheet.create({
   chips: {
-    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     flexWrap: 'wrap',
   },
   collapse: {
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     flexWrap: 'wrap',
     opacity: 0,
   },
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginVertical: 6,
     marginRight: 8,
-    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
   },
   disabled: {
     opacity: 0.5,

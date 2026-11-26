@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   textInput: {
-    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
     fontSize: 16,
   },
   row: {
-    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
   },
   // Like TouchableOpacity's default feedback.
   pressed: {
