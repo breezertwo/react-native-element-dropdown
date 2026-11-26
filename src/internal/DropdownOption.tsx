@@ -124,6 +124,23 @@ export function DropdownOption<T>({
   );
 }
 
+// A checkmark isn't mirrored in right-to-left layouts, but React Native
+// swaps left and right styles there (unless the app turned that off), which
+// would draw it as "‹". Its stroke has to be on the physical right.
+export const checkmarkStrokeFor = ({
+  isRTL,
+  swapsLeftAndRight,
+}: {
+  isRTL: boolean;
+  swapsLeftAndRight: boolean;
+}) =>
+  isRTL && swapsLeftAndRight ? { borderLeftWidth: 2 } : { borderRightWidth: 2 };
+
+const checkmarkStroke = checkmarkStrokeFor({
+  isRTL: I18nManager.isRTL,
+  swapsLeftAndRight: I18nManager.doLeftAndRightSwapInRTL,
+});
+
 const styles = StyleSheet.create({
   padding: {
     padding: 17,
@@ -146,7 +163,7 @@ const styles = StyleSheet.create({
     height: 13,
     marginHorizontal: 4,
     marginBottom: 3,
-    borderRightWidth: 2,
+    ...checkmarkStroke,
     borderBottomWidth: 2,
     transform: [{ rotate: '45deg' }],
   },
