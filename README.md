@@ -148,12 +148,99 @@ yarn add @breezertwo/react-native-element-dropdown
 | excludeItems                 | Item[]                                               | No        | The array containing the items to be excluded.                                                               |
 | excludeSearchItems           | Item[]                                               | No        | The array containing the items to be excluded.                                                               |
 
-### SelectCountry extends Dropdown
+### SelectCountry (deprecated)
+
+> **Deprecated:** `SelectCountry` will be removed in v3.0.0. It is a thin wrapper around `Dropdown`, so you can build the same thing with `renderLeftIcon` (image of the selected item) and `renderItem` (image + label per row). See the replacement below.
+
+`SelectCountry` extends `Dropdown` with these props:
 
 | Props      | Params     | isRequire | Description                          |
 | ---------- | ---------- | --------- | ------------------------------------ |
 | imageField | String     | Yes       | Extract the image from the data item |
 | imageStyle | ImageStyle | No        | Styling for image                    |
+
+#### Replacement with `Dropdown`
+
+```tsx
+import React, { useState } from 'react';
+import {
+  Image,
+  ImageSourcePropType,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { Dropdown } from '@breezertwo/react-native-element-dropdown';
+
+type Country = { value: string; label: string; image: ImageSourcePropType };
+
+const countries: Country[] = [
+  { value: 'de', label: 'Germany', image: require('./flags/de.png') },
+  { value: 'fr', label: 'France', image: require('./flags/fr.png') },
+];
+
+const CountrySelect = () => {
+  const [value, setValue] = useState<string | null>(null);
+  const selected = countries.find((country) => country.value === value);
+
+  return (
+    <Dropdown
+      style={styles.dropdown}
+      selectedTextStyle={styles.label}
+      data={countries}
+      labelField="label"
+      valueField="value"
+      value={value}
+      placeholder="Select country"
+      search
+      searchPlaceholder="Search..."
+      onChange={(item: Country) => setValue(item.value)}
+      renderLeftIcon={() =>
+        selected ? (
+          <Image
+            source={selected.image}
+            style={styles.image}
+            accessibilityIgnoresInvertColors
+          />
+        ) : null
+      }
+      renderItem={(item: Country) => (
+        <View style={styles.item}>
+          <Image
+            source={item.image}
+            style={styles.image}
+            accessibilityIgnoresInvertColors
+          />
+          <Text style={styles.label}>{item.label}</Text>
+        </View>
+      )}
+    />
+  );
+};
+
+export default CountrySelect;
+
+const styles = StyleSheet.create({
+  dropdown: {
+    height: 50,
+    paddingHorizontal: 8,
+  },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+  },
+  image: {
+    width: 24,
+    height: 24,
+    marginRight: 8,
+  },
+  label: {
+    flex: 1,
+    fontSize: 16,
+  },
+});
+```
 
 ### Method
 
@@ -701,214 +788,3 @@ const styles = StyleSheet.create({
   },
 });
 ```
-
-### SelectCountry example 1
-
-![](https://github.com/hoaphantn7604/file-upload/blob/master/document/dropdown/react-native-dropdown-4.png)
-
-```js
-import React, { useState } from 'react';
-import { StyleSheet } from 'react-native';
-import { SelectCountry } from 'react-native-element-dropdown';
-
-const local_data = [
-  {
-    value: '1',
-    lable: 'Country 1',
-    image: {
-      uri: 'https://www.vigcenter.com/public/all/images/default-image.jpg',
-    },
-  },
-  {
-    value: '2',
-    lable: 'Country 2',
-    image: {
-      uri: 'https://www.vigcenter.com/public/all/images/default-image.jpg',
-    },
-  },
-  {
-    value: '3',
-    lable: 'Country 3',
-    image: {
-      uri: 'https://www.vigcenter.com/public/all/images/default-image.jpg',
-    },
-  },
-  {
-    value: '4',
-    lable: 'Country 4',
-    image: {
-      uri: 'https://www.vigcenter.com/public/all/images/default-image.jpg',
-    },
-  },
-  {
-    value: '5',
-    lable: 'Country 5',
-    image: {
-      uri: 'https://www.vigcenter.com/public/all/images/default-image.jpg',
-    },
-  },
-];
-
-const SelectCountryScreen = (_props) => {
-  const [country, setCountry] = useState('1');
-
-  return (
-    <SelectCountry
-      style={styles.dropdown}
-      selectedTextStyle={styles.selectedTextStyle}
-      placeholderStyle={styles.placeholderStyle}
-      imageStyle={styles.imageStyle}
-      inputSearchStyle={styles.inputSearchStyle}
-      iconStyle={styles.iconStyle}
-      search
-      maxHeight={200}
-      value={country}
-      data={local_data}
-      valueField="value"
-      labelField="lable"
-      imageField="image"
-      placeholder="Select country"
-      searchPlaceholder="Search..."
-      onChange={(e) => {
-        setCountry(e.value);
-      }}
-    />
-  );
-};
-
-export default SelectCountryScreen;
-
-const styles = StyleSheet.create({
-  dropdown: {
-    margin: 16,
-    height: 50,
-    borderBottomColor: 'gray',
-    borderBottomWidth: 0.5,
-  },
-  imageStyle: {
-    width: 24,
-    height: 24,
-  },
-  placeholderStyle: {
-    fontSize: 16,
-  },
-  selectedTextStyle: {
-    fontSize: 16,
-    marginLeft: 8,
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
-  },
-});
-```
-
-### SelectCountry example 2
-
-![](https://github.com/hoaphantn7604/file-upload/blob/master/document/dropdown/react-native-dropdown-5.png)
-
-```js
-import React, { useState } from 'react';
-import { StyleSheet } from 'react-native';
-import { SelectCountry } from 'react-native-element-dropdown';
-
-const local_data = [
-  {
-    value: '1',
-    lable: 'Country 1',
-    image: {
-      uri: 'https://www.vigcenter.com/public/all/images/default-image.jpg',
-    },
-  },
-  {
-    value: '2',
-    lable: 'Country 2',
-    image: {
-      uri: 'https://www.vigcenter.com/public/all/images/default-image.jpg',
-    },
-  },
-  {
-    value: '3',
-    lable: 'Country 3',
-    image: {
-      uri: 'https://www.vigcenter.com/public/all/images/default-image.jpg',
-    },
-  },
-  {
-    value: '4',
-    lable: 'Country 4',
-    image: {
-      uri: 'https://www.vigcenter.com/public/all/images/default-image.jpg',
-    },
-  },
-  {
-    value: '5',
-    lable: 'Country 5',
-    image: {
-      uri: 'https://www.vigcenter.com/public/all/images/default-image.jpg',
-    },
-  },
-];
-
-const SelectCountryScreen = (_props) => {
-  const [country, setCountry] = useState('1');
-
-  return (
-    <SelectCountry
-      style={styles.dropdown}
-      selectedTextStyle={styles.selectedTextStyle}
-      placeholderStyle={styles.placeholderStyle}
-      imageStyle={styles.imageStyle}
-      iconStyle={styles.iconStyle}
-      maxHeight={200}
-      value={country}
-      data={local_data}
-      valueField="value"
-      labelField="lable"
-      imageField="image"
-      placeholder="Select country"
-      searchPlaceholder="Search..."
-      onChange={(e) => {
-        setCountry(e.value);
-      }}
-    />
-  );
-};
-
-export default SelectCountryScreen;
-
-const styles = StyleSheet.create({
-  dropdown: {
-    margin: 16,
-    height: 50,
-    width: 150,
-    backgroundColor: '#EEEEEE',
-    borderRadius: 22,
-    paddingHorizontal: 8,
-  },
-  imageStyle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-  },
-  placeholderStyle: {
-    fontSize: 16,
-  },
-  selectedTextStyle: {
-    fontSize: 16,
-    marginLeft: 8,
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
-});
-```
-
-<br/>
-
-[<img src="https://github.com/hoaphantn7604/file-upload/blob/master/document/profile/hoa_phan_dev_banner.png">](https://github.com/hoaphantn7604)

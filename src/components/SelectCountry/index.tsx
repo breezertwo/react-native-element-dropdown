@@ -1,13 +1,37 @@
-import React, { useImperativeHandle, useMemo, useRef } from 'react';
+import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { Image, Text, View } from 'react-native';
 import Dropdown from '../Dropdown';
 import { ISelectCountryRef, SelectCountryProps } from './model';
 import { styles } from './styles';
 
+export const SELECT_COUNTRY_DEPRECATION_MESSAGE =
+  '[@breezertwo/react-native-element-dropdown] `SelectCountry` is deprecated ' +
+  'and will be removed in v3.0.0. Use `Dropdown` with `renderLeftIcon` and ' +
+  '`renderItem` instead: ' +
+  'https://github.com/breezertwo/react-native-element-dropdown#selectcountry-deprecated';
+
+let hasWarnedDeprecation = false;
+
+const warnDeprecationOnce = () => {
+  if (__DEV__ && !hasWarnedDeprecation) {
+    hasWarnedDeprecation = true;
+    console.warn(SELECT_COUNTRY_DEPRECATION_MESSAGE);
+  }
+};
+
+/**
+ * @deprecated `SelectCountry` will be removed in v3.0.0. Use `Dropdown` with
+ * `renderLeftIcon` (selected image) and `renderItem` (image + label rows)
+ * instead.
+ */
 const SelectCountryComponent = React.forwardRef<
   ISelectCountryRef,
   SelectCountryProps<any>
 >((props, currentRef) => {
+  useEffect(() => {
+    warnDeprecationOnce();
+  }, []);
+
   const {
     data,
     value,
