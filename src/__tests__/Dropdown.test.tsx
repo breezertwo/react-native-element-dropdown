@@ -50,6 +50,15 @@ const isOpen = () =>
   screen.queryByTestId('dropdown flatlist', { includeHiddenElements: true }) !==
   null;
 
+// The view inside a row's touchable, which carries the row's style.
+const rowContent = (name: string) => {
+  const [content] = screen.getByRole('radio', { name }).children;
+  if (typeof content !== 'object') {
+    throw new Error(`Row ${name} has no content view`);
+  }
+  return content;
+};
+
 beforeEach(() => {
   jest.useFakeTimers();
   mockTriggerLayout();
@@ -664,6 +673,34 @@ describe('Dropdown', () => {
     });
   });
 
+  describe('row style', () => {
+    it('pads rows by default', async () => {
+      await renderDropdown();
+      await open();
+
+      expect(rowContent('Apple')).toHaveStyle({ padding: 17 });
+    });
+
+    it('replaces the default padding with the one in itemContainerStyle', async () => {
+      await renderDropdown({ itemContainerStyle: { padding: 4 } });
+      await open();
+
+      expect(rowContent('Apple')).toHaveStyle({ padding: 4 });
+      // Not added on top by an inner view either.
+      const [inner] = rowContent('Apple').children;
+      expect(inner).not.toHaveStyle({ padding: 17 });
+    });
+
+    it('does not pad rows of renderItem', async () => {
+      await renderDropdown({
+        renderItem: (item) => <Text>{item.label}</Text>,
+      });
+      await open();
+
+      expect(rowContent('Apple')).not.toHaveStyle({ padding: 17 });
+    });
+  });
+
   describe('disabled items', () => {
     const withSoldOut = fruits.map((fruit) =>
       fruit.value === 'banana' ? { ...fruit, soldOut: true } : fruit
@@ -695,14 +732,6 @@ describe('Dropdown', () => {
       });
       await open();
 
-      // The row's style is on the view inside the touchable.
-      const rowContent = (name: string) => {
-        const [content] = screen.getByRole('radio', { name }).children;
-        if (typeof content !== 'object') {
-          throw new Error(`Row ${name} has no content view`);
-        }
-        return content;
-      };
       expect(rowContent('Banana')).toHaveStyle({
         opacity: 0.5,
         backgroundColor: 'pink',

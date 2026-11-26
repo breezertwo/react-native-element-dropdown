@@ -91,6 +91,9 @@ export function DropdownOption<T>({
     >
       <View
         style={StyleSheet.flatten([
+          // The default padding, on the view itemContainerStyle styles, so a
+          // padding there replaces it. renderItem rows bring their own.
+          !renderItem && styles.padding,
           itemContainerStyle,
           selected && { backgroundColor: activeColor, ...selectedStyle },
           disabled && [styles.disabled, disabledStyle],
@@ -124,8 +127,10 @@ export function DropdownOption<T>({
 }
 
 const styles = StyleSheet.create({
-  item: {
+  padding: {
     padding: 17,
+  },
+  item: {
     flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
