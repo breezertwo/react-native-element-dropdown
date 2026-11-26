@@ -2,7 +2,13 @@
 import _get from 'lodash/get';
 import _isEqual from 'lodash/isEqual';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
   useDropdownPlacement,
@@ -16,6 +22,7 @@ import { DropdownOption } from '../../internal/DropdownOption';
 import { DropdownSearch } from '../../internal/DropdownSearch';
 import { DropdownTrigger } from '../../internal/DropdownTrigger';
 import { useFullScreenMode } from '../../internal/useFullScreenMode';
+import { createKeyExtractor } from '../../internal/keyExtractor';
 import { NO_ITEMS, useSearch } from '../../internal/useSearch';
 import { DropdownProps, IDropdownRef } from './model';
 import { styles } from './styles';
@@ -113,6 +120,11 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       excludeSearchItems,
       onChangeText,
     });
+
+    const keyExtractor = useMemo(
+      () => createKeyExtractor(valueField),
+      [valueField]
+    );
 
     const dismissSearch = useCallback(() => {
       onChangeText?.('');
@@ -297,7 +309,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
               data: listData,
               nativeID: nativeId,
               renderItem: _renderItem,
-              keyExtractor: (_item, index) => index.toString(),
+              keyExtractor,
               showsVerticalScrollIndicator,
             }}
           />

@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import _get from 'lodash/get';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
   useDropdownPlacement,
@@ -13,6 +19,7 @@ import { DropdownOption } from '../../internal/DropdownOption';
 import { DropdownSearch } from '../../internal/DropdownSearch';
 import { DropdownTrigger } from '../../internal/DropdownTrigger';
 import { useFullScreenMode } from '../../internal/useFullScreenMode';
+import { createKeyExtractor } from '../../internal/keyExtractor';
 import { NO_ITEMS, useSearch } from '../../internal/useSearch';
 import { IMultiSelectRef, MultiSelectProps } from './model';
 import { InsideTrigger } from './InsideTrigger';
@@ -121,6 +128,11 @@ const MultiSelectComponent = React.forwardRef<
     excludeSearchItems,
     onChangeText,
   });
+
+  const keyExtractor = useMemo(
+    () => createKeyExtractor(valueField),
+    [valueField]
+  );
 
   const { onPress: showOrClose } = useDropdownState({
     ref: currentRef,
@@ -279,7 +291,7 @@ const MultiSelectComponent = React.forwardRef<
             data: listData,
             nativeID: nativeId,
             renderItem: _renderItem,
-            keyExtractor: (_item, index) => index.toString(),
+            keyExtractor,
             showsVerticalScrollIndicator,
           }}
         />
@@ -303,6 +315,7 @@ const MultiSelectComponent = React.forwardRef<
         inside={inside}
         onUnselect={unSelect}
         labelField={labelField}
+        valueField={valueField}
         itemTestIDField={itemTestIDField}
         itemAccessibilityLabelField={itemAccessibilityLabelField}
         accessible={!!accessibilityLabel}

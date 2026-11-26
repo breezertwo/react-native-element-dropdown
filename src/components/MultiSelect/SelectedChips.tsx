@@ -16,6 +16,7 @@ interface SelectedChipsProps<T> {
   inside: boolean;
   onUnselect: (item: T) => void;
   labelField: keyof T;
+  valueField: keyof T;
   itemTestIDField?: string;
   itemAccessibilityLabelField?: string;
   /** Chips are only accessibility elements when the field has a label (2.x). */
@@ -35,6 +36,7 @@ export function SelectedChips<T>({
   inside,
   onUnselect,
   labelField,
+  valueField,
   itemTestIDField,
   itemAccessibilityLabelField,
   accessible,
@@ -55,9 +57,7 @@ export function SelectedChips<T>({
               item,
               itemAccessibilityLabelField || (labelField as string)
             )}
-            // 2.x behaviour, fixed in v3 plan phase 4: duplicate labels
-            // collide.
-            key={label}
+            key={String(_get(item, valueField as string))}
             onPress={() => onUnselect(item)}
           >
             {renderSelectedItem ? (

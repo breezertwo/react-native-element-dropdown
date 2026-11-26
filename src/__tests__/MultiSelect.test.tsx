@@ -222,6 +222,22 @@ describe('MultiSelect', () => {
       expect(screen.getByText('Cherry')).toBeTruthy();
     });
 
+    it('renders chips for items with the same label', async () => {
+      const consoleError = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+      await renderMultiSelect({
+        data: [
+          { label: 'Apple', value: 'red' },
+          { label: 'Apple', value: 'green' },
+        ],
+        value: ['red', 'green'],
+      });
+
+      expect(screen.getAllByText('Apple')).toHaveLength(2);
+      expect(consoleError).not.toHaveBeenCalled();
+    });
+
     it('unselects an item when its chip is pressed', async () => {
       const onChange = jest.fn();
       await renderMultiSelect({ value: ['banana', 'cherry'], onChange });
