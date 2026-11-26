@@ -1,10 +1,5 @@
 import type { ReactNode, Ref } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import type { FlatListProps } from 'react-native';
 
 type ListOwnProps<T> = Pick<
@@ -60,20 +55,20 @@ export function DropdownList<T>({
   );
 
   const content = (
-    <View style={styles.flexShrink}>
+    <>
       {isInverted && list}
       {search}
       {!isInverted && list}
-    </View>
+    </>
   );
 
   // Not an accessibility element: it only claims touches.
   return captureTouches ? (
-    <TouchableWithoutFeedback accessible={false}>
+    <Pressable accessible={false} style={styles.flexShrink}>
       {content}
-    </TouchableWithoutFeedback>
+    </Pressable>
   ) : (
-    content
+    <View style={styles.flexShrink}>{content}</View>
   );
 }
 

@@ -24,6 +24,10 @@ export const styles = StyleSheet.create({
   row: {
     flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
   },
+  // Like TouchableOpacity's default feedback.
+  pressed: {
+    opacity: 0.2,
+  },
   icon: {
     width: 20,
     height: 20,

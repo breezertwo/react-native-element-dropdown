@@ -1,15 +1,9 @@
 import { DEFAULT_GRAY } from '../../internal/colors';
 import type { TextScaling } from '../../internal/a11y';
 import { getFieldText } from '../../internal/fields';
-import { useState, type ReactElement } from 'react';
+import { useState, type ReactElement, type ReactNode } from 'react';
 import { fitChips } from './fitChips';
-import {
-  I18nManager,
-  StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import { I18nManager, Pressable, StyleSheet, Text, View } from 'react-native';
 import type {
   LayoutChangeEvent,
   StyleProp,
@@ -75,6 +69,16 @@ interface Measurements {
 const layoutWidth = (event: LayoutChangeEvent) =>
   event.nativeEvent.layout.width;
 
+interface ChipLook {
+  style: StyleProp<ViewStyle>;
+  content: ReactNode;
+}
+
+/** A chip as a plain view, for measuring it. */
+const lookView = ({ style, content }: ChipLook) => (
+  <View style={style}>{content}</View>
+);
+
 /**
  * A chip per selected item; pressing one unselects its item.
  *
@@ -116,59 +120,68 @@ export function SelectedChips<T>({
     fontFamily ? { fontFamily } : {},
   ]);
 
-  // What a chip looks like; the same for the row and the measuring copy.
-  const chipContent = (item: T) => {
+  // What a chip looks like: the style of its box and what is inside. The
+  // same for the row and the measuring copy. Custom chips sit in a row, so
+  // they stretch to the height of the others.
+  const chipLook = (item: T): ChipLook => {
     const disabled = isDisabled(item);
     if (renderSelectedItem) {
-      return renderSelectedItem(
-        item,
-        disabled ? undefined : () => onUnselect(item)
-      );
+      return {
+        style: styles.custom,
+        content: renderSelectedItem(
+          item,
+          disabled ? undefined : () => onUnselect(item)
+        ),
+      };
     }
-    return (
-      <View
-        style={StyleSheet.flatten([
-          styles.chip,
-          selectedStyle,
-          disabled && styles.disabled,
-        ])}
-      >
-        <Text {...textScaling} style={textStyle}>
-          {getFieldText(item, labelField)}
-        </Text>
-        {renderChipRemoveIcon ? (
-          renderChipRemoveIcon(item)
-        ) : (
-          <Text
-            {...textScaling}
-            style={StyleSheet.flatten([
-              styles.removeIcon,
-              selectedTextStyle,
-              chipRemoveIconStyle,
-            ])}
-          >
-            ⓧ
+    return {
+      style: StyleSheet.flatten([
+        styles.chip,
+        selectedStyle,
+        disabled && styles.disabled,
+      ]),
+      content: (
+        <>
+          <Text {...textScaling} style={textStyle}>
+            {getFieldText(item, labelField)}
           </Text>
-        )}
-      </View>
-    );
+          {renderChipRemoveIcon ? (
+            renderChipRemoveIcon(item)
+          ) : (
+            <Text
+              {...textScaling}
+              style={StyleSheet.flatten([
+                styles.removeIcon,
+                selectedTextStyle,
+                chipRemoveIconStyle,
+              ])}
+            >
+              ⓧ
+            </Text>
+          )}
+        </>
+      ),
+    };
   };
 
-  const moreContent = (hiddenCount: number) =>
-    renderChipsOverflow ? (
-      renderChipsOverflow(hiddenCount)
-    ) : (
-      <View style={StyleSheet.flatten([styles.chip, selectedStyle])}>
-        <Text {...textScaling} style={textStyle}>
-          {`+${hiddenCount}`}
-        </Text>
-      </View>
-    );
+  const moreLook = (hiddenCount: number): ChipLook =>
+    renderChipsOverflow
+      ? { style: styles.custom, content: renderChipsOverflow(hiddenCount) }
+      : {
+          style: StyleSheet.flatten([styles.chip, selectedStyle]),
+          content: (
+            <Text {...textScaling} style={textStyle}>
+              {`+${hiddenCount}`}
+            </Text>
+          ),
+        };
 
   const chip = (item: T) => {
     const disabled = isDisabled(item);
+    const look = chipLook(item);
     return (
-      <TouchableWithoutFeedback
+      <Pressable
+        style={look.style}
         disabled={disabled}
         accessibilityState={{ disabled }}
         testID={getFieldText(item, itemTestIDField || labelField)}
@@ -180,8 +193,8 @@ export function SelectedChips<T>({
         key={keyOf(item)}
         onPress={() => onUnselect(item)}
       >
-        {chipContent(item)}
-      </TouchableWithoutFeedback>
+        {look.content}
+      </Pressable>
     );
   };
 
@@ -196,23 +209,23 @@ export function SelectedChips<T>({
       : items.length;
   const hiddenCount = items.length - visibleCount;
 
+  const moreTestID = testID ? `${testID} chips more` : undefined;
+  const visibleMore = moreLook(hiddenCount);
   const more =
     hiddenCount === 0 ? null : onPressMore ? (
-      <TouchableWithoutFeedback
-        testID={testID ? `${testID} chips more` : undefined}
+      <Pressable
+        style={visibleMore.style}
+        testID={moreTestID}
         accessibilityRole="button"
         accessibilityLabel={strings.moreSelected(hiddenCount)}
         hitSlop={CHIP_HIT_SLOP}
         onPress={onPressMore}
       >
-        {moreContent(hiddenCount)}
-      </TouchableWithoutFeedback>
+        {visibleMore.content}
+      </Pressable>
     ) : (
-      <View
-        testID={testID ? `${testID} chips more` : undefined}
-        style={styles.moreWrapper}
-      >
-        {moreContent(hiddenCount)}
+      <View style={visibleMore.style} testID={moreTestID}>
+        {visibleMore.content}
       </View>
     );
 
@@ -245,7 +258,7 @@ export function SelectedChips<T>({
             testID={testID ? `${testID} chips measure` : undefined}
             onLayout={(event) => setChipWidth(key, layoutWidth(event))}
           >
-            {chipContent(item)}
+            {lookView(chipLook(item))}
           </View>
         );
       })}
@@ -253,7 +266,7 @@ export function SelectedChips<T>({
         testID={testID ? `${testID} chips measure more` : undefined}
         onLayout={(event) => setWidth('more', layoutWidth(event))}
       >
-        {moreContent(items.length)}
+        {lookView(moreLook(items.length))}
       </View>
     </View>
   ) : null;
@@ -287,9 +300,7 @@ const styles = StyleSheet.create({
     flexWrap: 'nowrap',
     overflow: 'hidden',
   },
-  // A row, so the "+N" chip stretches to the height of the other chips
-  // like they do as direct children of the chips row.
-  moreWrapper: {
+  custom: {
     flexDirection: 'row',
   },
   measuring: {

@@ -1,13 +1,7 @@
 import { FIELD_ROLE, type TextScaling } from '../../internal/a11y';
 import type { TriggerInstance } from '../../internal/placement/useDropdownPlacement';
 import type { ReactElement, ReactNode, Ref } from 'react';
-import {
-  I18nManager,
-  StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import { I18nManager, Pressable, StyleSheet, Text } from 'react-native';
 import type { ImageStyle, Insets, StyleProp, TextStyle } from 'react-native';
 import { ChevronIcon, triggerStyles } from '../../internal/DropdownTrigger';
 
@@ -65,7 +59,9 @@ export function InsideTrigger({
   iconStyle,
 }: InsideTriggerProps) {
   return (
-    <TouchableWithoutFeedback
+    <Pressable
+      ref={ref}
+      style={styles.field}
       hitSlop={hitSlop}
       testID={testID}
       accessibilityLabel={accessibilityLabel}
@@ -85,27 +81,25 @@ export function InsideTrigger({
       }}
       onPress={onPress}
     >
-      <View ref={ref} style={styles.field}>
-        {renderLeftIcon?.(visible)}
-        {chips ?? (
-          <Text
-            {...textScaling}
-            style={StyleSheet.flatten([
-              triggerStyles.text,
-              placeholderStyle,
-              fontFamily ? { fontFamily } : {},
-            ])}
-          >
-            {placeholder}
-          </Text>
-        )}
-        {renderRightIcon ? (
-          renderRightIcon(visible)
-        ) : (
-          <ChevronIcon color={iconColor} style={iconStyle} />
-        )}
-      </View>
-    </TouchableWithoutFeedback>
+      {renderLeftIcon?.(visible)}
+      {chips ?? (
+        <Text
+          {...textScaling}
+          style={StyleSheet.flatten([
+            triggerStyles.text,
+            placeholderStyle,
+            fontFamily ? { fontFamily } : {},
+          ])}
+        >
+          {placeholder}
+        </Text>
+      )}
+      {renderRightIcon ? (
+        renderRightIcon(visible)
+      ) : (
+        <ChevronIcon color={iconColor} style={iconStyle} />
+      )}
+    </Pressable>
   );
 }
 

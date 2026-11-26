@@ -1,13 +1,7 @@
 import type { TextScaling } from './a11y';
 import type { TriggerInstance } from './placement/useDropdownPlacement';
 import type { ReactElement, ReactNode, Ref } from 'react';
-import {
-  I18nManager,
-  StyleSheet,
-  Text,
-  TouchableHighlight,
-  View,
-} from 'react-native';
+import { I18nManager, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 
 interface DropdownOptionProps<T> {
@@ -27,7 +21,7 @@ interface DropdownOptionProps<T> {
   accessibilityLabel?: string;
   /** radio (Dropdown) or checkbox (MultiSelect); reports `selected` as checked. */
   accessibilityRole: 'radio' | 'checkbox';
-  /** Background while pressed and while selected. */
+  /** Background while pressed and while selected (`activeColor`). */
   activeColor: string;
   /** Extra style of the row while selected. */
   selectedStyle?: ViewStyle;
@@ -82,14 +76,14 @@ export function DropdownOption<T>({
   renderSelectedIcon,
 }: DropdownOptionProps<T>) {
   return (
-    <TouchableHighlight
+    <Pressable
       ref={ref}
       accessibilityRole={accessibilityRole}
       accessibilityState={{ checked: selected, disabled }}
       disabled={disabled}
       testID={testID}
       accessibilityLabel={accessibilityLabel}
-      underlayColor={activeColor}
+      style={({ pressed }) => pressed && { backgroundColor: activeColor }}
       onPress={onPress}
     >
       <View
@@ -126,7 +120,7 @@ export function DropdownOption<T>({
           </View>
         )}
       </View>
-    </TouchableHighlight>
+    </Pressable>
   );
 }
 

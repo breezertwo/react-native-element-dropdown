@@ -1,14 +1,7 @@
 import { FIELD_ROLE, type TextScaling } from './a11y';
 import type { TriggerInstance } from './placement/useDropdownPlacement';
 import type { ReactElement, Ref } from 'react';
-import {
-  I18nManager,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import { I18nManager, Image, Pressable, StyleSheet, Text } from 'react-native';
 import type {
   ImageStyle,
   Insets,
@@ -89,7 +82,9 @@ export function DropdownTrigger({
   iconStyle,
 }: DropdownTriggerProps) {
   return (
-    <TouchableWithoutFeedback
+    <Pressable
+      ref={ref}
+      style={triggerStyles.dropdown}
       hitSlop={hitSlop}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole={FIELD_ROLE}
@@ -101,26 +96,24 @@ export function DropdownTrigger({
       onPress={onPress}
       testID={testID}
     >
-      <View ref={ref} style={triggerStyles.dropdown}>
-        {renderLeftIcon?.(visible)}
-        <Text
-          {...textScaling}
-          style={[
-            triggerStyles.text,
-            textStyle,
-            fontFamily ? { fontFamily } : {},
-          ]}
-          {...textProps}
-        >
-          {text}
-        </Text>
-        {renderRightIcon ? (
-          renderRightIcon(visible)
-        ) : (
-          <ChevronIcon color={iconColor} style={iconStyle} />
-        )}
-      </View>
-    </TouchableWithoutFeedback>
+      {renderLeftIcon?.(visible)}
+      <Text
+        {...textScaling}
+        style={[
+          triggerStyles.text,
+          textStyle,
+          fontFamily ? { fontFamily } : {},
+        ]}
+        {...textProps}
+      >
+        {text}
+      </Text>
+      {renderRightIcon ? (
+        renderRightIcon(visible)
+      ) : (
+        <ChevronIcon color={iconColor} style={iconStyle} />
+      )}
+    </Pressable>
   );
 }
 

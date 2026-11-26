@@ -1,13 +1,6 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import React, { useState } from 'react';
-import {
-  Image,
-  TextInput,
-  TouchableOpacity,
-  View,
-  TouchableWithoutFeedback,
-  StyleSheet,
-} from 'react-native';
+import { Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import type { CTextInput } from './model';
 import { styles } from './styles';
 
@@ -53,10 +46,11 @@ const TextInputComponent: CTextInput = (props) => {
       }
       if (text.length > 0) {
         return (
-          <TouchableOpacity
+          <Pressable
             accessibilityRole="button"
             accessibilityLabel={clearButtonLabel}
             hitSlop={CLEAR_HIT_SLOP}
+            style={({ pressed }) => pressed && styles.pressed}
             onPress={() => onChange('')}
           >
             {renderClearIcon ? (
@@ -67,7 +61,7 @@ const TextInputComponent: CTextInput = (props) => {
                 style={StyleSheet.flatten([styles.icon, iconStyle])}
               />
             )}
-          </TouchableOpacity>
+          </Pressable>
         );
       }
       return null;
@@ -86,23 +80,22 @@ const TextInputComponent: CTextInput = (props) => {
   };
 
   return (
-    // Not an accessibility element: only the input and the clear button are.
-    <TouchableWithoutFeedback accessible={false}>
-      <View style={[style]}>
-        <View style={styles.textInput}>
-          {renderLeftIcon?.()}
-          <TextInput
-            {...props}
-            style={StyleSheet.flatten([styles.input, inputStyle, font()])}
-            value={text}
-            placeholder={placeholder}
-            placeholderTextColor={placeholderTextColor}
-            onChangeText={onChange}
-          />
-          {_renderRightIcon()}
-        </View>
+    // Claims touches around the input. Not an accessibility element: only
+    // the input and the clear button are.
+    <Pressable accessible={false} style={style}>
+      <View style={styles.textInput}>
+        {renderLeftIcon?.()}
+        <TextInput
+          {...props}
+          style={StyleSheet.flatten([styles.input, inputStyle, font()])}
+          value={text}
+          placeholder={placeholder}
+          placeholderTextColor={placeholderTextColor}
+          onChangeText={onChange}
+        />
+        {_renderRightIcon()}
       </View>
-    </TouchableWithoutFeedback>
+    </Pressable>
   );
 };
 
