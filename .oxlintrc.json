@@ -26,6 +26,10 @@
   "rules": {
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn",
+    // Not needed with the automatic JSX runtime (bob and Expo use it).
+    "react/react-in-jsx-scope": "off",
+    // DOM rule; TypeScript checks style props, and e.g. expo-status-bar's `style` is a string.
+    "react/style-prop-object": "off",
     "no-restricted-imports": [
       "error",
       {

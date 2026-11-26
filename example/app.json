@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Element Dropdown",
+    "slug": "element-dropdown-example",
+    "version": "1.0.0",
+    "orientation": "default",
+    "scheme": "elementdropdown",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "com.breezertwo.elementdropdown.example",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.breezertwo.elementdropdown.example"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

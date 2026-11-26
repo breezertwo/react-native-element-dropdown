@@ -28,6 +28,9 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      - name: Typecheck example app
+        run: pnpm --filter example typecheck
+
   test:
     runs-on: ubuntu-latest
     steps:
