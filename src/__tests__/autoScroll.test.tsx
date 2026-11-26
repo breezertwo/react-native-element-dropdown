@@ -6,10 +6,17 @@ import {
   it,
   jest,
 } from '@jest/globals';
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import {
+  act,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+} from '@testing-library/react-native';
 import React from 'react';
 import { FlatList } from 'react-native';
 import { Dropdown } from '../index';
+import { useAutoScroll } from '../internal/useAutoScroll';
 import { layoutOpenList, mockTriggerLayout } from '../__fixtures__/testUtils';
 
 const items = Array.from({ length: 100 }, (_, index) => ({
@@ -138,35 +145,92 @@ describe('Dropdown autoScroll', () => {
     expect(scrollToIndex).not.toHaveBeenCalled();
   });
 
-  it('retries a few times when the row is not rendered yet', async () => {
-    let failScroll: (index: number) => void = () => {};
+  it('retries later when the row is not measured yet, at most ten times', async () => {
+    let failures = 0;
     scrollToIndex.mockImplementation(function (
       this: FlatList,
       ...args: unknown[]
     ) {
       const { index } = args[0] as { index: number };
-      failScroll = (i) =>
-        this.props.onScrollToIndexFailed?.({
-          index: i,
-          highestMeasuredFrameIndex: 10,
-          averageItemLength: 50,
-        });
-      failScroll(index);
+      failures += 1;
+      // No row is measured on the first attempt, so the average is unknown.
+      this.props.onScrollToIndexFailed?.({
+        index,
+        highestMeasuredFrameIndex: 10,
+        averageItemLength: failures === 1 ? 0 : 50,
+      });
     });
     await renderDropdown();
     await open();
 
     await contentSizeChange(2000);
+    expect(scrollToIndex).toHaveBeenCalledTimes(1);
+    expect(scrollToOffset).not.toHaveBeenCalled();
+
+    // The retry waits about one FlatList render batch.
+    await act(async () => {
+      jest.advanceTimersByTime(49);
+    });
+    expect(scrollToIndex).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      jest.advanceTimersByTime(1);
+    });
+    expect(scrollToIndex).toHaveBeenCalledTimes(2);
+
     await act(async () => {
       jest.runAllTimers();
     });
 
-    // The first attempt plus three retries, each after jumping close to the row.
-    expect(scrollToIndex).toHaveBeenCalledTimes(4);
-    expect(scrollToOffset).toHaveBeenCalledTimes(3);
+    // The first attempt plus ten retries; from the second failure on, each
+    // jumps close to the row first.
+    expect(scrollToIndex).toHaveBeenCalledTimes(11);
+    expect(scrollToOffset).toHaveBeenCalledTimes(9);
     expect(scrollToOffset).toHaveBeenCalledWith({
       offset: 3000,
       animated: false,
     });
+  });
+});
+
+describe('useAutoScroll first render batch', () => {
+  const data = items;
+  const isSelected = (index: number) => (item: (typeof items)[number]) =>
+    item.value === `item-${index}`;
+
+  it.each([
+    // [selected index, consumer initialNumToRender, getItemLayout, expected]
+    [60, undefined, false, 71], // every row up to 60, plus ten after it
+    [5, undefined, false, 10], // within FlatList's default batch of 10
+    [60, 100, false, 100], // within the consumer's batch
+    [60, undefined, true, 10], // getItemLayout: FlatList can scroll anywhere
+    [-1, undefined, false, 10], // nothing selected
+  ])(
+    'selected %p, initialNumToRender %p, getItemLayout %p → %p',
+    async (index, initialNumToRender, hasItemLayout, expected) => {
+      const { result } = await renderHook(() =>
+        useAutoScroll({
+          enabled: true,
+          visible: true,
+          listData: data,
+          isSelected: isSelected(index),
+          initialNumToRender,
+          hasItemLayout,
+        })
+      );
+
+      expect(result.current.initialNumToRender).toBe(expected);
+    }
+  );
+
+  it('renders every row up to the selected one in the list', async () => {
+    await renderDropdown();
+    await open();
+
+    // Item 60 is also in the field, so check rows just above it.
+    for (const label of ['Item 0', 'Item 30', 'Item 59']) {
+      expect(
+        screen.getByText(label, { includeHiddenElements: true })
+      ).toBeTruthy();
+    }
   });
 });

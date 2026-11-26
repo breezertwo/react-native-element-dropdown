@@ -169,13 +169,19 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       [currentValue, valueField]
     );
 
-    const { listRef, onContentSizeChange, onScrollToIndexFailed } =
-      useAutoScroll({
-        enabled: autoScroll,
-        visible,
-        listData,
-        isSelected: isSelectedItem,
-      });
+    const {
+      listRef,
+      initialNumToRender,
+      onContentSizeChange,
+      onScrollToIndexFailed,
+    } = useAutoScroll({
+      enabled: autoScroll,
+      visible,
+      listData,
+      isSelected: isSelectedItem,
+      initialNumToRender: flatListProps?.initialNumToRender ?? undefined,
+      hasItemLayout: flatListProps?.getItemLayout != null,
+    });
 
     const onSelect = useCallback(
       (item: any) => {
@@ -308,6 +314,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
             flatListProps={flatListProps}
             listProps={{
               ref: listRef,
+              initialNumToRender,
               onContentSizeChange,
               onScrollToIndexFailed,
               data: listData,

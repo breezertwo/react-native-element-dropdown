@@ -1,8 +1,17 @@
 import { useCallback, useEffect, useRef } from 'react';
 import type { FlatList } from 'react-native';
 
+/** FlatList's default `initialNumToRender`. */
+const DEFAULT_INITIAL_NUM_TO_RENDER = 10;
+/** Rows rendered after the selected one, to fill the list below it. */
+const ROWS_AFTER_TARGET = 10;
 /** Retries when the selected row isn't rendered yet. */
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 10;
+/**
+ * Wait between retries: about one FlatList render batch, so rows at the new
+ * position are rendered and measured before the next attempt.
+ */
+const RETRY_DELAY_MS = 50;
 
 interface UseAutoScrollParams<T> {
   /** The `autoScroll` prop. */
@@ -11,6 +20,10 @@ interface UseAutoScrollParams<T> {
   /** The items the list shows. */
   listData: T[];
   isSelected: (item: T) => boolean;
+  /** The list's `initialNumToRender`, if the consumer sets it. */
+  initialNumToRender?: number;
+  /** Whether the consumer passes `getItemLayout` through flatListProps. */
+  hasItemLayout?: boolean;
 }
 
 type ScrollToIndexFailedInfo = {
@@ -19,27 +32,44 @@ type ScrollToIndexFailedInfo = {
 };
 
 /**
- * Scrolls the list to the selected item once each time it opens, as soon as
- * its content is laid out (still before the list becomes visible). Later
- * content changes, e.g. more rows rendering while the user scrolls, don't
- * scroll again. The index comes from the items the list shows, so it is
- * always in range, also while searching.
+ * Shows the selected item when the list opens, once its content is laid out
+ * (still before the list becomes visible).
+ *
+ * FlatList can only scroll to rows it has measured: without `getItemLayout`
+ * it caps the space for unrendered rows at the last measured row, and
+ * `initialScrollIndex` estimates the rows above, so scrolling up jumps. So
+ * the first render batch includes every row up to the selected one (plus a
+ * page after it). FlatList keeps that batch mounted, the scroll is exact and
+ * scrolling up stays smooth. With `getItemLayout`, FlatList can scroll
+ * anywhere and the batch stays as configured.
+ *
+ * Later content changes don't scroll again, so the list never snaps back.
+ * The index comes from the items the list shows, so it is always in range.
  */
 export const useAutoScroll = <T>({
   enabled,
   visible,
   listData,
   isSelected,
+  initialNumToRender = DEFAULT_INITIAL_NUM_TO_RENDER,
+  hasItemLayout = false,
 }: UseAutoScrollParams<T>) => {
   const listRef = useRef<FlatList<T>>(null);
   const hasScrolledRef = useRef(false);
   const retriesRef = useRef(0);
-  const retryFrameRef = useRef<number | null>(null);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const targetIndex = enabled ? listData.findIndex(isSelected) : -1;
+  // Only read by FlatList when it mounts, i.e. each time the list opens.
+  const firstBatchSize =
+    !hasItemLayout && targetIndex >= initialNumToRender
+      ? targetIndex + 1 + ROWS_AFTER_TARGET
+      : initialNumToRender;
 
   const cancelRetry = useCallback(() => {
-    if (retryFrameRef.current != null) {
-      cancelAnimationFrame(retryFrameRef.current);
-      retryFrameRef.current = null;
+    if (retryTimerRef.current != null) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
     }
   }, []);
 
@@ -54,18 +84,18 @@ export const useAutoScroll = <T>({
   useEffect(() => cancelRetry, [cancelRetry]);
 
   const onContentSizeChange = useCallback(() => {
-    if (!enabled || hasScrolledRef.current) {
+    if (hasScrolledRef.current) {
       return;
     }
     hasScrolledRef.current = true;
-    const index = listData.findIndex(isSelected);
-    if (index > -1) {
-      listRef.current?.scrollToIndex({ index, animated: false });
+    if (targetIndex > 0) {
+      listRef.current?.scrollToIndex({ index: targetIndex, animated: false });
     }
-  }, [enabled, listData, isSelected]);
+  }, [targetIndex]);
 
-  // FlatList can only scroll to rows it has rendered. Jump close to the row
-  // using the average row height, then try again on the next frame.
+  // Fallback when the row still isn't measured: jump close to it using the
+  // average row height (unknown until the first rows are measured), then try
+  // again once FlatList has rendered rows there.
   const onScrollToIndexFailed = useCallback(
     ({ index, averageItemLength }: ScrollToIndexFailedInfo) => {
       const list = listRef.current;
@@ -73,18 +103,25 @@ export const useAutoScroll = <T>({
         return;
       }
       retriesRef.current += 1;
-      list.scrollToOffset({
-        offset: averageItemLength * index,
-        animated: false,
-      });
+      if (averageItemLength > 0) {
+        list.scrollToOffset({
+          offset: averageItemLength * index,
+          animated: false,
+        });
+      }
       cancelRetry();
-      retryFrameRef.current = requestAnimationFrame(() => {
-        retryFrameRef.current = null;
+      retryTimerRef.current = setTimeout(() => {
+        retryTimerRef.current = null;
         listRef.current?.scrollToIndex({ index, animated: false });
-      });
+      }, RETRY_DELAY_MS);
     },
     [cancelRetry]
   );
 
-  return { listRef, onContentSizeChange, onScrollToIndexFailed };
+  return {
+    listRef,
+    initialNumToRender: firstBatchSize,
+    onContentSizeChange,
+    onScrollToIndexFailed,
+  };
 };

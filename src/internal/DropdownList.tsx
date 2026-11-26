@@ -16,6 +16,7 @@ type ListOwnProps<T> = Pick<
   | 'showsVerticalScrollIndicator'
   | 'onContentSizeChange'
   | 'onScrollToIndexFailed'
+  | 'initialNumToRender'
 > & { ref?: Ref<FlatList<T>> };
 
 interface DropdownListProps<T> {
