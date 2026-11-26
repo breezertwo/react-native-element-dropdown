@@ -13,6 +13,9 @@ import { styles } from './styles';
 
 const ic_close = require('../../assets/close.png');
 
+// The icon is 20pt; this makes the touch target 44pt.
+const CLEAR_HIT_SLOP = 12;
+
 const TextInputComponent: CTextInput = (props) => {
   const {
     fontFamily,
@@ -53,6 +56,7 @@ const TextInputComponent: CTextInput = (props) => {
           <TouchableOpacity
             accessibilityRole="button"
             accessibilityLabel={clearButtonLabel}
+            hitSlop={CLEAR_HIT_SLOP}
             onPress={() => onChange('')}
           >
             {renderClearIcon ? (

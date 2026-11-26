@@ -548,9 +548,10 @@ describe('Dropdown', () => {
         const input = screen.getByRole('search', { name: 'Search' });
 
         await fireEvent.changeText(input, 'ban');
-        await fireEvent.press(
-          screen.getByRole('button', { name: 'Clear search' })
-        );
+        const clear = screen.getByRole('button', { name: 'Clear search' });
+        // A 44pt touch target around the 20pt icon.
+        expect(clear.props.hitSlop).toBe(12);
+        await fireEvent.press(clear);
 
         expect(input.props.value).toBe('');
         expect(screen.getByText('Apple')).toBeTruthy();
