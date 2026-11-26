@@ -1,62 +1,90 @@
-import _debounce from 'lodash/debounce';
-import _findIndex from 'lodash/findIndex';
-import _get from 'lodash/get';
-import _isEqual from 'lodash/isEqual';
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { FlatList } from 'react-native';
 
+/** Retries when the selected row isn't rendered yet. */
+const MAX_RETRIES = 3;
+
 interface UseAutoScrollParams<T> {
-  autoScroll: boolean;
-  data: T[];
+  /** The `autoScroll` prop. */
+  enabled: boolean;
+  visible: boolean;
+  /** The items the list shows. */
   listData: T[];
-  value: unknown;
-  valueField: keyof T;
+  isSelected: (item: T) => boolean;
 }
 
+type ScrollToIndexFailedInfo = {
+  index: number;
+  averageItemLength: number;
+};
+
 /**
- * Scrolls the open list to the selected item (Dropdown's `autoScroll`).
- * Called when the list's content size changes and when scrolling to an item
- * that isn't rendered yet fails.
- *
- * 2.x behaviour, rewritten in v3 plan phase 4: the debounce is recreated on
- * every render, the callback keeps the `listData` of the render where its
- * dependencies last changed, and passing a ref-reading callback to
- * `_debounce` during render breaks the React Compiler rules (react/refs).
+ * Scrolls the list to the selected item once each time it opens, as soon as
+ * its content is laid out (still before the list becomes visible). Later
+ * content changes, e.g. more rows rendering while the user scrolls, don't
+ * scroll again. The index comes from the items the list shows, so it is
+ * always in range, also while searching.
  */
 export const useAutoScroll = <T>({
-  autoScroll,
-  data,
+  enabled,
+  visible,
   listData,
-  value,
-  valueField,
+  isSelected,
 }: UseAutoScrollParams<T>) => {
   const listRef = useRef<FlatList<T>>(null);
+  const hasScrolledRef = useRef(false);
+  const retriesRef = useRef(0);
+  const retryFrameRef = useRef<number | null>(null);
 
-  const scrollToValue = _debounce(
-    // oxlint-disable-next-line react/exhaustive-deps, react/refs -- 2.x behaviour, see above
-    useCallback(() => {
-      if (
-        autoScroll &&
-        data?.length > 0 &&
-        listData?.length === data?.length &&
-        listRef.current
-      ) {
-        const selectedValue =
-          typeof value === 'object' ? _get(value, valueField as string) : value;
-        const index = _findIndex(listData, (item) =>
-          _isEqual(selectedValue, _get(item, valueField as string))
-        );
-        if (listData.length > 0 && index > -1 && index <= listData.length - 1) {
-          try {
-            listRef.current.scrollToIndex({ index, animated: false });
-          } catch (error) {
-            console.warn(`scrollToIndex error: ${error}`);
-          }
-        }
+  const cancelRetry = useCallback(() => {
+    if (retryFrameRef.current != null) {
+      cancelAnimationFrame(retryFrameRef.current);
+      retryFrameRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!visible) {
+      hasScrolledRef.current = false;
+      retriesRef.current = 0;
+      cancelRetry();
+    }
+  }, [visible, cancelRetry]);
+
+  useEffect(() => cancelRetry, [cancelRetry]);
+
+  const onContentSizeChange = useCallback(() => {
+    if (!enabled || hasScrolledRef.current) {
+      return;
+    }
+    hasScrolledRef.current = true;
+    const index = listData.findIndex(isSelected);
+    if (index > -1) {
+      listRef.current?.scrollToIndex({ index, animated: false });
+    }
+  }, [enabled, listData, isSelected]);
+
+  // FlatList can only scroll to rows it has rendered. Jump close to the row
+  // using the average row height, then try again on the next frame.
+  const onScrollToIndexFailed = useCallback(
+    ({ index, averageItemLength }: ScrollToIndexFailedInfo) => {
+      const list = listRef.current;
+      if (!list || retriesRef.current >= MAX_RETRIES) {
+        return;
       }
-    }, [autoScroll, data.length, value, valueField]),
-    200
+      retriesRef.current += 1;
+      list.scrollToOffset({
+        offset: averageItemLength * index,
+        animated: false,
+      });
+      cancelRetry();
+      retryFrameRef.current = requestAnimationFrame(() => {
+        retryFrameRef.current = null;
+        listRef.current?.scrollToIndex({ index, animated: false });
+      });
+    },
+    [cancelRetry]
   );
 
-  return { listRef, scrollToValue };
+  return { listRef, onContentSizeChange, onScrollToIndexFailed };
 };

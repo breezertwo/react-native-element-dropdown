@@ -162,13 +162,20 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       getValue();
     }, [value, data, getValue]);
 
-    const { listRef, scrollToValue } = useAutoScroll({
-      autoScroll,
-      data,
-      listData,
-      value,
-      valueField,
-    });
+    const isSelectedItem = useCallback(
+      (item: any) =>
+        currentValue != null &&
+        _isEqual(_get(item, valueField), _get(currentValue, valueField)),
+      [currentValue, valueField]
+    );
+
+    const { listRef, onContentSizeChange, onScrollToIndexFailed } =
+      useAutoScroll({
+        enabled: autoScroll,
+        visible,
+        listData,
+        isSelected: isSelectedItem,
+      });
 
     const onSelect = useCallback(
       (item: any) => {
@@ -219,9 +226,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
 
     const _renderItem = useCallback(
       ({ item }: { item: any }) => {
-        const selected =
-          currentValue != null &&
-          _isEqual(_get(item, valueField), _get(currentValue, valueField));
+        const selected = isSelectedItem(item);
         return (
           <DropdownOption
             item={item}
@@ -246,8 +251,8 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       [
         accessibilityLabel,
         activeColor,
-        currentValue,
         fontFamily,
+        isSelectedItem,
         itemAccessibilityLabelField,
         itemContainerStyle,
         itemTestIDField,
@@ -255,7 +260,6 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
         labelField,
         onSelect,
         renderItem,
-        valueField,
       ]
     );
 
@@ -304,8 +308,8 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
             flatListProps={flatListProps}
             listProps={{
               ref: listRef,
-              onContentSizeChange: scrollToValue,
-              onScrollToIndexFailed: scrollToValue,
+              onContentSizeChange,
+              onScrollToIndexFailed,
               data: listData,
               nativeID: nativeId,
               renderItem: _renderItem,
