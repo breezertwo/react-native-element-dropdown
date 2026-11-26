@@ -50,10 +50,10 @@
     // Naming style of the 2.x code (`_get`, `_renderItem`); revisit in the refactor.
     "no-underscore-dangle": "off",
 
+    "rn-a11y/has-valid-accessibility-descriptors": "error",
+
     // Known issues in the 2.x code, raised back to "error" once fixed:
-    // touchables without role/label (v3 plan, phase 5) and React Compiler
-    // rule violations (phase 7).
-    "rn-a11y/has-valid-accessibility-descriptors": "warn",
+    // React Compiler rule violations (phase 7).
     "react/set-state-in-effect": "warn"
   }
 }

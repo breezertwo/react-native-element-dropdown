@@ -363,7 +363,11 @@ describe('Dropdown', () => {
       await renderDropdown({
         search: true,
         renderInputSearch: (onSearch) => (
-          <TextInput testID="custom search" onChangeText={onSearch} />
+          <TextInput
+            testID="custom search"
+            accessibilityRole="search"
+            onChangeText={onSearch}
+          />
         ),
       });
       await open();
