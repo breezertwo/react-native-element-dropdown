@@ -486,6 +486,42 @@ describe('Dropdown', () => {
       ).toBeTruthy();
     });
 
+    describe('search', () => {
+      it('is a search field named by searchPlaceholder, or "Search"', async () => {
+        await renderDropdown({ search: true, searchPlaceholder: 'Find fruit' });
+        await open();
+        expect(screen.getByRole('search', { name: 'Find fruit' })).toBeTruthy();
+      });
+
+      it('falls back to "Search" and has a "Clear search" button', async () => {
+        await renderDropdown({ search: true });
+        await open();
+        const input = screen.getByRole('search', { name: 'Search' });
+
+        await fireEvent.changeText(input, 'ban');
+        await fireEvent.press(
+          screen.getByRole('button', { name: 'Clear search' })
+        );
+
+        expect(input.props.value).toBe('');
+        expect(screen.getByText('Apple')).toBeTruthy();
+      });
+
+      it('uses accessibilityStrings', async () => {
+        await renderDropdown({
+          search: true,
+          accessibilityStrings: { search: 'Suche', clearSearch: 'Löschen' },
+        });
+        await open();
+        await fireEvent.changeText(
+          screen.getByRole('search', { name: 'Suche' }),
+          'ban'
+        );
+
+        expect(screen.getByRole('button', { name: 'Löschen' })).toBeTruthy();
+      });
+    });
+
     it('names the list like the field', async () => {
       await renderDropdown({ accessibilityLabel: 'Fruit' });
       await open();

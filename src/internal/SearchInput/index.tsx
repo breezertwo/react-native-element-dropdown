@@ -21,6 +21,7 @@ const TextInputComponent: CTextInput = (props) => {
     placeholderTextColor = '#000',
     placeholder = '',
     showIcon,
+    clearButtonLabel = 'Clear search',
     inputStyle,
     iconStyle,
     onChangeText = (_value: string) => {},
@@ -48,7 +49,11 @@ const TextInputComponent: CTextInput = (props) => {
       }
       if (text.length > 0) {
         return (
-          <TouchableOpacity onPress={() => onChange('')}>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel={clearButtonLabel}
+            onPress={() => onChange('')}
+          >
             <Image
               source={ic_close}
               style={StyleSheet.flatten([styles.icon, iconStyle])}
@@ -72,7 +77,8 @@ const TextInputComponent: CTextInput = (props) => {
   };
 
   return (
-    <TouchableWithoutFeedback>
+    // Not an accessibility element: only the input and the clear button are.
+    <TouchableWithoutFeedback accessible={false}>
       <View style={[style]}>
         <View style={styles.textInput}>
           {renderLeftIcon?.()}

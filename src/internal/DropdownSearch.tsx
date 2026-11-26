@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { StyleSheet } from 'react-native';
 import type { ImageStyle, StyleProp, TextStyle } from 'react-native';
+import type { DropdownAccessibilityStrings } from './a11y';
 import SearchInput from './SearchInput';
 
 interface DropdownSearchProps {
@@ -9,8 +10,8 @@ interface DropdownSearchProps {
   /** Replaces the built-in input (`renderInputSearch` prop). */
   renderInputSearch?: (onSearch: (text: string) => void) => ReactElement | null;
   testID?: string;
-  accessibilityLabel?: string;
   placeholder?: string;
+  strings: DropdownAccessibilityStrings;
   placeholderTextColor: string;
   /** Applied to both the input's container and the input (2.x behaviour). */
   inputSearchStyle?: StyleProp<TextStyle>;
@@ -25,8 +26,8 @@ export function DropdownSearch({
   onSearch,
   renderInputSearch,
   testID,
-  accessibilityLabel,
   placeholder,
+  strings,
   placeholderTextColor,
   inputSearchStyle,
   fontFamily,
@@ -40,7 +41,9 @@ export function DropdownSearch({
   return (
     <SearchInput
       testID={testID + ' input'}
-      accessibilityLabel={accessibilityLabel + ' input'}
+      accessibilityLabel={placeholder || strings.search}
+      accessibilityRole="search"
+      clearButtonLabel={strings.clearSearch}
       style={[styles.input, inputSearchStyle]}
       inputStyle={[inputSearchStyle, fontFamily ? { fontFamily } : {}]}
       value={searchText}

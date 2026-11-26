@@ -13,6 +13,8 @@ interface Props extends TextInputProps {
   inputStyle?: StyleProp<TextStyle>;
   iconStyle?: StyleProp<ImageStyle>;
   showIcon?: boolean;
+  /** Screen reader label of the clear button. */
+  clearButtonLabel?: string;
   renderRightIcon?: () => React.ReactElement | null;
   renderLeftIcon?: () => React.ReactElement | null;
 }

@@ -16,6 +16,7 @@ import {
 } from '../../internal/placement/useDropdownPlacement';
 import { useAutoScroll } from '../../internal/useAutoScroll';
 import { useDropdownState } from '../../internal/useDropdownState';
+import { resolveAccessibilityStrings } from '../../internal/a11y';
 import { DropdownList } from '../../internal/DropdownList';
 import { DropdownModal } from '../../internal/DropdownModal';
 import { DropdownOption } from '../../internal/DropdownOption';
@@ -75,6 +76,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       confirmSelectItem,
       onConfirmSelectItem,
       accessibilityLabel,
+      accessibilityStrings,
       itemAccessibilityLabelField,
       mode = 'default',
       closeModalWhenSelectedItem = true,
@@ -109,6 +111,11 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       safeAreaInsets,
       containerStyle,
     });
+
+    const strings = useMemo(
+      () => resolveAccessibilityStrings(accessibilityStrings),
+      [accessibilityStrings]
+    );
 
     const { searchText, listData, onSearch, clearSearch } = useSearch({
       data,
@@ -298,7 +305,7 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
                   onSearch={onSearch}
                   renderInputSearch={renderInputSearch}
                   testID={testID}
-                  accessibilityLabel={accessibilityLabel}
+                  strings={strings}
                   placeholder={searchPlaceholder}
                   placeholderTextColor={searchPlaceholderTextColor}
                   inputSearchStyle={inputSearchStyle}
