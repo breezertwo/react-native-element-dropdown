@@ -1,4 +1,5 @@
-import type { ReactElement } from 'react';
+import type { TriggerInstance } from './placement/useDropdownPlacement';
+import type { ReactElement, Ref } from 'react';
 import {
   I18nManager,
   Image,
@@ -31,6 +32,8 @@ export function ChevronIcon({ color, style }: ChevronIconProps) {
 }
 
 interface DropdownTriggerProps {
+  /** The accessibility element, for moving screen reader focus to it. */
+  ref?: Ref<TriggerInstance>;
   /** The list's open state, for aria-expanded and the icon render props. */
   visible: boolean;
   onPress: () => void;
@@ -56,6 +59,7 @@ interface DropdownTriggerProps {
  * and whether the list is expanded.
  */
 export function DropdownTrigger({
+  ref,
   visible,
   onPress,
   testID,
@@ -83,7 +87,7 @@ export function DropdownTrigger({
       onPress={onPress}
       testID={testID}
     >
-      <View style={triggerStyles.dropdown}>
+      <View ref={ref} style={triggerStyles.dropdown}>
         {renderLeftIcon?.(visible)}
         <Text
           style={[

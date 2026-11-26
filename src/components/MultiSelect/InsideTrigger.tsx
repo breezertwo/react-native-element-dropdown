@@ -1,4 +1,5 @@
-import type { ReactElement, ReactNode } from 'react';
+import type { TriggerInstance } from '../../internal/placement/useDropdownPlacement';
+import type { ReactElement, ReactNode, Ref } from 'react';
 import {
   I18nManager,
   StyleSheet,
@@ -10,6 +11,8 @@ import type { ImageStyle, StyleProp, TextStyle } from 'react-native';
 import { ChevronIcon, triggerStyles } from '../../internal/DropdownTrigger';
 
 interface InsideTriggerProps {
+  /** The accessibility element, for moving screen reader focus to it. */
+  ref?: Ref<TriggerInstance>;
   /** The list's open state, for the icon render props. */
   visible: boolean;
   onPress: () => void;
@@ -37,6 +40,7 @@ interface InsideTriggerProps {
 
 /** The field of `<MultiSelect inside />`: chips inside the field. */
 export function InsideTrigger({
+  ref,
   visible,
   onPress,
   testID,
@@ -73,7 +77,7 @@ export function InsideTrigger({
       }}
       onPress={onPress}
     >
-      <View style={styles.field}>
+      <View ref={ref} style={styles.field}>
         {renderLeftIcon?.(visible)}
         {chips ?? (
           <Text

@@ -1,4 +1,5 @@
-import type { ReactElement, ReactNode } from 'react';
+import type { TriggerInstance } from './placement/useDropdownPlacement';
+import type { ReactElement, ReactNode, Ref } from 'react';
 import {
   I18nManager,
   StyleSheet,
@@ -9,6 +10,8 @@ import {
 import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 
 interface DropdownOptionProps<T> {
+  /** The row, for moving screen reader focus to it. */
+  ref?: Ref<TriggerInstance>;
   item: T;
   label: ReactNode;
   selected: boolean;
@@ -29,6 +32,7 @@ interface DropdownOptionProps<T> {
 
 /** One row in the list: `renderItem`, or the label in a padded row. */
 export function DropdownOption<T>({
+  ref,
   item,
   label,
   selected,
@@ -45,6 +49,7 @@ export function DropdownOption<T>({
 }: DropdownOptionProps<T>) {
   return (
     <TouchableHighlight
+      ref={ref}
       accessibilityRole={accessibilityRole}
       accessibilityState={{ checked: selected }}
       testID={testID}

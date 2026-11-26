@@ -79,6 +79,11 @@ export function DropdownModal({
           >
             <View
               onLayout={onContainerLayout}
+              // Keeps VoiceOver inside the list; the iOS escape gesture
+              // (two-finger scrub) closes it like the back button.
+              accessibilityViewIsModal
+              aria-modal
+              onAccessibilityEscape={onRequestClose}
               accessibilityElementsHidden={!isReady}
               importantForAccessibility={
                 isReady ? 'auto' : 'no-hide-descendants'

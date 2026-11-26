@@ -11,7 +11,7 @@ import {
 } from '@jest/globals';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import React, { createRef } from 'react';
-import { Text, TextInput } from 'react-native';
+import { AccessibilityInfo, Text, TextInput } from 'react-native';
 import { Dropdown, type IDropdownRef } from '../index';
 import { layoutOpenList, mockTriggerLayout } from '../__fixtures__/testUtils';
 
@@ -520,6 +520,34 @@ describe('Dropdown', () => {
 
         expect(screen.getByRole('button', { name: 'Löschen' })).toBeTruthy();
       });
+    });
+
+    it('moves screen reader focus into the list when shown, and back to the field when closed', async () => {
+      const sendEvent = jest.mocked(AccessibilityInfo.sendAccessibilityEvent);
+      sendEvent.mockClear();
+      await renderDropdown({ value: 'banana' });
+
+      await open();
+      expect(sendEvent).toHaveBeenCalledTimes(1);
+      expect(sendEvent.mock.calls[0]?.[1]).toBe('focus');
+
+      await pressTrigger();
+      expect(sendEvent).toHaveBeenCalledTimes(2);
+      expect(sendEvent.mock.calls[1]?.[1]).toBe('focus');
+    });
+
+    it('keeps screen readers inside the open list and closes it on the escape gesture', async () => {
+      await renderDropdown();
+      await open();
+      const container = screen.root?.queryAll(
+        (node) => node.props.accessibilityViewIsModal === true
+      )[0];
+
+      expect(container?.props['aria-modal']).toBe(true);
+
+      await fireEvent(container!, 'accessibilityEscape');
+
+      expect(isOpen()).toBe(false);
     });
 
     it('names the list like the field', async () => {

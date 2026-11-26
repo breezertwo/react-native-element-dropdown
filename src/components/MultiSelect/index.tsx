@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import _get from 'lodash/get';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import type { ComponentRef } from 'react';
 import { StyleSheet, View } from 'react-native';
+import type { TextInput } from 'react-native';
 import {
   useDropdownPlacement,
   type TriggerInstance,
@@ -12,6 +14,7 @@ import { DropdownList } from '../../internal/DropdownList';
 import { DropdownModal } from '../../internal/DropdownModal';
 import { DropdownOption } from '../../internal/DropdownOption';
 import { DropdownSearch } from '../../internal/DropdownSearch';
+import { useAccessibilityFocus } from '../../internal/useAccessibilityFocus';
 import { DropdownTrigger } from '../../internal/DropdownTrigger';
 import { useFullScreenMode } from '../../internal/useFullScreenMode';
 import { createKeyExtractor } from '../../internal/keyExtractor';
@@ -173,6 +176,7 @@ const MultiSelectComponent = React.forwardRef<
 
   const _renderDropdown = () => (
     <DropdownTrigger
+      ref={triggerFocusRef}
       visible={visible}
       onPress={showOrClose}
       testID={testID}
@@ -202,9 +206,23 @@ const MultiSelectComponent = React.forwardRef<
     [currentValue, valueField]
   );
 
+  // Screen reader focus: into the list when it is shown (search input,
+  // else the selected or first row), back to the field when it closes.
+  const triggerFocusRef = useRef<TriggerInstance>(null);
+  const searchInputRef = useRef<ComponentRef<typeof TextInput>>(null);
+  const focusRowRef = useRef<TriggerInstance>(null);
+  const focusRowIndex = Math.max(0, listData.findIndex(checkSelected));
+  useAccessibilityFocus({
+    visible,
+    isReady: placement?.isReady ?? false,
+    getListTarget: () => searchInputRef.current ?? focusRowRef.current,
+    triggerRef: triggerFocusRef,
+  });
+
   const _renderItem = useCallback(
-    ({ item }: { item: any }) => (
+    ({ item, index }: { item: any; index: number }) => (
       <DropdownOption
+        ref={index === focusRowIndex ? focusRowRef : undefined}
         item={item}
         label={_get(item, labelField)}
         selected={checkSelected(item)}
@@ -226,6 +244,7 @@ const MultiSelectComponent = React.forwardRef<
     [
       activeColor,
       checkSelected,
+      focusRowIndex,
       fontFamily,
       itemAccessibilityLabelField,
       itemContainerStyle,
@@ -260,6 +279,7 @@ const MultiSelectComponent = React.forwardRef<
           search={
             search ? (
               <DropdownSearch
+                inputRef={searchInputRef}
                 searchText={searchText}
                 onSearch={onSearch}
                 renderInputSearch={renderInputSearch}
@@ -329,6 +349,7 @@ const MultiSelectComponent = React.forwardRef<
         onLayout={_measure}
       >
         <InsideTrigger
+          ref={triggerFocusRef}
           visible={visible}
           onPress={showOrClose}
           testID={testID}

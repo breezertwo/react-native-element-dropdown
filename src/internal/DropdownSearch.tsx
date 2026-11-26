@@ -1,10 +1,12 @@
-import type { ReactElement } from 'react';
+import type { ComponentRef, ReactElement, Ref } from 'react';
 import { StyleSheet } from 'react-native';
-import type { ImageStyle, StyleProp, TextStyle } from 'react-native';
+import type { ImageStyle, StyleProp, TextInput, TextStyle } from 'react-native';
 import type { DropdownAccessibilityStrings } from './a11y';
 import SearchInput from './SearchInput';
 
 interface DropdownSearchProps {
+  /** The built-in input, for moving screen reader focus to it. */
+  inputRef?: Ref<ComponentRef<typeof TextInput>>;
   searchText: string;
   onSearch: (text: string) => void;
   /** Replaces the built-in input (`renderInputSearch` prop). */
@@ -22,6 +24,7 @@ interface DropdownSearchProps {
 
 /** The search input above (or below) the list. */
 export function DropdownSearch({
+  inputRef,
   searchText,
   onSearch,
   renderInputSearch,
@@ -40,6 +43,7 @@ export function DropdownSearch({
 
   return (
     <SearchInput
+      ref={inputRef}
       testID={testID + ' input'}
       accessibilityLabel={placeholder || strings.search}
       accessibilityRole="search"

@@ -2,12 +2,14 @@ import type React from 'react';
 import type {
   ImageStyle,
   StyleProp,
+  TextInput,
   TextInputProps,
   TextStyle,
   ViewStyle,
 } from 'react-native';
 
 interface Props extends TextInputProps {
+  ref?: React.Ref<React.ComponentRef<typeof TextInput>>;
   fontFamily?: string;
   style?: StyleProp<ViewStyle>;
   inputStyle?: StyleProp<TextStyle>;
