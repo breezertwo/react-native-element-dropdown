@@ -49,6 +49,8 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
     disabledItemStyle,
     searchField,
     chipsContainerStyle,
+    chipsOverflow = 'grow',
+    renderChipsOverflow,
     selectedStyle,
     selectedTextStyle,
     chipRemoveIconStyle,
@@ -391,6 +393,10 @@ function MultiSelectComponent<T, V extends keyof T = keyof T>(
   const _renderItemSelected = (inside: boolean) => {
     return (
       <SelectedChips
+        testID={testID}
+        overflow={chipsOverflow}
+        renderChipsOverflow={renderChipsOverflow}
+        onPressMore={inside ? undefined : showOrClose}
         textScaling={textScaling}
         items={selectedItems}
         isDisabled={isDisabledItem}

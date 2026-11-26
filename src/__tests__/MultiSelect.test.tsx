@@ -659,6 +659,172 @@ describe('MultiSelect', () => {
     ).toHaveLength(2);
   });
 
+  describe('chipsOverflow', () => {
+    const fiveFruits: Fruit[] = [
+      ...fruits,
+      { label: 'Kiwi', value: 'kiwi' },
+      { label: 'Mango', value: 'mango' },
+    ];
+    const allValues = fiveFruits.map((fruit) => fruit.value);
+
+    const layoutEvent = (width: number) => ({
+      nativeEvent: { layout: { x: 0, y: 0, width, height: 40 } },
+    });
+
+    // The native side lays out the row and the invisible measuring copies
+    // of the chips and of the "+N" chip.
+    const layoutChips = async ({
+      row,
+      chip,
+      more,
+    }: {
+      row: number;
+      chip: number;
+      more: number;
+    }) => {
+      const hidden = { includeHiddenElements: true };
+      await fireEvent(
+        screen.getByTestId('multiselect chips'),
+        'layout',
+        layoutEvent(row)
+      );
+      for (const measure of screen.getAllByTestId(
+        'multiselect chips measure',
+        hidden
+      )) {
+        await fireEvent(measure, 'layout', layoutEvent(chip));
+      }
+      await fireEvent(
+        screen.getByTestId('multiselect chips measure more', hidden),
+        'layout',
+        layoutEvent(more)
+      );
+    };
+
+    const visibleChips = () =>
+      screen.queryAllByRole('button', { name: /^Remove / });
+
+    it('wraps all chips by default, without measuring them', async () => {
+      await renderMultiSelect({ data: fiveFruits, value: allValues });
+
+      expect(visibleChips()).toHaveLength(5);
+      expect(
+        screen.queryAllByTestId('multiselect chips measure', {
+          includeHiddenElements: true,
+        })
+      ).toHaveLength(0);
+      expect(screen.getByTestId('multiselect chips')).toHaveStyle({
+        flexWrap: 'wrap',
+      });
+    });
+
+    it('shows the chips that fit in one row and "+N" for the rest', async () => {
+      await renderMultiSelect({
+        data: fiveFruits,
+        value: allValues,
+        chipsOverflow: 'collapse',
+      });
+      // Before measuring: all chips, clipped to one row.
+      expect(visibleChips()).toHaveLength(5);
+
+      // 3 chips of 80 + "+N" of 40 = 280 fit in 300; 4 chips don't.
+      await layoutChips({ row: 300, chip: 80, more: 40 });
+
+      expect(
+        visibleChips().map((chip) => chip.props.accessibilityLabel)
+      ).toEqual(['Remove Apple', 'Remove Banana', 'Remove Cherry']);
+      expect(screen.getByText('+2')).toBeTruthy();
+      expect(screen.getByTestId('multiselect chips')).toHaveStyle({
+        flexWrap: 'nowrap',
+        overflow: 'hidden',
+      });
+    });
+
+    it('shows all chips and no "+N" when they fit', async () => {
+      await renderMultiSelect({
+        data: fiveFruits,
+        value: allValues,
+        chipsOverflow: 'collapse',
+      });
+      await layoutChips({ row: 400, chip: 80, more: 40 });
+
+      expect(visibleChips()).toHaveLength(5);
+      expect(screen.queryByText(/^\+\d/)).toBeNull();
+    });
+
+    it('opens the list when "+N" is pressed', async () => {
+      await renderMultiSelect({
+        data: fiveFruits,
+        value: allValues,
+        chipsOverflow: 'collapse',
+      });
+      await layoutChips({ row: 300, chip: 80, more: 40 });
+
+      const more = screen.getByRole('button', { name: '2 more selected' });
+      await fireEvent.press(more);
+
+      expect(isOpen()).toBe(true);
+    });
+
+    it('names "+N" with accessibilityStrings.moreSelected', async () => {
+      await renderMultiSelect({
+        data: fiveFruits,
+        value: allValues,
+        chipsOverflow: 'collapse',
+        accessibilityStrings: { moreSelected: (count) => `${count} weitere` },
+      });
+      await layoutChips({ row: 300, chip: 80, more: 40 });
+
+      expect(screen.getByRole('button', { name: '2 weitere' })).toBeTruthy();
+    });
+
+    it('replaces "+N" with renderChipsOverflow', async () => {
+      await renderMultiSelect({
+        data: fiveFruits,
+        value: allValues,
+        chipsOverflow: 'collapse',
+        renderChipsOverflow: (hiddenCount) => (
+          <Text>{`and ${hiddenCount} more`}</Text>
+        ),
+      });
+      await layoutChips({ row: 300, chip: 80, more: 40 });
+
+      expect(screen.getByText('and 2 more')).toBeTruthy();
+      expect(screen.queryByText('+2')).toBeNull();
+    });
+
+    it('keeps the measuring copies away from screen readers', async () => {
+      await renderMultiSelect({
+        data: fiveFruits,
+        value: allValues,
+        chipsOverflow: 'collapse',
+      });
+
+      // Only the row's chips are accessible, not their measuring copies.
+      expect(visibleChips()).toHaveLength(5);
+      expect(screen.queryAllByText('Apple')).toHaveLength(1);
+    });
+
+    it('inside the field: "+N" is part of the field, which keeps every remove action', async () => {
+      await renderMultiSelect({
+        data: fiveFruits,
+        value: allValues,
+        inside: true,
+        accessibilityLabel: 'Fruits',
+        chipsOverflow: 'collapse',
+      });
+      await layoutChips({ row: 300, chip: 80, more: 40 });
+
+      expect(screen.getByText('+2')).toBeTruthy();
+      expect(
+        screen.queryByRole('button', { name: '2 more selected' })
+      ).toBeNull();
+      const field = screen.getByRole(FIELD_ROLE, { name: 'Fruits' });
+      expect(field.props.accessibilityValue).toEqual({ text: '5 selected' });
+      expect(field.props.accessibilityActions).toHaveLength(5);
+    });
+  });
+
   describe('field style', () => {
     it('adds selectedPlaceholderStyle to the placeholder while items are selected', async () => {
       const props = {

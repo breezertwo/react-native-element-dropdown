@@ -74,12 +74,16 @@ These apply to every dropdown on every screen:
 ### MultiSelect
 
 - Visual: chips match the selection; removing a chip deselects the item; the
-  limited field stops at three items.
+  limited field stops at three items. The collapsed fields keep one row of
+  chips plus "+N"; removing a chip pulls the next one into the row; pressing
+  "+N" (below the field) opens the list.
 - Screen reader: rows are announced as checkboxes with their checked state;
   selecting or removing an item is announced ("Banana selected", "Banana
   removed"); every chip below the field is a button named "Remove <item>".
   With chips inside the field, the field offers "Remove <item>" as actions
-  (iOS: actions rotor; Android: actions menu).
+  (iOS: actions rotor; Android: actions menu). Collapsed below the field,
+  "+N" is a button named "N more selected"; collapsed inside, the field
+  still offers a remove action for every selected item.
 
 ### Disabled items
 

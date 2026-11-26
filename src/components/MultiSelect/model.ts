@@ -48,6 +48,17 @@ export interface MultiSelectProps<T, V extends keyof T = keyof T> {
   inputSearchStyle?: StyleProp<TextStyle>;
   /** Replaces the icon of the search's clear button (the button stays). */
   renderSearchClearIcon?: () => React.ReactElement | null;
+  /**
+   * Chips that don't fit in one row (below or inside the field):
+   * - `'grow'` (default): wrap onto more rows; the field grows with them
+   *   inside it (give the field a `minHeight`, not a `height`).
+   * - `'collapse'`: one row with as many chips as fit and a "+N" chip for
+   *   the rest. Pressing "+N" opens the list. Screen readers still get all
+   *   selected items (field value and remove actions).
+   */
+  chipsOverflow?: 'grow' | 'collapse';
+  /** Replaces the "+N" chip of `chipsOverflow="collapse"`. */
+  renderChipsOverflow?: (hiddenCount: number) => React.ReactElement | null;
   /** The view around the chips, below or inside the field (e.g. a gap). */
   chipsContainerStyle?: StyleProp<ViewStyle>;
   selectedStyle?: StyleProp<ViewStyle>;

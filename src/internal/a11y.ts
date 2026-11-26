@@ -11,6 +11,8 @@ export interface DropdownAccessibilityStrings {
   clearSearch: string;
   /** Value of a MultiSelect field, e.g. "2 selected". */
   selectedCount: (count: number) => string;
+  /** Label of the "+N" chip of `chipsOverflow="collapse"`. */
+  moreSelected: (count: number) => string;
   /** Label of a MultiSelect chip, which removes its item. */
   removeItem: (label: string) => string;
   /** Announced after an item was added to a MultiSelect. */
@@ -25,6 +27,7 @@ export const defaultAccessibilityStrings: DropdownAccessibilityStrings = {
   search: 'Search',
   clearSearch: 'Clear search',
   selectedCount: (count) => `${count} selected`,
+  moreSelected: (count) => `${count} more selected`,
   removeItem: (label) => `Remove ${label}`,
   itemSelected: (label) => `${label} selected`,
   itemRemoved: (label) => `${label} removed`,

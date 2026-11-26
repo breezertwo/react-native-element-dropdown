@@ -7,9 +7,17 @@ export default function MultiSelectScreen() {
   const [below, setBelow] = useState<string[]>(['apple', 'banana']);
   const [inside, setInside] = useState<string[]>(['cherry']);
   const [limited, setLimited] = useState<string[]>([]);
+  const [collapsed, setCollapsed] = useState<string[]>([
+    'apple',
+    'banana',
+    'blueberry',
+    'cherry',
+    'grape',
+    'strawberry',
+  ]);
 
   return (
-    <Scenario description="Select and remove items in the list and with the chips. Chips must match the selection, and the limited field must stop at three items.">
+    <Scenario description="Select and remove items in the list and with the chips. Chips must match the selection, and the limited field must stop at three items. The collapsed fields keep their chips in one row, with “+N” for the rest.">
       <Field label="Chips below the field">
         <MultiSelect
           style={dropdownStyles.dropdown}
@@ -33,6 +41,33 @@ export default function MultiSelectScreen() {
           placeholder="Select fruits"
           accessibilityLabel="Chips inside the field"
           onChange={setInside}
+        />
+      </Field>
+      <Field label="Collapsed chips below the field">
+        <MultiSelect
+          style={dropdownStyles.dropdown}
+          chipsOverflow="collapse"
+          data={fruits}
+          labelField="label"
+          valueField="value"
+          value={collapsed}
+          placeholder="Select fruits"
+          accessibilityLabel="Collapsed chips below the field"
+          onChange={setCollapsed}
+        />
+      </Field>
+      <Field label="Collapsed chips inside the field">
+        <MultiSelect
+          style={dropdownStyles.dropdown}
+          inside
+          chipsOverflow="collapse"
+          data={fruits}
+          labelField="label"
+          valueField="value"
+          value={collapsed}
+          placeholder="Select fruits"
+          accessibilityLabel="Collapsed chips inside the field"
+          onChange={setCollapsed}
         />
       </Field>
       <Field label="At most three">
