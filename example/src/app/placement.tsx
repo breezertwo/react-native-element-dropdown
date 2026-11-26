@@ -8,10 +8,12 @@ function FruitDropdown({
   label,
   position,
   data = fruits,
+  maxHeight,
 }: {
   label: string;
   position: 'auto' | 'top' | 'bottom';
   data?: Option[];
+  maxHeight?: number;
 }) {
   const [value, setValue] = useState<string | null>(null);
 
@@ -26,6 +28,7 @@ function FruitDropdown({
         placeholder="Select a fruit"
         accessibilityLabel={label}
         dropdownPosition={position}
+        maxHeight={maxHeight}
         onChange={(item: Option) => setValue(item.value)}
       />
     </Field>
@@ -36,16 +39,20 @@ export default function Placement() {
   return (
     <Scenario
       scroll={false}
-      description="The auto dropdowns should open where there is more room: down at the top of the screen, up at the bottom. Forced positions must stay put. Nothing may overlap the status bar or navigation bar."
+      description="The auto dropdowns should open where there is more room: down at the top of the screen, up at the bottom. Forced positions must stay put; their lists may grow up to the status bar and down to the navigation bar, but never under them."
     >
       <View style={styles.edges}>
         <FruitDropdown label="Auto, near the top" position="auto" />
         <View style={styles.row}>
           <View style={styles.cell}>
-            <FruitDropdown label="Always top" position="top" />
+            <FruitDropdown label="Always top" position="top" maxHeight={1000} />
           </View>
           <View style={styles.cell}>
-            <FruitDropdown label="Always bottom" position="bottom" />
+            <FruitDropdown
+              label="Always bottom"
+              position="bottom"
+              maxHeight={1000}
+            />
           </View>
         </View>
         <FruitDropdown

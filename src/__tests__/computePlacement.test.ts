@@ -152,26 +152,76 @@ describe('computePlacement', () => {
   });
 
   describe('forced position', () => {
-    it('opens above with dropdownPosition="top", even without room', () => {
+    it('opens above with dropdownPosition="top", even without room, capped to the space above', () => {
       expect(
         computePlacement(input({ dropdownPosition: 'top' }))
       ).toMatchObject({
         isTopPosition: true,
-        maxHeight: 340,
+        maxHeight: 90, // 98 - 8
         wrapperStyle: { justifyContent: 'flex-end', paddingBottom: 702 },
       });
     });
 
-    it('opens below with dropdownPosition="bottom", even without room', () => {
+    it('opens below with dropdownPosition="bottom", even without room, capped to the space below', () => {
       expect(
         computePlacement(
           input({ trigger: at(700), dropdownPosition: 'bottom' })
         )
       ).toMatchObject({
         isTopPosition: false,
-        maxHeight: 340,
+        maxHeight: 50, // 800 - 8 - 742
         wrapperStyle: { paddingTop: 742 },
       });
+    });
+
+    it('keeps maxHeight when the forced side has room', () => {
+      expect(
+        computePlacement(
+          input({ trigger: at(100), dropdownPosition: 'bottom' })
+        )?.maxHeight
+      ).toBe(340);
+    });
+
+    it('stays clear of the insets, the keyboard and minHeight on the forced side', () => {
+      const below = {
+        trigger: at(300),
+        maxHeight: 1000,
+        dropdownPosition: 'bottom',
+      } as const;
+      // 800 - 48 - 8 - 342 = 402
+      expect(
+        computePlacement(input({ ...below, defaultBottomInset: 48 }))?.maxHeight
+      ).toBe(402);
+      // Keyboard top 600: 598 - 342 = 256
+      expect(
+        computePlacement(
+          input({
+            ...below,
+            keyboard: { screenY: 600, height: 200 },
+          })
+        )?.maxHeight
+      ).toBe(256);
+      // Above, below a 24 status bar: 298 - (24 + 8) = 266
+      expect(
+        computePlacement(
+          input({
+            trigger: at(300),
+            maxHeight: 1000,
+            dropdownPosition: 'top',
+            defaultTopInset: 24,
+          })
+        )?.maxHeight
+      ).toBe(266);
+      // Never below minHeight, even without room.
+      expect(
+        computePlacement(
+          input({
+            trigger: at(780),
+            dropdownPosition: 'bottom',
+            minHeight: 100,
+          })
+        )?.maxHeight
+      ).toBe(100);
     });
   });
 

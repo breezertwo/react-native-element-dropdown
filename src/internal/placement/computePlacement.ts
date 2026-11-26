@@ -149,14 +149,23 @@ export const computePlacement = ({
     };
   }
 
+  // A forced position keeps its side even without room, but the list only
+  // gets the space on that side, so it never reaches under the system bars,
+  // the keyboard or off the screen.
   if (dropdownPosition !== 'auto') {
     const isTopPosition = dropdownPosition === 'top';
+    const available = isTopPosition
+      ? trigger.y - GAP - topLimit - verticalMargins
+      : bottomLimit - (trigger.y + trigger.height + GAP) - verticalMargins;
     return {
       isReady,
       isTopPosition,
       left,
       width: trigger.width,
-      maxHeight,
+      maxHeight: Math.max(
+        minHeight,
+        Math.min(maxHeight, Math.floor(available))
+      ),
       wrapperStyle: isTopPosition
         ? {
             justifyContent: 'flex-end',
