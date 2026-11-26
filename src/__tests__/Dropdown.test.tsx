@@ -161,8 +161,7 @@ describe('Dropdown', () => {
       expect(onFocus).not.toHaveBeenCalled();
     });
 
-    // Known bug (v3 plan, phase 4): the unmount cleanup calls eventClose.
-    it.failing('does not call onBlur when it unmounts', async () => {
+    it('does not call onBlur when it unmounts', async () => {
       const onBlur = jest.fn();
       const { unmount } = await renderDropdown({ onBlur });
 

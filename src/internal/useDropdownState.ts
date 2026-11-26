@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useImperativeHandle } from 'react';
+import { useCallback, useImperativeHandle } from 'react';
 import type { Ref } from 'react';
 import { Keyboard } from 'react-native';
 
@@ -98,11 +98,6 @@ export const useDropdownState = ({
   ]);
 
   useImperativeHandle(ref, () => ({ open, close, toggle }));
-
-  // 2.x behaviour, fixed in v3 plan phase 4: unmounting calls `close` (from
-  // the first render), which calls onBlur.
-  // oxlint-disable-next-line react/exhaustive-deps, react/exhaustive-effect-dependencies -- runs only on unmount
-  useEffect(() => close, []);
 
   return { open, close, toggle, onPress };
 };

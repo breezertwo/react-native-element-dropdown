@@ -106,6 +106,15 @@ describe('MultiSelect', () => {
 
       expect(isOpen()).toBe(false);
     });
+
+    it('does not call onBlur when it unmounts', async () => {
+      const onBlur = jest.fn();
+      const { unmount } = await renderMultiSelect({ onBlur });
+
+      await unmount();
+
+      expect(onBlur).not.toHaveBeenCalled();
+    });
   });
 
   describe('selecting', () => {
