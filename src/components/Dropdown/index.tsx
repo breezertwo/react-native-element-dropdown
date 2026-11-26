@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-shadow */
-import _assign from 'lodash/assign';
 import _differenceWith from 'lodash/differenceWith';
 import _findIndex from 'lodash/findIndex';
 import _get from 'lodash/get';
@@ -457,7 +456,6 @@ const DropdownComponent = React.forwardRef<IDropdownRef, DropdownProps<any>>(
       ({ item, index }: { item: any; index: number }) => {
         const isSelected = currentValue && _get(currentValue, valueField);
         const selected = _isEqual(_get(item, valueField), isSelected);
-        _assign(item, { _index: index });
         return (
           <TouchableHighlight
             accessibilityRole="radio"

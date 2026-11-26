@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-shadow */
-import _assign from 'lodash/assign';
 import _differenceWith from 'lodash/differenceWith';
 import _get from 'lodash/get';
 import React, {
@@ -428,7 +427,6 @@ const MultiSelectComponent = React.forwardRef<
   const _renderItem = useCallback(
     ({ item, index }: { item: any; index: number }) => {
       const selected = checkSelected(item);
-      _assign(item, { _index: index });
       return (
         <TouchableHighlight
           key={index.toString()}
